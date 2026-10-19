@@ -1,0 +1,35 @@
+{
+  "width": 256,
+  "height": 256,
+  "max_height": 320,
+  "frame_width": 256,
+  "frames": 1,
+  "fps": 1,
+  "crop": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 256
+  },
+  "views": {
+    "full": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+    },
+    "bust": {
+      "x": 48,
+      "y": 0,
+      "w": 160,
+      "h": 172
+    }
+  },
+  "layers": [
+    {
+      "id": "public-sample",
+      "src": "ui/public-sample/avatar.png",
+      "z": 1
+    }
+  ]
+}

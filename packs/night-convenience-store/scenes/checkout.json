@@ -1,0 +1,49 @@
+{
+  "id": "checkout",
+  "title": "收银台",
+  "text": "收银台上摊着一本翻开的账本，纸页泛黄。店员站在台后，工装洗得发白，胸口别着一枚没有名字的工牌。收银机没有开，屏幕却是亮的，上面跳动着今天的日期——三个月前。",
+  "options": [
+    {
+      "id": "talk_clerk",
+      "label": "跟店员搭话",
+      "action_text": "你敲了敲收银台，问店员这店怎么还开着"
+    },
+    {
+      "id": "to_backroom",
+      "label": "去后仓看看",
+      "action_text": "你绕到收银台后面，推开那扇「员工专用」的门",
+      "next_scene": "backroom",
+      "requires": [
+        {
+          "field": "flag_met_clerk",
+          "op": "==",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "to_street",
+      "label": "走出玻璃门",
+      "action_text": "你推开玻璃门，走进雨里",
+      "next_scene": "street"
+    },
+    {
+      "id": "accept_offer",
+      "label": "接下那件空着的工装",
+      "action_text": "你伸手接下店员递来的那件洗得发白的工装",
+      "next_scene": "ending_stay",
+      "requires": [
+        {
+          "field": "flag_met_clerk",
+          "op": "==",
+          "value": true
+        },
+        {
+          "field": "flag_heard_voice",
+          "op": "==",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

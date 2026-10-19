@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "NarratorStatus": {
+      "additionalProperties": false,
+      "description": "叙事模型附带的结构化角色状态（只给右侧状态栏用，不写进叙事正文）。\n\nname 是文本；其余四项统一 0~100 分（越界会被夹到范围里），方便 UI 画条。",
+      "properties": {
+        "name": {
+          "default": "",
+          "maxLength": 40,
+          "title": "Name",
+          "type": "string"
+        },
+        "lewd": {
+          "default": 0,
+          "title": "Lewd",
+          "type": "integer"
+        },
+        "body": {
+          "default": 0,
+          "title": "Body",
+          "type": "integer"
+        },
+        "sensitivity": {
+          "default": 0,
+          "title": "Sensitivity",
+          "type": "integer"
+        },
+        "desire": {
+          "default": 0,
+          "title": "Desire",
+          "type": "integer"
+        },
+        "notes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "object"
+        }
+      },
+      "title": "NarratorStatus",
+      "type": "object"
+    },
+    "Option": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "action_text": {
+          "default": "",
+          "title": "Action Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Option",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "narrative": {
+      "title": "Narrative",
+      "type": "string"
+    },
+    "options": {
+      "items": {
+        "$ref": "#/$defs/Option"
+      },
+      "maxItems": 4,
+      "minItems": 0,
+      "title": "Options",
+      "type": "array"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NarratorStatus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "narrative"
+  ],
+  "title": "NarratorOutput",
+  "type": "object"
+}

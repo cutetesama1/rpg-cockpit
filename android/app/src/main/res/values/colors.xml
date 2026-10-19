@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 自适应图标背景：和 App 主色一致，避免白底突兀 -->
+    <color name="ic_launcher_background">#0B2025</color>
+    <color name="splash_background">#0b0e13</color>
+</resources>

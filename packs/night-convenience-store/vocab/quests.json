@@ -1,0 +1,9 @@
+{
+  "quests": [
+    {
+      "id": "survive_night",
+      "name": "撑到天亮",
+      "description": "在凌晨两点的便利店里活到天亮，或者找到离开的路"
+    }
+  ]
+}

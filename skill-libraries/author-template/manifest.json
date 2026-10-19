@@ -1,0 +1,20 @@
+{
+  "type": "rpg.skill-library",
+  "schema_version": 1,
+  "id": "custom-skills-example",
+  "title": "作者自定义技能库示例",
+  "version": "1.0.0",
+  "description": "复制目录、修改内容与库 id 后打成 ZIP 导入。",
+  "resources": {
+    "effort": [
+      "stamina",
+      "energy",
+      "focus"
+    ],
+    "mana": [
+      "mp",
+      "mana",
+      "focus"
+    ]
+  }
+}

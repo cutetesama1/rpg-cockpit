@@ -1,0 +1,32 @@
+{
+  "collection": "星穹庭院 UI v1",
+  "generated_on": "2026-10-18",
+  "generator": "built-in image_gen",
+  "images_unmodified": true,
+  "assets": [
+    {
+      "file": "compass-crest.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1990697,
+      "sha256": "0106e5dd7d52960dbfca18833961bbfdff92136a413f7493c2a76c012ec13e72",
+      "transparent_pixels": 908825
+    },
+    {
+      "file": "night-background.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2136367,
+      "sha256": "ac78670340d4741a48cd67ce099d501816324adda9ae90f05083ceb072cbea91",
+      "transparent_pixels": 0
+    },
+    {
+      "file": "portrait-alcove.png",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 2102282,
+      "sha256": "1931245b7d0c83f24e4ddcac85b985f6f7b97e44ad406dd2462afbbfffefa3c6",
+      "transparent_pixels": 0
+    }
+  ]
+}

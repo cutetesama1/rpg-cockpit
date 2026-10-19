@@ -1,0 +1,9 @@
+{
+  "id": "night-convenience-store",
+  "title": "凌晨便利店",
+  "version": "0.4.0",
+  "schema_version": 1,
+  "rating": "12+",
+  "dependencies": [],
+  "description": "示例内容包：凌晨两点，你走进一家不该开着的便利店。P4 第一晚：10 个场景 / 3 个结局，支持多槽位存读档与自动续玩。"
+}

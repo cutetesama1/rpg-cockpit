@@ -1,0 +1,79 @@
+/* Only the phone conversation composer; desktop and game panels keep their styles. */
+.mobile-chat .chat-composer {
+  margin: 0 max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-radius: 24px;
+  background: linear-gradient(155deg, var(--theme-panel-top), var(--panel) 75%);
+  box-shadow: 0 8px 28px #0003, inset 0 1px #ffffff09;
+}
+.mobile-chat .chat-composer .chat-suggestions {
+  gap: 8px;
+  padding: 0 1px 8px;
+}
+.mobile-chat .chat-composer .chat-suggestions button {
+  border-radius: 999px;
+  padding: 7px 13px;
+  border-color: color-mix(in srgb, var(--line) 72%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 75%, transparent);
+  box-shadow: inset 0 1px #ffffff06;
+}
+.mobile-chat .chat-composer .chat-input-modes {
+  gap: 6px;
+  padding: 0 1px 8px;
+}
+.mobile-chat .chat-composer .chat-input-modes label {
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.mobile-chat .chat-composer .chat-input-modes label:has(input:checked) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--theme-user) 65%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.mobile-chat .chat-composer .chat-picked { border-radius: 999px; }
+.mobile-chat .chat-composer .chat-input-row {
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 22px;
+  background: var(--theme-input);
+  box-shadow: inset 0 1px 5px #0002;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.mobile-chat .chat-composer .chat-input-row:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.mobile-chat .chat-composer .chat-input-row textarea,
+.mobile-chat .chat-composer .chat-input-row textarea:focus {
+  padding-left: 10px;
+  border: 0;
+  border-radius: 16px;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+.mobile-chat .chat-composer .chat-input-row textarea::placeholder {
+  color: var(--muted);
+  opacity: .75;
+}
+.mobile-chat .chat-composer .chat-send {
+  min-width: 62px;
+  padding: 9px 14px;
+  border-radius: 17px;
+  box-shadow: inset 0 1px #ffffff1c, 0 3px 10px #0002;
+}
+.mobile-chat .chat-composer .chat-send:disabled { opacity: .5; box-shadow: none; }
+@media (orientation: landscape) and (max-height: 560px) {
+  .mobile-chat .chat-composer { margin-bottom: 5px; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  .mobile-chat .chat-composer .chat-input-modes { padding-bottom: 4px; }
+  .mobile-chat .chat-composer .chat-suggestions { padding-bottom: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-chat .chat-composer .chat-input-modes label,
+  .mobile-chat .chat-composer .chat-input-row { transition: none; }
+}

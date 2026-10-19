@@ -1,0 +1,15 @@
+{
+  "title": "异世界",
+  "bars": [
+    "hp",
+    "focus"
+  ],
+  "numbers": [
+    "credits"
+  ],
+  "badges": [
+    "flag_started"
+  ],
+  "skills_section": "技能",
+  "options_section": "接下来"
+}

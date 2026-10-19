@@ -1,0 +1,36 @@
+{
+  "id": "office",
+  "title": "值班室",
+  "text": "值班室只有一张桌子和一台显示器，屏幕分成四格，是店里的监控画面。另外三格都是空的，只有一格亮着——画面里是此刻的收银台，店员站着，背对着镜头。桌上摊着那本账本，最后一页的日期是三个月前，之后是空白的。",
+  "options": [
+    {
+      "id": "read_ledger",
+      "label": "翻开账本",
+      "action_text": "你走到桌前，翻开那本摊着的账本"
+    },
+    {
+      "id": "watch_monitor",
+      "label": "盯着监控画面",
+      "action_text": "你凑近监控屏幕，盯着收银台那一格画面"
+    },
+    {
+      "id": "to_backroom",
+      "label": "回到后仓",
+      "action_text": "你退出值班室，回到后仓",
+      "next_scene": "backroom"
+    },
+    {
+      "id": "to_ending_truth",
+      "label": "把账本翻到最后一页",
+      "action_text": "你把账本翻到最后一页，手指停在空白的格子上",
+      "next_scene": "ending_truth",
+      "requires": [
+        {
+          "field": "flag_saw_ledger",
+          "op": "==",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

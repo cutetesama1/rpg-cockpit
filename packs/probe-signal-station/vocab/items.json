@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "medkit",
+      "name": "应急药包",
+      "description": "按压式止血与镇静二合一。",
+      "stackable": false,
+      "use_effect_hint": "恢复少量氧气与精神。"
+    },
+    {
+      "id": "oxygen_canister",
+      "name": "备用氧气罐",
+      "description": "标着「白鲸-7 物资科」的黄色钢瓶。",
+      "stackable": true,
+      "use_effect_hint": "补充氧气。"
+    },
+    {
+      "id": "signal_log",
+      "name": "信号记录仪",
+      "description": "记录着前六次呼叫的原始波形。",
+      "stackable": false,
+      "use_effect_hint": "读取可推进调查。"
+    }
+  ]
+}

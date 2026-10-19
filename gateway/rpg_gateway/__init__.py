@@ -1,0 +1,91 @@
+"""rpg_gateway：LLM 网关（角色路由 + provider + 设置）。"""
+
+from .catalog import (
+    CUSTOM_PRESET_ID,
+    EFFORT_IDS,
+    PRESETS,
+    catalog_payload,
+    get_preset,
+    model_efforts,
+    normalize_effort,
+    preset_ids,
+    validate_preset,
+)
+from .factory import build_providers, build_router, validate_settings
+from .model_list import DEFAULT_TIMEOUT as MODEL_LIST_TIMEOUT
+from .model_list import ModelListError, list_endpoint_models, models_url
+from .providers import (
+    LlmResponse,
+    OpenAICompatibleProvider,
+    RecordingProvider,
+    ReplayProvider,
+    ScriptedProvider,
+    parse_narrator_content,
+)
+from .roles import LlmProvider, LlmRouter, RouterError
+from .world_builder import (
+    BUILDER_SYSTEM_PROMPT,
+    KNOWN_TARGETS,
+    PROMPT_KEYS,
+    STATE_FIELDS,
+    build_request as builder_request,
+    compose_prompt as builder_compose,
+    draft_summary,
+    extract_json,
+    parse_draft,
+)
+from .settings import (
+    config_dir,
+    default_settings,
+    load_settings,
+    mask_key,
+    merge_update,
+    public_view,
+    save_settings,
+    settings_path,
+)
+
+__all__ = [
+    "LlmResponse",
+    "RecordingProvider",
+    "ReplayProvider",
+    "ScriptedProvider",
+    "OpenAICompatibleProvider",
+    "parse_narrator_content",
+    "LlmProvider",
+    "LlmRouter",
+    "RouterError",
+    "build_providers",
+    "build_router",
+    "validate_settings",
+    "ModelListError",
+    "list_endpoint_models",
+    "models_url",
+    "MODEL_LIST_TIMEOUT",
+    "config_dir",
+    "default_settings",
+    "load_settings",
+    "mask_key",
+    "merge_update",
+    "public_view",
+    "save_settings",
+    "settings_path",
+    "CUSTOM_PRESET_ID",
+    "EFFORT_IDS",
+    "PRESETS",
+    "catalog_payload",
+    "get_preset",
+    "model_efforts",
+    "normalize_effort",
+    "preset_ids",
+    "validate_preset",
+    "BUILDER_SYSTEM_PROMPT",
+    "KNOWN_TARGETS",
+    "PROMPT_KEYS",
+    "STATE_FIELDS",
+    "builder_request",
+    "builder_compose",
+    "draft_summary",
+    "extract_json",
+    "parse_draft",
+]

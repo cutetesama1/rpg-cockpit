@@ -1,0 +1,14 @@
+{
+  "flags": [
+    {
+      "id": "heard_signal",
+      "label": "听到第七次呼叫",
+      "description": "你确认了频道里确实有人在按你的名字呼叫。"
+    },
+    {
+      "id": "door_sealed",
+      "label": "舱门已封闭",
+      "description": "走廊尽头的舱门被临时封住。"
+    }
+  ]
+}

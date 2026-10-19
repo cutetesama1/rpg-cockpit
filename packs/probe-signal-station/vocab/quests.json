@@ -1,0 +1,9 @@
+{
+  "quests": [
+    {
+      "id": "survive_seven_calls",
+      "name": "熬过第七次呼叫",
+      "description": "前六次呼叫之后，站里都少了一个人。"
+    }
+  ]
+}

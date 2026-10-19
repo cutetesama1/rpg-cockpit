@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+ui/dist/
+dist/
+build/
+.DS_Store
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# Public source export: local secrets and generated media
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+settings.json
+saves/
+*.apk
+*.aab
+*.exe
+*.mp4
+*.wav

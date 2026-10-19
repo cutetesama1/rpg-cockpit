@@ -1,0 +1,18 @@
+{
+  "skills": [
+    {
+      "id": "look",
+      "name": "查看四周",
+      "description": "打量当前场景，也许会发现点什么。",
+      "cost": {},
+      "cooldown": 0,
+      "targets": [
+        "scene"
+      ],
+      "action_text": "我停下脚步，仔细查看四周。",
+      "effect_hint": "",
+      "category": "探索",
+      "brief": "侦察环境"
+    }
+  ]
+}

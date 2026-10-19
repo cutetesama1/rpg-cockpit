@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PluginManifest",
+  "description": "P0 占位契约：插件只做声明式扩展（改内容包、加词表、换提示词、加 UI 槽位），不执行第三方代码。实现排期见 PLAN P6（M7）。",
+  "type": "object",
+  "required": ["id", "name", "version", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "kind": { "enum": ["content-overlay", "vocab", "prompt", "ui-slot", "theme"] },
+    "targets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "要覆盖的内容包 id 或字段/技能 id"
+    },
+    "overrides": {
+      "type": "object",
+      "description": "声明式覆盖：路径 -> 值。P6 实现白名单与冲突检测。",
+      "additionalProperties": true
+    },
+    "requires": {
+      "type": "object",
+      "properties": {
+        "framework": { "type": "string" },
+        "packs": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

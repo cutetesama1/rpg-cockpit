@@ -1,0 +1,113 @@
+{
+  "fields": [
+    {
+      "id": "hp",
+      "label": "生命",
+      "type": "int",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 20,
+      "display": "bar",
+      "group": "vitals",
+      "llm_visible": true,
+      "color": "#ef4444"
+    },
+    {
+      "id": "stamina",
+      "label": "体力",
+      "type": "int",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 10,
+      "display": "bar",
+      "group": "vitals",
+      "llm_visible": true,
+      "color": "#f59e0b"
+    },
+    {
+      "id": "sanity",
+      "label": "精神",
+      "type": "int",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 20,
+      "display": "bar",
+      "group": "vitals",
+      "llm_visible": true,
+      "color": "#a855f7"
+    },
+    {
+      "id": "money",
+      "label": "零钱",
+      "type": "int",
+      "min": 0,
+      "max": 999,
+      "step": 1,
+      "default": 37,
+      "display": "number",
+      "group": "resources",
+      "llm_visible": true,
+      "unit": "元",
+      "color": "#34d399"
+    },
+    {
+      "id": "flag_met_clerk",
+      "label": "见过店员",
+      "type": "bool",
+      "default": false,
+      "display": "badge",
+      "group": "flags",
+      "llm_visible": true
+    },
+    {
+      "id": "flag_found_door",
+      "label": "找到后门",
+      "type": "bool",
+      "default": false,
+      "display": "hidden",
+      "group": "flags",
+      "llm_visible": true
+    },
+    {
+      "id": "flag_read_note",
+      "label": "看过招聘启事",
+      "type": "bool",
+      "default": false,
+      "display": "badge",
+      "group": "flags",
+      "llm_visible": true
+    },
+    {
+      "id": "flag_heard_voice",
+      "label": "听见冷库里的声音",
+      "type": "bool",
+      "default": false,
+      "display": "hidden",
+      "group": "flags",
+      "llm_visible": true
+    },
+    {
+      "id": "flag_saw_ledger",
+      "label": "看清了账本",
+      "type": "bool",
+      "default": false,
+      "display": "hidden",
+      "group": "flags",
+      "llm_visible": true
+    }
+  ],
+  "limits": {
+    "max_tool_rounds": 6,
+    "max_rejections": 1,
+    "narrative_number_check": true,
+    "max_delta_per_turn": {
+      "hp": 8,
+      "stamina": 5,
+      "sanity": 6,
+      "money": 50
+    }
+  }
+}

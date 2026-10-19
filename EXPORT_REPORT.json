@@ -1,0 +1,20 @@
+{
+  "source_version": "0.7.0",
+  "github_published": false,
+  "git_initialized": true,
+  "license": "Apache-2.0 for first-party code and original sample graphics, matching the existing repository license",
+  "new_brand_assets_included": true,
+  "readme_language": "zh-CN",
+  "python_syntax_verified_files": 100,
+  "json_files_parsed": 73,
+  "xml_svg_and_png_verified": true,
+  "public_portrait_is_static_sample": true,
+  "default_sprite_asset_and_tauri_icon_references_checked": true,
+  "credential_pattern_hits": [],
+  "private_history_configs_saves_and_sprite_tree_not_copied": true,
+  "prebuilt_wheels_not_bundled": true,
+  "full_runtime_test_suite_run_on_this_export": false,
+  "new_app_binaries_built": false,
+  "github_repository": "https://github.com/cutetesama1/rpg-cockpit",
+  "publication_note": "Snapshot prepared before push; published status is verified separately after push."
+}

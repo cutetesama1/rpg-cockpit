@@ -1,0 +1,9 @@
+{
+  "id": "probe-signal-station",
+  "title": "信号站：第七次呼叫",
+  "version": "0.1.0",
+  "schema_version": 1,
+  "rating": "12+",
+  "description": "第二题材探针包：同一个框架装下科幻悬疑，用来验证框架没有绑定题材。",
+  "dependencies": []
+}

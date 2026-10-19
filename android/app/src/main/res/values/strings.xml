@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RPG 驾驶舱</string>
+    <string name="starting_engine">正在启动本地引擎…</string>
+    <string name="engine_timeout">本地引擎启动超时，请退出重试</string>
+    <string name="engine_failed">本地引擎启动失败：%1$s</string>
+</resources>

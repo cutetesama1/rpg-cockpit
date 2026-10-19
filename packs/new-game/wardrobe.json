@@ -1,0 +1,39 @@
+{
+  "slots": {
+    "upper": {
+      "field": "upper",
+      "condition_field": "upper_condition",
+      "color_field": "outfit_color",
+      "items": {
+        "tshirt": "T恤",
+        "hoodie": "连帽卫衣",
+        "sweater": "毛衣",
+        "blouse": "衬衫",
+        "turtleneck": "高领衫",
+        "gymshirt": "运动上衣",
+        "kimono": "和服",
+        "karate": "练功服",
+        "diving": "潜水服",
+        "chef": "厨师服",
+        "cardigan sailor uniform": "开衫水手服"
+      }
+    },
+    "lower": {
+      "field": "lower",
+      "condition_field": "lower_condition",
+      "color_field": "pants_color",
+      "items": {
+        "jeans": "牛仔裤",
+        "trousers": "长裤",
+        "shorts": "短裤",
+        "sweatpants": "运动裤",
+        "gymshorts": "运动短裤",
+        "cargo": "工装裤",
+        "kimono": "和服下装",
+        "karate": "练功裤",
+        "diving": "潜水服下装",
+        "cardigan skirt": "校服裙"
+      }
+    }
+  }
+}

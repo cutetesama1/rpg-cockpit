@@ -1,0 +1,32 @@
+{
+  "id": "aisle",
+  "title": "货架之间",
+  "text": "货架之间的过道很窄，牛奶盒排得整整齐齐，只有最里面那一排倒了一个。收银台后面的门虚掩着，门缝里没有光，门把手上挂着一块褪色的「员工专用」牌子。冷柜的嗡鸣声里，好像混着别的声音。",
+  "options": [
+    {
+      "id": "to_checkout",
+      "label": "去收银台",
+      "action_text": "你沿着货架走向收银台",
+      "next_scene": "checkout"
+    },
+    {
+      "id": "to_backroom",
+      "label": "去后仓看看",
+      "action_text": "你绕过收银台，走向那扇「员工专用」的门",
+      "next_scene": "backroom",
+      "requires": [{ "field": "flag_met_clerk", "op": "==", "value": true }]
+    },
+    {
+      "id": "to_cold",
+      "label": "掀开冷柜后面的帘子",
+      "action_text": "你掀开冷柜后面那块厚重的塑料帘子",
+      "next_scene": "cold_storage",
+      "requires": [{ "field": "flag_heard_voice", "op": "==", "value": true }]
+    },
+    {
+      "id": "check_shelf",
+      "label": "检查货架",
+      "action_text": "你蹲下来，把最里排倒下的牛奶盒一个个码好"
+    }
+  ]
+}

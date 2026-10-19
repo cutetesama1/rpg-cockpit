@@ -1,0 +1,17 @@
+[
+  {
+    "id": "night-background",
+    "transparent": false,
+    "prompt": "Use case: stylized-concept. Asset type: finished background artwork for a dark Chinese narrative RPG reading interface, not a UI mockup. Primary request: an elegant moonlit observatory landscape backdrop, subdued charcoal blue slate, desaturated teal and very restrained antique brass accents matching a dark teal RPG interface. Composition: wide 16:9 landscape, full bleed, high resolution. The middle 70 percent is very dark, calm negative space with barely visible mist so opaque reading panels can sit above it. Faint old stone arches and botanical silhouettes only around the outer edges, delicate astronomical circles in the distant upper corners, soft moonlight from beyond the frame. Style: refined hand-painted fantasy game environment, matte digital illustration with fine material grain, sophisticated and quiet. No characters, no foreground objects, no written symbols, no text, no letters, no logo, no watermark, no interface panels or buttons. Low contrast under text areas; artwork intended as a real production background."
+  },
+  {
+    "id": "portrait-alcove",
+    "transparent": false,
+    "prompt": "Use case: stylized-concept. Asset type: empty portrait display backdrop for a layered pixel character in a dark narrative RPG UI. Primary request: an elegant empty moonlit stone alcove, understated illustrated game background, matching charcoal slate, desaturated teal and subtle antique brass. Vertical 3:4 composition, high resolution, full bleed. Thin weathered arch along the side edges, a broad simple dark central recess with absolutely nothing in front of it, small oval stone standing plinth at the bottom, soft teal moonlit rim at the far edges. The entire central 65 percent remains empty and uniformly dark so a pixel character from head to feet will read clearly. Painterly matte surface, restrained texture, no bright decorations behind the character. No person, no figure, no creature, no statue, no silhouette of a person, no clothing, no text, no letters, no watermark, no rendered UI or frame labels."
+  },
+  {
+    "id": "compass-crest",
+    "transparent": true,
+    "prompt": "Use case: stylized-concept. Asset type: transparent decorative painted emblem for a dark fantasy narrative RPG interface. Primary request: a compact antique brass celestial compass medallion with a small faceted desaturated jade center, finely engraved radial metal layers and two delicate feather-like metal flourishes. A tactile hand-painted game inventory ornament, elegant restrained detail, used as a header crest, not a logo mockup. Centered square composition with generous transparent margins, the object occupies about 70 percent of the image. Top-down/front view, balanced symmetrical silhouette, warm muted brass and cool muted jade, very subtle patina and bevel highlights, clean legible outer contour. Fully isolated on a genuinely transparent alpha background, including transparent gaps between the metal spokes. No rectangular card, no scenery, no text, no letters, no numbers, no runes, no watermark, no checkerboard painted into the image, no cast shadow outside the object."
+  }
+]

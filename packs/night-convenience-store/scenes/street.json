@@ -1,0 +1,24 @@
+{
+  "id": "street",
+  "title": "店外雨夜",
+  "text": "雨下得很密，路灯把雨丝照成一片灰白。回头能看见便利店的玻璃窗，暖黄的灯里，店员仍然站在收银台后，一动不动。街对面有一家早点铺，卷帘门拉了一半，里面的灯也亮着。",
+  "options": [
+    {
+      "id": "back_inside",
+      "label": "推门回去",
+      "action_text": "你转身推门回到便利店里",
+      "next_scene": "opening"
+    },
+    {
+      "id": "walk_away",
+      "label": "走进雨里，不再回头",
+      "action_text": "你拉上外套的拉链，走进雨里",
+      "next_scene": "ending_leave"
+    },
+    {
+      "id": "smoke",
+      "label": "在屋檐下站一会儿",
+      "action_text": "你在屋檐下站定，看着雨顺着檐角往下淌"
+    }
+  ]
+}

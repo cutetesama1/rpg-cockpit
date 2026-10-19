@@ -1,0 +1,19 @@
+{
+  "id": "core",
+  "title": "核心舱",
+  "text": "核心舱里只剩下低频的嗡鸣。反应堆的观察窗结满水雾，水雾后面有什么东西正贴着玻璃缓慢移动。墙上的告示写着：舱门封闭后方可进入。",
+  "requires": [{ "field": "flag_door_sealed", "op": "==", "value": true }],
+  "options": [
+    {
+      "id": "back_to_corridor",
+      "label": "退回走廊",
+      "action_text": "我沿着原路退回走廊",
+      "next_scene": "corridor"
+    },
+    {
+      "id": "touch_window",
+      "label": "擦开观察窗",
+      "action_text": "我抬手去擦观察窗上的水雾"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "信号站：第七次呼叫",
+  "bars": ["oxygen", "integrity"],
+  "numbers": ["power", "credits"],
+  "badges": ["flag_heard_signal"],
+  "skills_section": "可执行操作",
+  "options_section": "接下来"
+}

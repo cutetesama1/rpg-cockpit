@@ -1,0 +1,28 @@
+{
+  "id": "cold_storage",
+  "title": "冷库",
+  "text": "冷库的灯管一闪一闪，白汽贴着地面爬。货架上的东西都盖着一层薄霜，标签上的日期全是三个月前。最里面的角落堆着几个空纸箱，箱底压着一件叠好的工装，胸口的位置别着一枚工牌，名字那一栏是空的。",
+  "options": [
+    {
+      "id": "open_box",
+      "label": "打开最里面的纸箱",
+      "action_text": "你蹲下去，打开最里面那个纸箱"
+    },
+    {
+      "id": "take_uniform",
+      "label": "拿起那件工装",
+      "action_text": "你伸手拿起那件叠好的工装"
+    },
+    {
+      "id": "listen_cold",
+      "label": "屏住呼吸听",
+      "action_text": "你站在原地，屏住呼吸听冷库里的动静"
+    },
+    {
+      "id": "back_to_backroom",
+      "label": "回到后仓",
+      "action_text": "你退后几步，掀开帘子回到后仓",
+      "next_scene": "backroom"
+    }
+  ]
+}

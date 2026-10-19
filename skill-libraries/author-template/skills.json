@@ -1,0 +1,39 @@
+{
+  "skills": [
+    {
+      "id": "steady_step",
+      "kind": "martial",
+      "tier": "low",
+      "school": "身法",
+      "tags": [
+        "身法",
+        "武技",
+        "低级",
+        "防御"
+      ],
+      "aliases": [],
+      "requires_world_tags": [],
+      "excludes_world_tags": [],
+      "prerequisites": [],
+      "resource_cost": {
+        "effort": 1.0
+      },
+      "instruction": "固定行动：观察空位并向侧面移开身体。预定效果：避开一条可见攻击线。熟练层级：以单次、短距、有限范围完成基础动作。适用条件：需要身体能正常活动，受伤或地形不利时效果会降低。框架已收取 resource_cost 对应消耗，不再次收取同一笔。命中、对抗和额外环境后果按现有结算规则处理，不将敌方伤害记到玩家生命上。",
+      "skill": {
+        "id": "steady_step",
+        "name": "稳步",
+        "description": "低级身法。观察空位并向侧面移开身体，避开一条可见攻击线。",
+        "cost": {},
+        "cooldown": 0,
+        "targets": [
+          "self"
+        ],
+        "usable_when": "需要身体能正常活动，受伤或地形不利时效果会降低",
+        "action_text": "我收拢步幅，稳住重心。",
+        "effect_hint": "避开一条可见攻击线",
+        "category": "武技 · 低级",
+        "brief": "避开一条可见攻击线"
+      }
+    }
+  ]
+}

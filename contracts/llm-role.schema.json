@@ -1,0 +1,54 @@
+{
+  "$defs": {
+    "LlmProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "default": "scripted",
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "default": "",
+          "title": "Model",
+          "type": "string"
+        },
+        "temperature": {
+          "default": 0.7,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "max_tokens": {
+          "default": 0,
+          "title": "Max Tokens",
+          "type": "integer"
+        }
+      },
+      "title": "LlmProfile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "一期：narrator 与 settler 指向同一 profile，separated=False。\n\n拆分多 LLM 只改这里：separated=True + settler 指向小模型，核心契约不变。",
+  "properties": {
+    "separated": {
+      "default": false,
+      "title": "Separated",
+      "type": "boolean"
+    },
+    "narrator": {
+      "$ref": "#/$defs/LlmProfile"
+    },
+    "settler": {
+      "$ref": "#/$defs/LlmProfile"
+    },
+    "arbiter": {
+      "$ref": "#/$defs/LlmProfile"
+    },
+    "setup": {
+      "$ref": "#/$defs/LlmProfile"
+    }
+  },
+  "title": "LlmRolesConfig",
+  "type": "object"
+}

@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "id": "world_tone",
+      "title": "世界基调",
+      "content": "在这里写下这个世界的基调、时代、氛围与不可违反的规则。",
+      "keywords": [],
+      "always_on": true,
+      "priority": 100,
+      "category": "基调"
+    },
+    {
+      "id": "place_example",
+      "title": "开场地点",
+      "content": "在这里写开场地点的样子；当玩家行动里出现下面的关键词时，这段设定会被注入提示词。",
+      "keywords": [
+        "开场",
+        "四周"
+      ],
+      "priority": 50,
+      "category": "地点"
+    }
+  ]
+}

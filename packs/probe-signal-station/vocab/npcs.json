@@ -1,0 +1,14 @@
+{
+  "npcs": [
+    {
+      "id": "station_ai",
+      "name": "鲸歌",
+      "description": "站载 AI，最近开始答非所问。"
+    },
+    {
+      "id": "unknown_caller",
+      "name": "未登记呼号",
+      "description": "第七次呼叫的来源，频段不在民用表里。"
+    }
+  ]
+}

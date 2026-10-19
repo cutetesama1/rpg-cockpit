@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "bandage",
+      "name": "纱布",
+      "description": "没拆封的纱布，可以做简易包扎",
+      "stackable": true,
+      "use_effect_hint": "恢复少量生命"
+    },
+    {
+      "id": "crowbar",
+      "name": "撬棍",
+      "description": "生锈的撬棍，握起来有点凉",
+      "stackable": false,
+      "use_effect_hint": "可以作为攻击手段"
+    },
+    {
+      "id": "coins",
+      "name": "硬币",
+      "description": "几枚硬币",
+      "stackable": true,
+      "use_effect_hint": "可以在收银台使用"
+    }
+  ]
+}

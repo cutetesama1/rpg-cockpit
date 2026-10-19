@@ -1,0 +1,1236 @@
+{
+  "$defs": {
+    "CatalogSkill": {
+      "additionalProperties": false,
+      "description": "World-local, immutable snapshot of a skill-library entry.",
+      "properties": {
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "library_id": {
+          "title": "Library Id",
+          "type": "string"
+        },
+        "template_id": {
+          "title": "Template Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "martial",
+            "magic"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "low",
+            "mid",
+            "high"
+          ],
+          "title": "Tier",
+          "type": "string"
+        },
+        "school": {
+          "title": "School",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "prerequisites": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Prerequisites",
+          "type": "array"
+        },
+        "instruction": {
+          "title": "Instruction",
+          "type": "string"
+        },
+        "resource_cost": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Resource Cost",
+          "type": "object"
+        },
+        "skill": {
+          "$ref": "#/$defs/SkillSpec"
+        }
+      },
+      "required": [
+        "ref",
+        "library_id",
+        "template_id",
+        "kind",
+        "tier",
+        "school",
+        "instruction",
+        "skill"
+      ],
+      "title": "CatalogSkill",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "description": "场景/选项的进入条件：对已声明状态字段做受限比较（结构化，不解析自由文本）。",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "op": {
+          "default": "==",
+          "enum": [
+            "==",
+            "!=",
+            ">",
+            ">=",
+            "<",
+            "<=",
+            "in",
+            "not_in"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "default": true,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "ContentPackManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "rating": {
+          "default": "all",
+          "title": "Rating",
+          "type": "string"
+        },
+        "dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependencies",
+          "type": "array"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "version"
+      ],
+      "title": "ContentPackManifest",
+      "type": "object"
+    },
+    "FlagSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "FlagSpec",
+      "type": "object"
+    },
+    "ItemSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "stackable": {
+          "default": false,
+          "title": "Stackable",
+          "type": "boolean"
+        },
+        "use_effect_hint": {
+          "default": "",
+          "title": "Use Effect Hint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "ItemSpec",
+      "type": "object"
+    },
+    "NpcSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "NpcSpec",
+      "type": "object"
+    },
+    "OpeningScene": {
+      "additionalProperties": false,
+      "description": "一个场景。opening 是其中一个特殊场景（也是默认起点）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "requires": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Requires",
+          "type": "array"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/SceneOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "ending": {
+          "default": false,
+          "title": "Ending",
+          "type": "boolean"
+        },
+        "ending_title": {
+          "default": "",
+          "title": "Ending Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "OpeningScene",
+      "type": "object"
+    },
+    "QuestSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "QuestSpec",
+      "type": "object"
+    },
+    "SceneOption": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "action_text": {
+          "default": "",
+          "title": "Action Text",
+          "type": "string"
+        },
+        "next_scene": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Scene"
+        },
+        "requires": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Requires",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "SceneOption",
+      "type": "object"
+    },
+    "SkillSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "cost": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Cost",
+          "type": "object"
+        },
+        "cooldown": {
+          "default": 0,
+          "title": "Cooldown",
+          "type": "integer"
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Targets",
+          "type": "array"
+        },
+        "usable_when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Usable When"
+        },
+        "action_text": {
+          "default": "",
+          "title": "Action Text",
+          "type": "string"
+        },
+        "effect_hint": {
+          "default": "",
+          "title": "Effect Hint",
+          "type": "string"
+        },
+        "category": {
+          "default": "",
+          "title": "Category",
+          "type": "string"
+        },
+        "brief": {
+          "default": "",
+          "title": "Brief",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "SkillSpec",
+      "type": "object"
+    },
+    "SpriteCrop": {
+      "additionalProperties": false,
+      "description": "素材里的有效区域（像素）。\n\nDoL 的立绘 PNG 是 512×256 的大图，真正的角色只占左上角一小块，右侧另有一块\n放大预览；整张画会重影。`crop` 指定从每层图片的哪一块取样，所有图层共用同一\n窗口，再等比放大到画布。",
+      "properties": {
+        "x": {
+          "default": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "default": 0,
+          "title": "Y",
+          "type": "integer"
+        },
+        "w": {
+          "default": 0,
+          "title": "W",
+          "type": "integer"
+        },
+        "h": {
+          "default": 0,
+          "title": "H",
+          "type": "integer"
+        }
+      },
+      "title": "SpriteCrop",
+      "type": "object"
+    },
+    "SpriteLayer": {
+      "additionalProperties": false,
+      "description": "立绘的一层：图片路径 + 层序 + 显示条件 + 着色/遮罩。\n\n`src` 是相对内容包根目录的路径模板，可以用 `{field}` 引用状态字段，\n例如 `ui/sprites/body/base-{body_type}.png`；字段值会原样替换。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "src": {
+          "title": "Src",
+          "type": "string"
+        },
+        "z": {
+          "default": 0,
+          "title": "Z",
+          "type": "integer"
+        },
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "When",
+          "type": "array"
+        },
+        "unless": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Unless",
+          "type": "array"
+        },
+        "tint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tint"
+        },
+        "tint_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tint Field"
+        },
+        "opacity": {
+          "default": 1.0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "wear_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Wear Field"
+        },
+        "blend": {
+          "default": "normal",
+          "enum": [
+            "normal",
+            "multiply"
+          ],
+          "title": "Blend",
+          "type": "string"
+        },
+        "mask": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mask"
+        },
+        "x": {
+          "default": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "default": 0,
+          "title": "Y",
+          "type": "integer"
+        },
+        "adult": {
+          "default": false,
+          "title": "Adult",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "src"
+      ],
+      "title": "SpriteLayer",
+      "type": "object"
+    },
+    "SpritePose": {
+      "additionalProperties": false,
+      "description": "一种姿势：自己的取样窗口 + 图层列表。\n\n立绘默认用 `SpriteSheet.layers`；当状态字段 `pose` 的值等于某个姿势名时，\n改用该姿势的窗口和图层。DoL 的坐/卧/性交姿势都是独立的一套图层，\n取样窗口也和站姿不同，所以每个姿势自带 `crop`。",
+      "properties": {
+        "crop": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpriteCrop"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "layers": {
+          "items": {
+            "$ref": "#/$defs/SpriteLayer"
+          },
+          "title": "Layers",
+          "type": "array"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height"
+        },
+        "frames": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frames"
+        },
+        "fps": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fps"
+        },
+        "frame_width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Width"
+        }
+      },
+      "title": "SpritePose",
+      "type": "object"
+    },
+    "SpriteRule": {
+      "additionalProperties": false,
+      "description": "状态联动规则：满足 `when` 时把若干字段替换成 `set` 里的值再画。\n\n只影响绘制，不改状态本身（不写账本）——「受伤时换成 hurt 表情」这类\n表现层联动适合放这里；真要改数值请用调试台或剧情事件。",
+      "properties": {
+        "when": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "When",
+          "type": "array"
+        },
+        "set": {
+          "additionalProperties": true,
+          "title": "Set",
+          "type": "object"
+        }
+      },
+      "title": "SpriteRule",
+      "type": "object"
+    },
+    "SpriteSheet": {
+      "additionalProperties": false,
+      "description": "内容包可选的立绘配置：ui/sprites.json。",
+      "properties": {
+        "width": {
+          "default": 256,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "default": 256,
+          "title": "Height",
+          "type": "integer"
+        },
+        "max_height": {
+          "default": 320,
+          "title": "Max Height",
+          "type": "integer"
+        },
+        "crop": {
+          "$ref": "#/$defs/SpriteCrop"
+        },
+        "layers": {
+          "items": {
+            "$ref": "#/$defs/SpriteLayer"
+          },
+          "title": "Layers",
+          "type": "array"
+        },
+        "poses": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SpritePose"
+          },
+          "title": "Poses",
+          "type": "object"
+        },
+        "views": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SpriteCrop"
+          },
+          "title": "Views",
+          "type": "object"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/SpriteRule"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "frame_width": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Width"
+        },
+        "frames": {
+          "default": 1,
+          "title": "Frames",
+          "type": "integer"
+        },
+        "fps": {
+          "default": 2.0,
+          "title": "Fps",
+          "type": "number"
+        }
+      },
+      "title": "SpriteSheet",
+      "type": "object"
+    },
+    "StateField": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "default": "int",
+          "enum": [
+            "int",
+            "float",
+            "bool",
+            "enum",
+            "string"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "step": {
+          "default": 1,
+          "title": "Step",
+          "type": "number"
+        },
+        "default": {
+          "default": 0,
+          "title": "Default"
+        },
+        "display": {
+          "default": "number",
+          "enum": [
+            "bar",
+            "number",
+            "badge",
+            "text",
+            "hidden"
+          ],
+          "title": "Display",
+          "type": "string"
+        },
+        "group": {
+          "default": "misc",
+          "title": "Group",
+          "type": "string"
+        },
+        "llm_visible": {
+          "default": true,
+          "title": "Llm Visible",
+          "type": "boolean"
+        },
+        "enum_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enum Values"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "StateField",
+      "type": "object"
+    },
+    "StateSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/StateField"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "resource_bindings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Resource Bindings",
+          "type": "object"
+        },
+        "limits": {
+          "$ref": "#/$defs/TurnLimits"
+        }
+      },
+      "required": [
+        "fields"
+      ],
+      "title": "StateSchema",
+      "type": "object"
+    },
+    "TurnLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tool_rounds": {
+          "default": 6,
+          "title": "Max Tool Rounds",
+          "type": "integer"
+        },
+        "max_rejections": {
+          "default": 1,
+          "title": "Max Rejections",
+          "type": "integer"
+        },
+        "narrative_number_check": {
+          "default": true,
+          "title": "Narrative Number Check",
+          "type": "boolean"
+        },
+        "max_delta_per_turn": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Max Delta Per Turn",
+          "type": "object"
+        }
+      },
+      "title": "TurnLimits",
+      "type": "object"
+    },
+    "UiLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "bars": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Bars",
+          "type": "array"
+        },
+        "numbers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Numbers",
+          "type": "array"
+        },
+        "badges": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Badges",
+          "type": "array"
+        },
+        "skills_section": {
+          "default": "技能",
+          "title": "Skills Section",
+          "type": "string"
+        },
+        "options_section": {
+          "default": "接下来",
+          "title": "Options Section",
+          "type": "string"
+        }
+      },
+      "title": "UiLayout",
+      "type": "object"
+    },
+    "WardrobeConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "slots": {
+          "additionalProperties": {
+            "$ref": "#/$defs/WardrobeSlot"
+          },
+          "maxProperties": 8,
+          "minProperties": 1,
+          "title": "Slots",
+          "type": "object"
+        }
+      },
+      "required": [
+        "slots"
+      ],
+      "title": "WardrobeConfig",
+      "type": "object"
+    },
+    "WardrobeSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "condition_field": {
+          "title": "Condition Field",
+          "type": "string"
+        },
+        "color_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color Field"
+        },
+        "items": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Items",
+          "type": "object"
+        }
+      },
+      "required": [
+        "field",
+        "condition_field",
+        "items"
+      ],
+      "title": "WardrobeSlot",
+      "type": "object"
+    },
+    "WorldbookEntry": {
+      "additionalProperties": false,
+      "description": "世界书条目：一段世界观设定，按关键词命中时注入 LLM 上下文。\n\n`always_on` 的条目每回合都注入（用于世界的底层规则/基调），其余按命中。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keywords",
+          "type": "array"
+        },
+        "always_on": {
+          "default": false,
+          "title": "Always On",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "priority": {
+          "default": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "category": {
+          "default": "",
+          "title": "Category",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "content"
+      ],
+      "title": "WorldbookEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "manifest": {
+      "$ref": "#/$defs/ContentPackManifest"
+    },
+    "state": {
+      "$ref": "#/$defs/StateSchema"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/SkillSpec"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "skill_catalog": {
+      "items": {
+        "$ref": "#/$defs/CatalogSkill"
+      },
+      "title": "Skill Catalog",
+      "type": "array"
+    },
+    "skill_selection": {
+      "additionalProperties": true,
+      "title": "Skill Selection",
+      "type": "object"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/ItemSpec"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "npcs": {
+      "items": {
+        "$ref": "#/$defs/NpcSpec"
+      },
+      "title": "Npcs",
+      "type": "array"
+    },
+    "quests": {
+      "items": {
+        "$ref": "#/$defs/QuestSpec"
+      },
+      "title": "Quests",
+      "type": "array"
+    },
+    "flags": {
+      "items": {
+        "$ref": "#/$defs/FlagSpec"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "worldbook": {
+      "items": {
+        "$ref": "#/$defs/WorldbookEntry"
+      },
+      "title": "Worldbook",
+      "type": "array"
+    },
+    "prompts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Prompts",
+      "type": "object"
+    },
+    "prompt_versions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Prompt Versions",
+      "type": "object"
+    },
+    "ui": {
+      "$ref": "#/$defs/UiLayout"
+    },
+    "sprites": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SpriteSheet"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "asset_pack": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset Pack"
+    },
+    "wardrobe": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WardrobeConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "opening": {
+      "$ref": "#/$defs/OpeningScene"
+    },
+    "scenes": {
+      "items": {
+        "$ref": "#/$defs/OpeningScene"
+      },
+      "title": "Scenes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "manifest",
+    "state"
+  ],
+  "title": "ContentPack",
+  "type": "object"
+}

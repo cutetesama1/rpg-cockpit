@@ -1,0 +1,8 @@
+{
+  "title": "凌晨便利店 · 第一晚",
+  "bars": ["hp", "stamina", "sanity"],
+  "numbers": ["money"],
+  "badges": ["flag_met_clerk"],
+  "skills_section": "技能",
+  "options_section": "接下来"
+}

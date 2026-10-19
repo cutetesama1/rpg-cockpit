@@ -1,0 +1,183 @@
+{
+  "$defs": {
+    "StateField": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "default": "int",
+          "enum": [
+            "int",
+            "float",
+            "bool",
+            "enum",
+            "string"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "step": {
+          "default": 1,
+          "title": "Step",
+          "type": "number"
+        },
+        "default": {
+          "default": 0,
+          "title": "Default"
+        },
+        "display": {
+          "default": "number",
+          "enum": [
+            "bar",
+            "number",
+            "badge",
+            "text",
+            "hidden"
+          ],
+          "title": "Display",
+          "type": "string"
+        },
+        "group": {
+          "default": "misc",
+          "title": "Group",
+          "type": "string"
+        },
+        "llm_visible": {
+          "default": true,
+          "title": "Llm Visible",
+          "type": "boolean"
+        },
+        "enum_values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enum Values"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Color"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "StateField",
+      "type": "object"
+    },
+    "TurnLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_tool_rounds": {
+          "default": 6,
+          "title": "Max Tool Rounds",
+          "type": "integer"
+        },
+        "max_rejections": {
+          "default": 1,
+          "title": "Max Rejections",
+          "type": "integer"
+        },
+        "narrative_number_check": {
+          "default": true,
+          "title": "Narrative Number Check",
+          "type": "boolean"
+        },
+        "max_delta_per_turn": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Max Delta Per Turn",
+          "type": "object"
+        }
+      },
+      "title": "TurnLimits",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "fields": {
+      "items": {
+        "$ref": "#/$defs/StateField"
+      },
+      "title": "Fields",
+      "type": "array"
+    },
+    "resource_bindings": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Resource Bindings",
+      "type": "object"
+    },
+    "limits": {
+      "$ref": "#/$defs/TurnLimits"
+    }
+  },
+  "required": [
+    "fields"
+  ],
+  "title": "StateSchema",
+  "type": "object"
+}

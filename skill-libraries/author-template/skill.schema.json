@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "SkillSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "cost": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Cost",
+          "type": "object"
+        },
+        "cooldown": {
+          "default": 0,
+          "title": "Cooldown",
+          "type": "integer"
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Targets",
+          "type": "array"
+        },
+        "usable_when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Usable When"
+        },
+        "action_text": {
+          "default": "",
+          "title": "Action Text",
+          "type": "string"
+        },
+        "effect_hint": {
+          "default": "",
+          "title": "Effect Hint",
+          "type": "string"
+        },
+        "category": {
+          "default": "",
+          "title": "Category",
+          "type": "string"
+        },
+        "brief": {
+          "default": "",
+          "title": "Brief",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "SkillSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "pattern": "^[a-z][a-z0-9_]{1,39}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "martial",
+        "magic"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "tier": {
+      "enum": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "title": "Tier",
+      "type": "string"
+    },
+    "school": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "School",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 24,
+      "title": "Tags",
+      "type": "array"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 12,
+      "title": "Aliases",
+      "type": "array"
+    },
+    "requires_world_tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Requires World Tags",
+      "type": "array"
+    },
+    "excludes_world_tags": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Excludes World Tags",
+      "type": "array"
+    },
+    "prerequisites": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Prerequisites",
+      "type": "array"
+    },
+    "resource_cost": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Resource Cost",
+      "type": "object"
+    },
+    "instruction": {
+      "maxLength": 1600,
+      "minLength": 8,
+      "title": "Instruction",
+      "type": "string"
+    },
+    "skill": {
+      "$ref": "#/$defs/SkillSpec"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "tier",
+    "school",
+    "instruction",
+    "skill"
+  ],
+  "title": "LibrarySkill",
+  "type": "object"
+}

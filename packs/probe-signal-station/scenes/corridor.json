@@ -1,0 +1,35 @@
+{
+  "id": "corridor",
+  "text": "走廊比记忆里更窄。舱壁上有新鲜的刮痕，像被什么从内侧抓过；应急灯每暗一次，刮痕的影子就换个方向。尽头那扇舱门的密封胶条已经翘起，门缝里没有风，只有一股很淡的、铁锈味的凉。",
+  "options": [
+    {
+      "id": "listen",
+      "label": "贴门听",
+      "action_text": "我把耳朵贴在舱门上，屏住呼吸听里面的动静。"
+    },
+    {
+      "id": "seal",
+      "label": "先把门封住",
+      "action_text": "我用撬棍别住舱门，再缠上两圈胶带。"
+    },
+    {
+      "id": "back",
+      "label": "退回主控台",
+      "action_text": "我慢慢后退，退回主控台那边。"
+    },
+    {
+      "id": "to_core",
+      "label": "进核心舱",
+      "action_text": "我推开走廊尽头那扇舱门，走进核心舱",
+      "next_scene": "core",
+      "requires": [
+        {
+          "field": "flag_door_sealed",
+          "op": "==",
+          "value": true
+        }
+      ]
+    }
+  ],
+  "title": "走廊"
+}

@@ -1,0 +1,317 @@
+[
+  {
+    "name": "roll",
+    "description": "掷骰。点数由框架生成，LLM 不得自行编造。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "dice": {
+          "type": "string",
+          "description": "如 1d6+2"
+        }
+      },
+      "required": [
+        "dice"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "damage",
+    "description": "对目标造成伤害（默认 hp）。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "heal",
+    "description": "恢复生命/资源（默认 hp）。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "add_stat",
+    "description": "对某个已声明数值字段做增量修改。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "delta"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "set_stat",
+    "description": "把某个已声明字段设为指定值（仅在确有必要时使用）。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "value"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "add_item",
+    "description": "获得物品。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "set_flag",
+    "description": "设置剧情标记。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "flag": {
+          "type": "string"
+        },
+        "value": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "flag",
+        "value"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "enter_scene",
+    "description": "进入另一个场景。只能进入内容包已声明且进入条件已满足的场景。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "scene_id": {
+          "type": "string",
+          "description": "目标场景 id"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scene_id"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "learn_skill",
+    "description": "玩家习得一个新技能（剧情奖励/学习成果）。只允许在叙事里真的写到他学会/掌握了这门新本事时调用；技能会立刻出现在玩家技能栏里，之后可以和输入一起勾选使用。只能新增内容包里还没有的技能 id，不能修改已有技能。",
+    "params": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "技能 id：小写英文字母开头，只能用小写字母/数字/下划线，2~40 字符，如 shadow_step"
+        },
+        "name": {
+          "type": "string",
+          "description": "技能中文名，如 潜行"
+        },
+        "description": {
+          "type": "string",
+          "description": "技能说明（一句话）"
+        },
+        "cost": {
+          "type": "object",
+          "description": "施展消耗：内容包已声明的数值字段 → 数值，如 {\"stamina\": 2}；可为空对象"
+        },
+        "cooldown": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "冷却回合数，0 表示无冷却"
+        },
+        "action_text": {
+          "type": "string",
+          "description": "使用技能时玩家视角的一句行动文本（可空）"
+        },
+        "category": {
+          "type": "string",
+          "description": "分类，如 生存/战斗（可空）"
+        },
+        "effect_hint": {
+          "type": "string",
+          "description": "技能效果提示（可空）"
+        },
+        "reason": {
+          "type": "string",
+          "description": "习得原因（剧情依据）"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "learn_catalog_skills",
+    "description": "按世界预设技能目录登记已学会的技能，只引用 ref 与本次叙述原文证据，不生成或修改技能定义。无学习则 skills=[]。",
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "evidence"
+            ]
+          }
+        }
+      },
+      "required": [
+        "skills"
+      ]
+    },
+    "permission": "settler"
+  },
+  {
+    "name": "update_clothing",
+    "description": "读取本次最终叙述后，原子更新衣物款式、颜色和损坏程度。无变化时提交空 changes。仅限衣物后置结算阶段。",
+    "params": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "changes": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "slot": {
+                "type": "string",
+                "description": "衣物槽位，例如 upper/lower"
+              },
+              "garment": {
+                "type": "string",
+                "description": "目录里的衣物 id，未换衣时省略"
+              },
+              "condition": {
+                "type": "string",
+                "enum": [
+                  "intact",
+                  "scuffed",
+                  "damaged",
+                  "ruined"
+                ]
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 300,
+                "description": "本次叙述中证明实际换衣、损坏或修复已经发生的原文片段"
+              }
+            },
+            "required": [
+              "slot",
+              "evidence"
+            ]
+          }
+        }
+      },
+      "required": [
+        "changes"
+      ]
+    },
+    "permission": "settler"
+  }
+]

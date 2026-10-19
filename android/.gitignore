@@ -1,0 +1,18 @@
+# Gradle / Android 构建产物
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.cxx/
+captures/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+
+# P3: 构建时由 syncBackend 生成的 assets（后端源码/UI/样例包）
+app/src/main/assets/backend/
+
+# P6：release 签名材料不入库
+keystore/

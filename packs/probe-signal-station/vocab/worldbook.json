@@ -1,0 +1,50 @@
+{
+  "entries": [
+    {
+      "id": "world_tone",
+      "title": "世界基调",
+      "content": "深空里一座废弃信号站，硬科幻、低光、低温。氧气、电力与站体完整度都是硬约束，任何行动都要付出代价。",
+      "keywords": [],
+      "always_on": true,
+      "priority": 100,
+      "category": "基调"
+    },
+    {
+      "id": "seventh_call",
+      "title": "第七次呼叫",
+      "content": "第七次呼叫来自一个未登记频道，每隔一段时间重复一次；呼号栏里反复跳出的，是你自己的名字。",
+      "keywords": [
+        "呼叫",
+        "信号",
+        "频道",
+        "第七次"
+      ],
+      "priority": 90,
+      "category": "异常"
+    },
+    {
+      "id": "corridor_lore",
+      "title": "走廊与舱门",
+      "content": "走廊的灯一闪一灭，频率像某种等待回答的节拍；舱门可以用撬棍和胶带临时封闭，封住后站体完整度更稳。",
+      "keywords": [
+        "走廊",
+        "舱门",
+        "气闸"
+      ],
+      "priority": 70,
+      "category": "地点"
+    },
+    {
+      "id": "station_ai",
+      "title": "站体 AI",
+      "content": "站体 AI 的声音平静、礼貌，偶尔延迟半秒，像在斟酌措辞；它从不主动提「第七次呼叫」。",
+      "keywords": [
+        "站体",
+        "主控",
+        "AI"
+      ],
+      "priority": 60,
+      "category": "人物"
+    }
+  ]
+}

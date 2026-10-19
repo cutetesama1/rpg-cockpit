@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>立绘图层调试</title>
+    <style>
+      body {
+        background: #0f1115;
+        color: #dfe6ee;
+        font: 13px/1.5 "Segoe UI", "Microsoft YaHei", sans-serif;
+        margin: 16px;
+      }
+      h1 {
+        font-size: 15px;
+        margin: 0 0 8px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .card {
+        background: #171b22;
+        border: 1px solid #2a3140;
+        border-radius: 6px;
+        padding: 6px;
+      }
+      .card canvas {
+        display: block;
+        background: #101419;
+        image-rendering: pixelated;
+      }
+      .card p {
+        margin: 4px 0 0;
+        font-size: 11px;
+        color: #9fb0c4;
+        max-width: 270px;
+        word-break: break-all;
+      }
+      .main canvas {
+        width: 512px;
+        height: 512px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>立绘合成 + 逐层调试（?explicit=1 打开成人向底层）</h1>
+    <div id="summary">loading…</div>
+    <div class="row" id="layers"></div>
+    <script>
+      const explicit = new URLSearchParams(location.search).has("explicit");
+      const assetBase = "/api/pack/asset/";
+
+      function cmp(actual, op, expected) {
+        if (op === "==") return actual === expected;
+        if (op === "!=") return actual !== expected;
+        const a = Number(actual);
+        const b = Number(expected);
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+        if (op === ">") return a > b;
+        if (op === ">=") return a >= b;
+        if (op === "<") return a < b;
+        return a <= b;
+      }
+
+      function passes(list, ctx) {
+        return !list || list.length === 0 || list.every((c) => cmp(ctx[c.field], c.op, c.value));
+      }
+
+      function visible(layer, ctx) {
+        if (layer.adult && !explicit) return false;
+        if (!passes(layer.when, ctx)) return false;
+        if (layer.unless && layer.unless.some((c) => cmp(ctx[c.field], c.op, c.value))) return false;
+        return true;
+      }
+
+      function load(src) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = assetBase + src;
+        });
+      }
+
+      function bbox(img) {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const g = c.getContext("2d");
+        g.drawImage(img, 0, 0);
+        const data = g.getImageData(0, 0, w, h).data;
+        let minx = w,
+          miny = h,
+          maxx = -1,
+          maxy = -1;
+        for (let y = 0; y < h; y += 1) {
+          for (let x = 0; x < w; x += 1) {
+            if (data[(y * w + x) * 4 + 3] > 8) {
+              if (x < minx) minx = x;
+              if (x > maxx) maxx = x;
+              if (y < miny) miny = y;
+              if (y > maxy) maxy = y;
+            }
+          }
+        }
+        return maxx < 0 ? "empty" : `x${minx}..${maxx} y${miny}..${maxy}`;
+      }
+
+      function tinted(img, color) {
+        if (!color) return img;
+        const c = document.createElement("canvas");
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        const g = c.getContext("2d");
+        g.drawImage(img, 0, 0);
+        g.globalCompositeOperation = "source-in";
+        g.fillStyle = color;
+        g.fillRect(0, 0, c.width, c.height);
+        return c;
+      }
+
+      (async () => {
+        const [sheetRes, stateRes] = await Promise.all([
+          fetch("/api/sprite").then((r) => r.json()),
+          fetch("/api/state").then((r) => r.json()),
+        ]);
+        const sheet = sheetRes.sheet;
+        const ctx = { ...stateRes.state, explicit };
+        const active = sheet.layers
+          .filter((l) => visible(l, ctx))
+          .map((l) => ({ ...l, src: l.src.replace(/\{(\w+)\}/g, (_m, k) => (ctx[k] ?? "")) }))
+          .filter((l) => !l.src.endsWith("/"))
+          .sort((a, b) => a.z - b.z);
+        const imgs = await Promise.all(active.map((l) => load(l.src)));
+        const main = document.createElement("div");
+        main.className = "card main";
+        const canvas = document.createElement("canvas");
+        canvas.width = sheet.width;
+        canvas.height = sheet.height;
+        const g = canvas.getContext("2d");
+        g.clearRect(0, 0, canvas.width, canvas.height);
+        const info = [];
+        active.forEach((layer, i) => {
+          const img = imgs[i];
+          if (!img) {
+            info.push(`${layer.id}: LOAD FAIL ${layer.src}`);
+            return;
+          }
+          const color = layer.tint_field ? ctx[layer.tint_field] : layer.tint;
+          const source = tinted(img, color);
+          const sw = Math.min(img.naturalWidth, sheet.width);
+          const sh = Math.min(img.naturalHeight, sheet.height);
+          g.globalAlpha = layer.opacity ?? 1;
+          g.drawImage(source, 0, 0, sw, sh, layer.x ?? 0, layer.y ?? 0, sw, sh);
+          g.globalAlpha = 1;
+          info.push(`${layer.id}: z${layer.z} ${img.naturalWidth}x${img.naturalHeight} draw ${sw}x${sh}@${layer.x ?? 0},${layer.y ?? 0} content ${bbox(img)}`);
+        });
+        main.appendChild(canvas);
+        const summary = document.getElementById("summary");
+        summary.textContent = `sheet ${sheet.width}x${sheet.height} · active ${active.length} layers · explicit=${explicit}`;
+        const row = document.getElementById("layers");
+        row.appendChild(main);
+        active.forEach((layer, i) => {
+          const img = imgs[i];
+          if (!img) return;
+          const card = document.createElement("div");
+          card.className = "card";
+          const c = document.createElement("canvas");
+          c.width = sheet.width;
+          c.height = sheet.height;
+          c.style.width = "180px";
+          c.style.height = "180px";
+          const gg = c.getContext("2d");
+          const color = layer.tint_field ? ctx[layer.tint_field] : layer.tint;
+          const source = tinted(img, color);
+          const sw = Math.min(img.naturalWidth, sheet.width);
+          const sh = Math.min(img.naturalHeight, sheet.height);
+          gg.drawImage(source, 0, 0, sw, sh, layer.x ?? 0, layer.y ?? 0, sw, sh);
+          const p = document.createElement("p");
+          p.textContent = info[i];
+          card.appendChild(c);
+          card.appendChild(p);
+          row.appendChild(card);
+        });
+      })();
+    </script>
+  </body>
+</html>

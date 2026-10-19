@@ -1,0 +1,37 @@
+{
+  "id": "backroom",
+  "title": "便利店后仓",
+  "text": "后仓比店里更冷。纸箱堆到齐腰高，角落里放着一张折叠床，床头压着一本翻烂的进货单。墙上用胶带贴着一张照片：便利店门口，站着一个人，脸被剪掉了。尽头是一扇挂着厚塑料帘子的门，帘子后面透出冷柜那种白汽。",
+  "requires": [
+    {
+      "field": "flag_met_clerk",
+      "op": "==",
+      "value": true
+    }
+  ],
+  "options": [
+    {
+      "id": "to_cold",
+      "label": "掀开帘子进冷库",
+      "action_text": "你走到后仓尽头，掀开那块结着白霜的塑料帘子",
+      "next_scene": "cold_storage"
+    },
+    {
+      "id": "to_office",
+      "label": "推开值班室的门",
+      "action_text": "你推开后仓侧面那扇写着「值班室」的门",
+      "next_scene": "office"
+    },
+    {
+      "id": "read_photo",
+      "label": "仔细看那张照片",
+      "action_text": "你伸手把墙上那张被剪掉脸的照片揭下来"
+    },
+    {
+      "id": "back_to_aisle",
+      "label": "回到货架间",
+      "action_text": "你退回到货架之间的过道",
+      "next_scene": "aisle"
+    }
+  ]
+}

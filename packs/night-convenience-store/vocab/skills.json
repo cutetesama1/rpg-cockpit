@@ -1,0 +1,53 @@
+{
+  "skills": [
+    {
+      "id": "smash",
+      "name": "撬棍击打",
+      "description": "抡起撬棍砸向货架后的影子",
+      "cost": {
+        "stamina": 2
+      },
+      "cooldown": 0,
+      "targets": [
+        "enemy"
+      ],
+      "usable_when": null,
+      "action_text": "你抡起撬棍砸过去",
+      "effect_hint": "造成一次中等物理伤害（约 5~9 点，具体由结算规则决定）",
+      "category": "战斗",
+      "brief": "中等物理伤害"
+    },
+    {
+      "id": "first_aid",
+      "name": "急救包扎",
+      "description": "撕开一包没拆封的纱布按住伤口",
+      "cost": {
+        "stamina": 1
+      },
+      "cooldown": 1,
+      "targets": [
+        "self"
+      ],
+      "usable_when": null,
+      "action_text": "你按住伤口，做了简单包扎",
+      "effect_hint": "恢复少量生命（约 4~6 点，具体由结算规则决定）",
+      "category": "恢复",
+      "brief": "恢复少量生命"
+    },
+    {
+      "id": "observe",
+      "name": "观察四周",
+      "description": "扫视货架、收银台和虚掩的门",
+      "cost": {},
+      "cooldown": 0,
+      "targets": [
+        "scene"
+      ],
+      "usable_when": null,
+      "action_text": "你环顾四周",
+      "effect_hint": "没有直接数值效果，获得信息",
+      "category": "探索",
+      "brief": "侦察环境"
+    }
+  ]
+}

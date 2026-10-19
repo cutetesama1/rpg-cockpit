@@ -1,0 +1,10 @@
+[project]
+name = "rpg-framework"
+version = "0.0.1"
+description = "通用 AI 文字冒险 RPG 框架 · P0 骨架"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["core", "gateway", "content", "api"]
+testpaths = ["tests"]
+addopts = "-q"

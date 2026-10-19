@@ -1,0 +1,118 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "seq": {
+      "title": "Seq",
+      "type": "integer"
+    },
+    "turn": {
+      "title": "Turn",
+      "type": "integer"
+    },
+    "kind": {
+      "enum": [
+        "turn.started",
+        "skill.used",
+        "skill.learned",
+        "scene.entered",
+        "narrative.generated",
+        "narrative.checked",
+        "clothing.checked",
+        "settlement.checked",
+        "settlement.rejected",
+        "status.updated",
+        "story.fact",
+        "world.configured",
+        "skills.checked",
+        "roll.resolved",
+        "tool.proposed",
+        "tool.applied",
+        "tool.rejected",
+        "llm.usage",
+        "turn.committed",
+        "turn.rolled_back",
+        "state.snapshot"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "actor": {
+      "default": "system",
+      "title": "Actor",
+      "type": "string"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "rolls": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Rolls",
+      "type": "array"
+    },
+    "caused_by": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Caused By"
+    },
+    "prompt_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Version"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "ts": {
+      "format": "date-time",
+      "title": "Ts",
+      "type": "string"
+    }
+  },
+  "required": [
+    "seq",
+    "turn",
+    "kind"
+  ],
+  "title": "Event",
+  "type": "object"
+}

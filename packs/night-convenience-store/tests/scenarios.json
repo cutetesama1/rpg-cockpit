@@ -1,0 +1,26 @@
+{
+  "scenarios": [
+    {
+      "id": "golden_smash",
+      "description": "点技能卡撬棍击打：应有 roll.resolved + damage 7，生命 20→13",
+      "action": { "kind": "skill", "skill_id": "smash" },
+      "expect": {
+        "state": { "hp": 13 },
+        "events_include": ["roll.resolved", "tool.applied", "narrative.generated"],
+        "narrative_no_leaks": true
+      }
+    },
+    {
+      "id": "golden_first_aid",
+      "description": "急救：生命不能超过上限 20",
+      "action": { "kind": "skill", "skill_id": "first_aid" },
+      "expect": { "state": { "hp": 20 } }
+    },
+    {
+      "id": "golden_observe",
+      "description": "观察：无工具调用，状态不变",
+      "action": { "kind": "skill", "skill_id": "observe" },
+      "expect": { "state": { "hp": 20 }, "events_include": ["narrative.generated"] }
+    }
+  ]
+}

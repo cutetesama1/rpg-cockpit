@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "enum": [
+        "roll",
+        "damage",
+        "heal",
+        "add_stat",
+        "set_stat",
+        "add_item",
+        "set_flag",
+        "enter_scene",
+        "learn_skill",
+        "learn_catalog_skills",
+        "update_clothing"
+      ],
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": true,
+      "title": "Params",
+      "type": "object"
+    },
+    "permission": {
+      "default": "settler",
+      "title": "Permission",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "params"
+  ],
+  "title": "MutatorSpec",
+  "type": "object"
+}

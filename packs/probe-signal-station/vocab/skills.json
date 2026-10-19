@@ -1,0 +1,48 @@
+{
+  "skills": [
+    {
+      "id": "scan",
+      "name": "扫描舱段",
+      "description": "用手持扫描器读取舱段状态，会消耗电力。",
+      "cost": {
+        "power": 2
+      },
+      "cooldown": 0,
+      "targets": [
+        "scene"
+      ],
+      "action_text": "我举起手持扫描器，沿走廊缓慢扫过。",
+      "effect_hint": "消耗电力；可能发现站体损伤或异常信号。",
+      "category": "探索",
+      "brief": "扫描舱段、发现异常"
+    },
+    {
+      "id": "reroute",
+      "name": "重新配线",
+      "description": "从备用电池把电引到主控台。",
+      "cost": {},
+      "cooldown": 2,
+      "targets": [
+        "self"
+      ],
+      "action_text": "我蹲下来，把备用电池的线路接到主控台上。",
+      "effect_hint": "冷却 2 回合；可能恢复电力。",
+      "category": "维修",
+      "brief": "恢复电力"
+    },
+    {
+      "id": "seal_door",
+      "name": "封闭舱门",
+      "description": "用撬棍和胶带临时封住舱门。",
+      "cost": {},
+      "cooldown": 1,
+      "targets": [
+        "scene"
+      ],
+      "action_text": "我用撬棍别住舱门，又缠了两圈胶带。",
+      "effect_hint": "冷却 1 回合；可能提升站体完整度。",
+      "category": "防护",
+      "brief": "封闭舱门、提升完整度"
+    }
+  ]
+}

@@ -113,4 +113,4 @@ Android 的预编译依赖 wheel、发布签名、安装包、模型密钥、个
 
 ## 许可证
 
-本导出包的一方代码与原创示例图形采用 [MIT License](LICENSE)。第三方依赖和素材保留各自许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+本导出包的一方代码与原创示例图形采用 [Apache License 2.0](LICENSE)。第三方依赖和素材保留各自许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

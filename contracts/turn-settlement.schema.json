@@ -1,0 +1,90 @@
+{
+  "$defs": {
+    "Operation": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "damage",
+            "heal",
+            "add_stat",
+            "set_stat",
+            "add_item",
+            "set_flag",
+            "enter_scene",
+            "learn_skill",
+            "learn_catalog_skills",
+            "update_clothing",
+            "set_value",
+            "record_fact",
+            "roll"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        },
+        "evidence": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "source": {
+          "default": "narrative",
+          "enum": [
+            "narrative",
+            "skill_cost"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "evidence"
+      ],
+      "title": "Operation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "checked": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Checked",
+      "type": "array"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/Operation"
+      },
+      "maxItems": 80,
+      "title": "Operations",
+      "type": "array"
+    },
+    "status_patch": {
+      "additionalProperties": true,
+      "title": "Status Patch",
+      "type": "object"
+    },
+    "uncertain": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Uncertain",
+      "type": "array"
+    }
+  },
+  "required": [
+    "checked"
+  ],
+  "title": "Proposal",
+  "type": "object"
+}

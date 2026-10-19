@@ -1,0 +1,14 @@
+{
+  "flags": [
+    {
+      "id": "met_clerk",
+      "label": "见过店员",
+      "description": "你与店员有过直接交流"
+    },
+    {
+      "id": "found_door",
+      "label": "发现后门",
+      "description": "你注意到收银台后的门"
+    }
+  ]
+}

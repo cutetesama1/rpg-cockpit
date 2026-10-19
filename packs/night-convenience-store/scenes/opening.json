@@ -1,0 +1,11 @@
+{
+  "id": "opening",
+  "title": "便利店门口",
+  "text": "凌晨两点，街面上一个人也没有。便利店的灯亮着，玻璃门上贴着一张没撕干净的招聘启事。冷柜在嗡嗡响。收银台后面站着一个人，好像很久没有眨眼。雨把柏油路泡得发亮。",
+  "options": [
+    { "id": "opt_enter", "label": "推门进去", "action_text": "你推开便利店的门", "next_scene": "aisle" },
+    { "id": "opt_to_checkout", "label": "直接走向收银台", "action_text": "你推门进去，径直走向收银台", "next_scene": "checkout" },
+    { "id": "opt_look", "label": "先隔着玻璃看", "action_text": "你隔着玻璃往里看" },
+    { "id": "opt_leave", "label": "转身离开", "action_text": "你转身离开便利店", "next_scene": "street" }
+  ]
+}

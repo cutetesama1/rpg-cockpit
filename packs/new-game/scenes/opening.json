@@ -1,0 +1,16 @@
+{
+  "id": "opening",
+  "text": "你站在一扇半开的门前。门后很暗，隐约有风从里面吹出来。",
+  "options": [
+    {
+      "id": "look_around",
+      "label": "先看看四周",
+      "action_text": "我先在门口停下，看清周围的环境。"
+    },
+    {
+      "id": "move_on",
+      "label": "推门进去",
+      "action_text": "我推开门，走了进去。"
+    }
+  ]
+}

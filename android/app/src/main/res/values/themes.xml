@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.RpgCockpit" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">#11151b</item>
+        <item name="android:statusBarColor">#0b0e13</item>
+        <item name="android:navigationBarColor">#0b0e13</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

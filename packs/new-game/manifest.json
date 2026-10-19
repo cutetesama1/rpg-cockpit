@@ -1,0 +1,9 @@
+{
+  "id": "new-game",
+  "title": "异世界",
+  "version": "0.1.0",
+  "schema_version": 1,
+  "rating": "all",
+  "description": "由 rpg-framework scaffold 生成的最小内容包；先跑通，再往里填。",
+  "dependencies": []
+}

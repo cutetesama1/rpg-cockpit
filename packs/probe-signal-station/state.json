@@ -1,0 +1,89 @@
+{
+  "fields": [
+    {
+      "id": "oxygen",
+      "label": "氧气",
+      "type": "int",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 82,
+      "display": "bar",
+      "group": "vitals",
+      "llm_visible": true,
+      "unit": "%",
+      "color": "#38bdf8"
+    },
+    {
+      "id": "integrity",
+      "label": "站体完整度",
+      "type": "int",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 96,
+      "display": "bar",
+      "group": "vitals",
+      "llm_visible": true,
+      "unit": "%",
+      "color": "#fb923c"
+    },
+    {
+      "id": "power",
+      "label": "电力",
+      "type": "int",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 18,
+      "display": "number",
+      "group": "resources",
+      "llm_visible": true,
+      "unit": "kW",
+      "color": "#facc15"
+    },
+    {
+      "id": "credits",
+      "label": "配给点",
+      "type": "int",
+      "min": 0,
+      "max": 200,
+      "step": 1,
+      "default": 24,
+      "display": "number",
+      "group": "resources",
+      "llm_visible": true,
+      "unit": null,
+      "color": "#34d399"
+    },
+    {
+      "id": "flag_heard_signal",
+      "label": "听到第七次呼叫",
+      "type": "bool",
+      "default": false,
+      "display": "badge",
+      "group": "flags",
+      "llm_visible": true
+    },
+    {
+      "id": "flag_door_sealed",
+      "label": "舱门已封闭",
+      "type": "bool",
+      "default": false,
+      "display": "hidden",
+      "group": "flags",
+      "llm_visible": true
+    }
+  ],
+  "limits": {
+    "max_tool_rounds": 6,
+    "max_rejections": 1,
+    "narrative_number_check": true,
+    "max_delta_per_turn": {
+      "oxygen": 10,
+      "integrity": 8,
+      "power": 6,
+      "credits": 30
+    }
+  }
+}

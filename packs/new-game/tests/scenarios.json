@@ -1,0 +1,18 @@
+{
+  "scenarios": [
+    {
+      "id": "opening_look",
+      "description": "自举包的第一个回合：文本行动不改变初始状态",
+      "action": {
+        "kind": "text",
+        "text": "我先在门口停下，看清周围的环境。"
+      },
+      "expect": {
+        "state": {
+          "hp": 20
+        },
+        "narrative_no_leaks": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "scenarios": [
+    {
+      "id": "opening_check_suit",
+      "description": "探针包第一回合：文本行动不改变初始状态",
+      "action": {
+        "kind": "text",
+        "text": "我先检查增压服的密封性，再决定往哪走。"
+      },
+      "expect": {
+        "state": {
+          "oxygen": 82,
+          "integrity": 96
+        },
+        "narrative_no_leaks": true
+      }
+    },
+    {
+      "id": "scan_costs_power",
+      "description": "技能消耗走框架账本：扫描扣电力",
+      "action": {
+        "kind": "skill",
+        "skill_id": "scan"
+      },
+      "expect": {
+        "state": {
+          "power": 16
+        }
+      }
+    }
+  ]
+}

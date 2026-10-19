@@ -1,0 +1,20 @@
+{
+  "type": "rpg.skill-library",
+  "schema_version": 1,
+  "id": "standard-martial-magic",
+  "title": "武技与魔法标准技能库·300",
+  "version": "1.0.0",
+  "description": "150个武技、150个魔法；每类低/中/高各50。初始掌握数量由角色背景决定。",
+  "resources": {
+    "effort": [
+      "stamina",
+      "energy",
+      "focus"
+    ],
+    "mana": [
+      "mp",
+      "mana",
+      "focus"
+    ]
+  }
+}
