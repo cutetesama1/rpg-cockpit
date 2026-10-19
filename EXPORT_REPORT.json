@@ -1,6 +1,6 @@
 {
   "source_version": "0.7.0",
-  "github_published": false,
+  "github_published": true,
   "git_initialized": true,
   "license": "Apache-2.0 for first-party code and original sample graphics, matching the existing repository license",
   "new_brand_assets_included": true,
@@ -16,5 +16,6 @@
   "full_runtime_test_suite_run_on_this_export": false,
   "new_app_binaries_built": false,
   "github_repository": "https://github.com/cutetesama1/rpg-cockpit",
-  "publication_note": "Snapshot prepared before push; published status is verified separately after push."
+  "publication_note": "Public GitHub source, main commit, license, required paths and README images verified after push.",
+  "github_source_commit": "4a50c6bc9cdc26c1de68bc31b7830bd631a32cca"
 }
