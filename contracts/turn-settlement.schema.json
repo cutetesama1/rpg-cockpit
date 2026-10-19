@@ -15,6 +15,7 @@
             "learn_skill",
             "learn_catalog_skills",
             "update_clothing",
+            "update_portrait",
             "set_value",
             "record_fact",
             "roll"

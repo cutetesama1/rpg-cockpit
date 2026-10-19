@@ -286,6 +286,7 @@ EventKind = Literal[
     "clothing.checked",
     "settlement.checked",
     "settlement.rejected",
+    "settlement.warning",
     "status.updated",
     "story.fact",
     "world.configured",
@@ -495,6 +496,8 @@ class SpriteLayer(BaseModel):
     y: int = 0
     # 成人向图层：只有设置里打开「显示成人向图层」时才渲染
     adult: bool = False
+    # Decorations stay fixed while character layers participate in motions.
+    space: Literal["character", "background", "foreground"] = "character"
 
 
 class SpriteCrop(BaseModel):
@@ -560,6 +563,14 @@ class SpriteSheet(BaseModel):
     layers: list[SpriteLayer] = Field(default_factory=list)
     # 可选：不同姿势；键名和状态字段 pose 的值对应
     poses: dict[str, SpritePose] = Field(default_factory=dict)
+    # Registered portrait fields with readable option labels.
+    controls: dict[str, dict[str, str]] = Field(default_factory=dict)
+    motions: dict[str, Literal["none", "sway", "walk", "run", "jump", "attack", "cast", "hurt"]] = Field(default_factory=dict)
+    revision: int = 0
+    legacy_hashes: list[str] = Field(default_factory=list)
+    arm_preferences: dict[str, Literal["idle", "hold"]] = Field(default_factory=dict)
+    handheld_modes: dict[str, list[Literal["idle", "hold", "cover"]]] = Field(default_factory=dict)
+    labels: dict[str, dict[str, str]] = Field(default_factory=dict)
     # 可选：同一套图层的不同取景（如全身 / 半身），由界面设置切换
     views: dict[str, SpriteCrop] = Field(default_factory=dict)
     # 可选：状态联动（按顺序覆盖字段，后面的覆盖前面的）
@@ -585,7 +596,7 @@ class WardrobeSlot(BaseModel):
 
 class WardrobeConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    slots: dict[str, WardrobeSlot] = Field(min_length=1, max_length=8)
+    slots: dict[str, WardrobeSlot] = Field(min_length=1, max_length=16)
 
 
 class ContentPack(BaseModel):

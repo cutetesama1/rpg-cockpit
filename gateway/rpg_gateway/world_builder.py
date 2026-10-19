@@ -37,6 +37,8 @@ character_profile 输出 power(novice/trained/master/legendary)、schools(精通
 skills 只收录作者明确的特殊技能，不用生成整个常规技能库。每项有 id,name,description,cost(本世界数值id到消耗),cooldown,targets,action_text,effect_hint,category,brief。标准预设会由框架另行匹配。
 worldbook（世界书）每项含 id,title,content,keywords,always_on,priority,category；关键词具体，主角身份和世界硬规则应常驻。
 工具契约由运行时提供，不在提示词中发明 inventory/flag 等工具名，不设回合上限、不锁死结局、不锁死剧情。
+settler 只写本世界已发生事实如何映射伤害、恢复、货币、物品、技能与剧情变化；不要要求逐个调用工具、输出全量状态或依赖聊天记忆。
+数值规则应与本草稿 state 的实际资源id、范围和 limits 一致，不同时写出互相冲突的固定限额；未知事项保留原值并说明，其他有依据的变化照常结算。
 只输出一个 JSON 对象，保持作者素材的限制和风格。
 """
 

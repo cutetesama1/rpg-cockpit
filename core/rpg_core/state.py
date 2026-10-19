@@ -41,6 +41,9 @@ def project(events: list[Event], schema: StateSchema) -> dict[str, Any]:
         if event.turn in cancelled:continue
         if event.kind == "world.configured":
             state=dict(event.payload["values"])
+            # Template-only visual fields may be introduced after this event.
+            for field in schema.fields:
+                if field.group in ('appearance','sprite'):state.setdefault(field.id,field.default)
             continue
         if event.kind not in FOLDED_EVENT_KINDS:
             continue

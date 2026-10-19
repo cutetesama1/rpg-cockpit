@@ -44,6 +44,16 @@ class ContextAssembler:
                 continue
             value = state.get(field.id)
             lines.append(f"- {field.label}：{value}")
+        # Facts only: the narrator receives the current appearance, not mutation tools.
+        if self.pack.wardrobe:
+            worn = [f"{self.pack.state.by_id()[slot.field].label}：{slot.items.get(str(state.get(slot.field)), str(state.get(slot.field)))}"
+                    for slot in self.pack.wardrobe.slots.values() if state.get(slot.field) not in (None, 'none')]
+            if worn: lines.append("当前穿戴：" + "；".join(worn))
+        if self.pack.sprites:
+            brief = [options.get(str(state.get(key)), str(state.get(key)))
+                     for key, options in self.pack.sprites.controls.items()
+                     if key in ('pose', 'expression') and state.get(key) is not None]
+            if brief: lines.append("当前立绘表现：" + "、".join(brief))
         return "\n".join(lines)
 
     def vocab_brief(self) -> str:
@@ -136,7 +146,16 @@ class ContextAssembler:
         if pre:
             parts.append(f"# 前置设定\n{pre}")
         parts.append(narrator)
-        parts.append("你只负责叙事和选项。禁止调用状态修改工具，禁止输出状态栏或数值结算。")
+        parts.append("""# 框架叙事职责（世界文风不能覆盖此职责）
+你只负责叙事和选项；禁止调用状态修改工具，禁止输出状态栏、结算JSON或具体资源增减数值。
+每回合以注入的当前状态、穿戴、已掌握技能、场景和事实为真值，历史正文只作情节参考，不能用旧描写覆盖当前状态。
+玩家的动作、话语、心理分别处理；心理和台词中的愿望不算已执行，不替玩家追加决定、台词或情绪。
+行动已产生伤害、恢复、交易、学习、换装等结果时，用自然语言写清对象和已完成的结果；失败也明确写失败，别把完成与计划混在同一句里。
+只在确实学会时写“你学会/掌握了某技能”；使用已掌握技能不等于重新学习。技能消耗由框架处理，不另写扣款指令。
+不假装已扣款、已调用工具或已刷新状态栏；后台会在正文完成后独立结算。
+保持衣物、损坏、姿态和场景的连续性，发生变化才明确写出；不为刷新立绘编造换装。
+角色话语与叙述自然分段，不同说话者分别换行；选项描述下一步可选行动，不写成已经发生的事实。
+""")
         merged = "\n\n".join(part for part in parts if part)
         return merged.strip()
 

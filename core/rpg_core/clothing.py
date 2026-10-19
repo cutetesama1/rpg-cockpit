@@ -26,11 +26,12 @@ def validate_wardrobe(wardrobe: WardrobeConfig, schema: StateSchema) -> list[str
     return errors
 
 
-def wardrobe_snapshot(wardrobe: WardrobeConfig, state: dict[str, Any]) -> dict:
+def wardrobe_snapshot(wardrobe: WardrobeConfig, state: dict[str, Any], narrative: str | None = None) -> dict:
+    from .portrait import catalog_options
     return {key: {
         "garment": state.get(slot.field), "condition": state.get(slot.condition_field),
         "color": state.get(slot.color_field) if slot.color_field else None,
-        "items": dict(slot.items),
+        "items": catalog_options(slot.items, narrative, state.get(slot.field), limit=80 if len(slot.items)<=80 else 24),
     } for key, slot in wardrobe.slots.items()}
 
 

@@ -36,6 +36,8 @@ const TABS: { id: Tab; label: string }[] = [
 
 /** 立绘面板最快用到的字段：顺序 = 从上到下改完就能看到效果。 */
 const SPRITE_FIELDS = [
+  "pose", "left_arm", "right_arm", "eye_state", "gaze", "mouth_shape", "tears", "freckles",
+  "decoration_background", "decoration_foreground",
   "body_type",
   "eye_color",
   "expression",
@@ -50,6 +52,11 @@ const SPRITE_FIELDS = [
   "lower",
   "lower_condition",
   "pants_color",
+  "hairpin_position", "earring_graphic", "accessory_tone",
+  "headwear", "facewear", "neckwear", "handwear", "legwear", "footwear",
+  "backwear", "earrings", "fingerwear", "handheld",
+  "headwear_color", "facewear_color", "neckwear_color", "handwear_color", "legwear_color", "footwear_color",
+  "backwear_color", "earrings_color", "fingerwear_color", "handheld_color",
   "under_upper",
   "under_lower",
   "genital",
@@ -67,10 +74,12 @@ function FieldRow({
   field,
   value,
   onChange,
+  labels,
 }: {
   field: FieldDef;
   value: unknown;
   onChange: (value: unknown) => void;
+  labels?: Record<string, string>;
 }) {
   const choices = field.enum_values ?? [];
   return (
@@ -86,7 +95,7 @@ function FieldRow({
           )}
           {choices.map((choice) => (
             <option key={choice} value={choice}>
-              {choice}
+              {labels?.[choice] ?? choice}
             </option>
           ))}
         </select>
@@ -214,6 +223,7 @@ export default function DebugConsole({
     <FieldRow
       key={field.id}
       field={field}
+      labels={sheet?.labels?.[field.id] ?? sheet?.controls?.[field.id]}
       value={field.id in draft ? draft[field.id] : catalog?.state[field.id]}
       onChange={(value) => setDraft((prev) => ({ ...prev, [field.id]: value }))}
     />
@@ -282,7 +292,7 @@ export default function DebugConsole({
           ) : tab === "sprite" ? (
             <>
               <p className="muted small">
-                这些字段直接驱动立绘合成：改完应用即可在右栏「立绘」里看到变化。内衣/下体/涂鸦需要先打开「成人向图层」。
+                这些字段直接驱动立绘合成：改完应用即可在右栏「立绘」里看到变化。动作、表情、饰品和前后景均可预览；应用后写入当前游戏并支持撤销。
               </p>
               {sheet && (
                 <div className="dbg-sprite-preview">

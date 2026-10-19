@@ -3629,3 +3629,7 @@ button.primary:hover:not(:disabled) {
 }
 
 .clothing-condition-row { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 0 2px 8px; }
+
+/* Compact, readable portrait labels for ordinary actions and expressions. */
+.portrait-state-summary { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 8px; }
+.portrait-state-summary span { border:1px solid var(--line); border-radius:999px; padding:2px 8px; }

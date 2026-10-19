@@ -17,15 +17,17 @@ RPG 驾驶舱将自由叙事与游戏状态管理结合：叙事模型负责推�
 
 ## 下载与安装
 
-当前公开版：**[v0.7.1 · Windows / Android](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.7.1)**。
+当前公开版：**[v0.7.3 · Windows / Android](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.7.3)**。
 
 | 平台 | 下载 |
 | --- | --- |
-| Android 10+，多数手机 | [arm64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-arm64.apk) |
-| Android 通用包 | [通用 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1.apk) |
-| Windows 10/11 64位 | [桌面安装包](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-Windows-x64-Setup.exe) · [便携 ZIP](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-Windows-x64-Portable.zip) |
+| Android 10+，多数手机 | [arm64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.3/RPG-Cockpit-v0.7.3-arm64.apk) |
+| Android 通用包 | [通用 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.3/RPG-Cockpit-v0.7.3.apk) |
+| Windows 10/11 64位 | [桌面安装包](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.3/RPG-Cockpit-v0.7.3-Windows-x64-Setup.exe) · [便携 ZIP](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.3/RPG-Cockpit-v0.7.3-Windows-x64-Portable.zip) |
 
 便携版请完整解压，运行 `rpg-cockpit.exe`；桌面窗口需要 WebView2 Runtime。进入设置后配置自己的模型 API。公开下载版默认使用原创静态示意角色，素材范围与本仓库一致；完整分层立绘库未附带。校验值和本次验证范围见 Release 说明。
+
+本次更新重点修复回滚与结算遗漏，详见 [更新日志](CHANGELOG.md) 和 [v0.7.3 说明](docs/releases/v0.7.3.md)。
 
 ## 你可以自定义什么
 

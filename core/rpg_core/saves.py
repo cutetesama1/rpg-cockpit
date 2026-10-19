@@ -174,6 +174,26 @@ def restore_session(session: GameSession, payload: dict[str, Any]) -> dict[str, 
     if isinstance(payload.get("pack_snapshot"),dict):
         snapshot=ContentPack.model_validate(payload["pack_snapshot"])
         if snapshot.manifest.id != active:raise ValueError("存档世界定义不匹配")
+        # A saved world keeps its rules and numeric definitions while shared
+        # portrait templates may gain fields and layers in a newer application.
+        current = session.pack
+        old_revision = snapshot.sprites.revision if snapshot.sprites else 0
+        if current.sprites and current.sprites.revision > old_revision and (
+            current.asset_pack == "new-game" or current.manifest.id == "new-game"
+        ):
+            import copy
+            existing = snapshot.state.by_id()
+            for field in current.state.fields:
+                if field.group not in ('appearance', 'sprite'): continue
+                if field.id not in existing: snapshot.state.fields.append(copy.deepcopy(field))
+                elif field.id in current.sprites.controls and field.enum_values:
+                    existing[field.id].enum_values = list(dict.fromkeys([*(existing[field.id].enum_values or []), *field.enum_values]))
+            snapshot.sprites = current.sprites
+            snapshot.asset_pack = current.asset_pack
+            if current.wardrobe:
+                slots = dict(current.wardrobe.slots)
+                if snapshot.wardrobe: slots.update(snapshot.wardrobe.slots)
+                snapshot.wardrobe = current.wardrobe.model_copy(update={'slots': slots})
         session.pack=snapshot
         session.executor.wardrobe=snapshot.wardrobe
     session.load_events(events)
@@ -183,12 +203,12 @@ def restore_session(session: GameSession, payload: dict[str, Any]) -> dict[str, 
         # Only the new wardrobe condition fields may be absent in older saves.
         for slot in session.pack.wardrobe.slots.values():
             expected.setdefault(slot.condition_field, session.pack.state.by_id()[slot.condition_field].default)
-    if isinstance(expected,dict) and not payload.get('pack_snapshot') and session.pack.asset_pack:
+    if isinstance(expected,dict) and (session.pack.asset_pack or session.pack.sprites and session.pack.sprites.revision):
         expected=dict(expected)
         # Legacy worlds gaining shared appearance keep their numeric/event history;
-        # only newly introduced nonnumeric appearance defaults are additive.
+        # only registered appearance defaults are additive; numeric game resources stay strict.
         for field in session.pack.state.fields:
-            if field.type in ('enum','string'):expected.setdefault(field.id,field.default)
+            if field.group in ('appearance','sprite'):expected.setdefault(field.id,field.default)
     if isinstance(expected, dict) and expected != session.state:
         raise ValueError("存档状态与会话回放不一致，可能来自不同版本的内容包，已拒绝读档")
     verify = session.verify()

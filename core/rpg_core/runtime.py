@@ -581,6 +581,9 @@ class GameSession:
         if settlement_error:
             return self._rollback(turn, [settlement_error])
         ignored=[str(e.payload.get("error")) for e in self.ledger.for_turn(turn) if e.kind=="tool.rejected" and e.payload.get("ignored")]
+        ignored += ["待确认，相关状态保持原值：" + str(note)
+                    for e in self.ledger.for_turn(turn) if e.kind=='settlement.warning'
+                    for note in e.payload.get('uncertain',[])]
 
         self._record(
             turn=turn,
@@ -944,7 +947,7 @@ class GameSession:
 
     def appearance_revision(self) -> str:
         import hashlib,json
-        data=self.pack.sprites.model_dump(mode='json') if self.pack.sprites else None
+        data={'sheet':self.pack.sprites.model_dump(mode='json') if self.pack.sprites else None,'resource_bindings':self.pack.state.resource_bindings}
         return hashlib.sha256(json.dumps(data,sort_keys=True).encode()).hexdigest()[:12]
 
     def status(self) -> dict[str, Any]:

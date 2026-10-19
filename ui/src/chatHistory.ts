@@ -40,6 +40,10 @@ export function buildChatHistory(events: EventRecord[], names: Record<string, st
     } else if (event.kind === "narrative.generated" && !failed.has(event.turn)) {
       const text = event.payload.narrative;
       if (typeof text === "string" && text.trim()) entries.push({ id: `ai-${event.seq}`, turn: event.turn, role: "assistant", text, meta: [] });
+    } else if (event.kind === "settlement.warning" && !failed.has(event.turn)) {
+      const notes = event.payload.uncertain;
+      if (Array.isArray(notes) && notes.length) entries.push({ id: `settlement-warning-${event.seq}`, turn: event.turn,
+        role: "notice", text: `待确认，相关状态保持原值：${notes.filter(note => typeof note === "string").join("；")}`, meta: [] });
     } else if (event.kind === "turn.rolled_back" && failed.has(event.turn)) {
       const errors = event.payload.errors;
       entries.push({ id: `error-${event.seq}`, turn: event.turn, role: "notice", text: `本回合未完成，状态已回滚。${Array.isArray(errors) ? errors.join("；") : ""}`, meta: [] });

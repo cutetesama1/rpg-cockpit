@@ -13,6 +13,9 @@ from rpg_content import load_pack
 from rpg_core.contracts import SpriteSheet
 
 
+requires_imported_art = pytest.mark.skipif(not (ROOT / "packs/new-game/ui/sprites/body/base-head.png").is_file(), reason="Optional third-party art is excluded from the public source; synthetic renderer tests still run.")
+
+
 def png(path, w, h, pixels):
     path.parent.mkdir(parents=True, exist_ok=True)
     encode_png_rgba(path, w, h, pixels)
@@ -82,6 +85,7 @@ def test_severe_damage_rule_reaches_blush():
     assert ctx["expression"] == "gloomy" and ctx["blush"] == 3
 
 
+@requires_imported_art
 def test_imported_pack_faces_and_cameras_are_complete():
     pack = load_pack(ROOT / "packs/new-game")
     sheet = pack.sprites
@@ -113,12 +117,14 @@ def test_face_blink_atlas_is_not_played_as_idle(tmp_path):
     assert rgba[(58 * w + 110) * 4:(58 * w + 110) * 4 + 4] == bytes((10, 20, 30, 255))
 
 
+@requires_imported_art
 def test_imported_face_atlases_stay_open_during_idle():
     for part in ("eyelids", "lashes", "mouth"):
         w, h, _ = read_png_rgba(ROOT / f"packs/new-game/ui/sprites/face/default/{part}.png")
         assert (w, h) == (256, 256)
 
 
+@requires_imported_art
 def test_iris_is_clipped_to_the_eye_whites():
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))
@@ -154,6 +160,7 @@ def test_fringe_only_style_gets_independent_side_hair(tmp_path):
     assert ("aerial", "sides", "chest", "ui/sprites/hair/sides/default/chest.png") in info["hair_parts"]
 
 
+@requires_imported_art
 def test_all_body_types_have_both_idle_arms():
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))
@@ -164,6 +171,7 @@ def test_all_body_types_have_both_idle_arms():
         assert {l["id"].split("_")[1] for l in arms} == {"left", "right"}
 
 
+@requires_imported_art
 def test_all_hair_choices_include_fringe_and_sides():
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))
@@ -176,6 +184,7 @@ def test_all_hair_choices_include_fringe_and_sides():
         assert (pack / sides[0]["src"]).is_file()
 
 
+@requires_imported_art
 def test_clothes_have_front_panels_and_separate_sleeves():
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))
@@ -188,6 +197,7 @@ def test_clothes_have_front_panels_and_separate_sleeves():
         assert not any(l.get("adult") for l in layers)
 
 
+@requires_imported_art
 def test_changing_upper_changes_pixels_without_adult_toggle():
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))
@@ -203,6 +213,7 @@ def test_changing_upper_changes_pixels_without_adult_toggle():
 
 
 @pytest.mark.parametrize("style", ["aerial", "french curls", "thorn and curl", "torn and curl"])
+@requires_imported_art
 def test_corrected_crowns_do_not_leave_bare_skin_line(style):
     pack = ROOT / "packs/new-game"
     sheet = json.loads((pack / "ui/sprites.json").read_text(encoding="utf-8"))

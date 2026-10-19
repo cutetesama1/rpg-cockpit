@@ -526,6 +526,7 @@ export interface SpriteLayer {
   x?: number;
   y?: number;
   adult?: boolean;
+  space?: "character" | "background" | "foreground";
 }
 
 export interface SpriteCrop {
@@ -563,6 +564,13 @@ export interface SpriteSheet {
   layers: SpriteLayer[];
   /** 不同姿势，键名与状态字段 pose 对应 */
   poses?: Record<string, SpritePose>;
+  controls?: Record<string, Record<string, string>>;
+  motions?: Record<string, string>;
+  revision?: number;
+  arm_preferences?: Record<string, string>;
+  handheld_modes?: Record<string, string[]>;
+  resource_bindings?: Record<string, string>;
+  labels?: Record<string, Record<string, string>>;
   /** 同一套图层的不同取景（full / bust …），由界面设置切换 */
   views?: Record<string, SpriteCrop>;
   /** 状态联动规则（按顺序覆盖，后面的赢） */

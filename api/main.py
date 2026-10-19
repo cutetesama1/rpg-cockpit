@@ -97,7 +97,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.7.1-builder"
+API_VERSION = "0.7.3-builder"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -848,7 +848,7 @@ def get_sprite() -> dict[str, Any]:
     sheet = manager.session.pack.sprites
     return {
         "pack": manager.active_pack,
-        "sheet": {**sheet.model_dump(mode="json"),"asset_key":manager.active_pack+":"+manager.session.appearance_revision()} if sheet is not None else None,
+        "sheet": {**sheet.model_dump(mode="json"),"resource_bindings":manager.session.pack.state.resource_bindings,"asset_key":manager.active_pack+":"+manager.session.appearance_revision()} if sheet is not None else None,
     }
 
 

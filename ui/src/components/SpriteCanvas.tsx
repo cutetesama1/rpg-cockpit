@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { packAssetUrl } from "../api";
 import { clothingWearPixel, CLOTHING_CONDITION_LABELS } from "../clothingWear";
 import { spriteFrameOffset } from "../spriteGeometry";
+import { portraitContext, portraitMotion, paintPortraitEffect } from "../spriteMotion";
 import type { FieldDef, SpriteCondition, SpriteLayer, SpriteSheet } from "../types";
 
 /**
@@ -191,6 +192,8 @@ export default function SpriteCanvas({
   // 整数倍最近邻不会插值出错，再由浏览器 CSS 放大到面板宽度。
   // 之前把 60×165 的窗口直接画进 256（3.1 倍非整数放大）会出条纹伪影。
   const RES = 2;
+  const PAD = sheet.motions && Object.keys(sheet.motions).length ? 16 : 0;
+  const maskedFrames = useRef(new Map<string, HTMLCanvasElement>());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -214,14 +217,20 @@ export default function SpriteCanvas({
   }, [state, fields]);
 
   const context = useMemo<Context>(() => {
-    const base: Context = { ...safeState, explicit };
+    const base: Context = portraitContext({ ...safeState, explicit }, 0, false, sheet.arm_preferences, sheet.handheld_modes);
+    if (sheet.revision && base.expression === "default") {
+      const health = fields?.find(field => field.id === (sheet.resource_bindings?.health ?? "hp"));
+      const current = health ? Number(base[health.id]) : NaN;
+      if (health?.max != null && health.max > (health.min ?? 0) && Number.isFinite(current)
+        && (current - (health.min ?? 0)) / (health.max - (health.min ?? 0)) <= .25) base.expression = "gloomy";
+    }
     for (const rule of sheet.rules ?? []) {
       if (conditionsPass(rule.when, base)) {
         for (const [key, value] of Object.entries(rule.set ?? {})) base[key] = value;
       }
     }
     return base;
-  }, [safeState, explicit, sheet.rules]);
+  }, [safeState, explicit, sheet.rules, sheet.revision, sheet.resource_bindings, sheet.arm_preferences, sheet.handheld_modes, fields]);
 
   // 姿势：界面的「取景」优先，其次看状态里的 pose
   const poseName = useMemo(() => {
@@ -273,6 +282,8 @@ export default function SpriteCanvas({
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motionKind = sheet.motions?.[String(context.pose ?? "stand")] ?? "none";
+  const moving = animated && !reduced && motionKind !== "none";
   const playing = animated && frames > 1 && !reduced;
 
   const drawFrame = (timeMs: number) => {
@@ -282,26 +293,38 @@ export default function SpriteCanvas({
     if (!ctx) return;
     const cropW = crop.w > 0 ? crop.w : width;
     const cropH = crop.h > 0 ? crop.h : height;
-    if (canvas.width !== cropW * RES || canvas.height !== cropH * RES) {
-      canvas.width = cropW * RES;
-      canvas.height = cropH * RES;
+    if (canvas.width !== (cropW + PAD * 2) * RES || canvas.height !== (cropH + PAD * 2) * RES) {
+      canvas.width = (cropW + PAD * 2) * RES;
+      canvas.height = (cropH + PAD * 2) * RES;
     }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.translate(PAD * RES, PAD * RES);
     ctx.imageSmoothingEnabled = false;
     const frame = playing ? Math.floor((timeMs / 1000) * fps) % frames : 0;
     (window as unknown as { __spriteFrame?: number }).__spriteFrame = frame;
     let drawn = 0;
+    const motion = portraitMotion(moving ? motionKind : "none", timeMs / 1000);
     for (const item of assetsRef.current.items) {
       const image = item.image;
       if (!image || image.naturalWidth === 0) continue;
       // 只有「这张图确实有 N 帧」时才按帧偏移取图（单帧小图不能加偏移）
       const offset = spriteFrameOffset(image.naturalWidth, frameWidth, frames, frame);
-      const source = worn(image, item.tint, ["outfit_color", "pants_color"].includes(item.layer.tint_field ?? ""), item.layer.wear_field ? context[item.layer.wear_field] : "intact");
+      ctx.save();
+      if (!item.layer.space || item.layer.space === "character") {
+        const px = cropW * RES * .5, py = cropH * RES * .94;
+        ctx.translate(px + motion.x * RES, py + motion.y * RES);
+        ctx.rotate(motion.angle); ctx.scale(motion.scaleX, motion.scaleY); ctx.translate(-px, -py);
+      }
+      const source = worn(image, item.tint, (Boolean(item.layer.wear_field) || ["outfit_color", "pants_color"].includes(item.layer.tint_field ?? "")), item.layer.wear_field ? context[item.layer.wear_field] : "intact");
       ctx.globalAlpha = item.layer.opacity ?? 1;
       ctx.globalCompositeOperation =
         item.layer.blend === "multiply" ? "multiply" : "source-over";
       if (item.mask) {
         // 遮罩：先把这层画到离屏画布，再用遮罩 alpha 裁一刀
+        const maskKey = `${item.layer.id}|${frame}|${crop.x},${crop.y},${cropW},${cropH}`;
+        const cachedMask = maskedFrames.current.get(maskKey);
+        if (cachedMask) { ctx.drawImage(cachedMask, 0, 0); ctx.restore(); drawn += 1; continue; }
         const off = document.createElement("canvas");
         off.width = cropW * RES;
         off.height = cropH * RES;
@@ -333,6 +356,7 @@ export default function SpriteCanvas({
             cropH * RES,
           );
           offCtx.globalCompositeOperation = "source-over";
+          maskedFrames.current.set(maskKey, off);
           ctx.drawImage(off, 0, 0);
         }
       } else {
@@ -348,10 +372,12 @@ export default function SpriteCanvas({
           cropH * RES,
         );
       }
+      ctx.restore();
       drawn += 1;
     }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
+    if (animated && !reduced) paintPortraitEffect(ctx, motionKind, timeMs / 1000, cropW * RES, cropH * RES);
     setReady(true);
     setFailed(drawn === 0);
   };
@@ -371,6 +397,7 @@ export default function SpriteCanvas({
       }),
     ).then((rows) => {
       if (!alive) return;
+      maskedFrames.current.clear();
       assetsRef.current.items = rows.filter(
         (row): row is NonNullable<typeof row> => row !== null,
       );
@@ -389,14 +416,14 @@ export default function SpriteCanvas({
     let lastFrame = -1;
     const paint = (t: number) => {
       if (!alive) return;
-      const frame = playing ? Math.floor((t / 1000) * fps) % frames : 0;
+      const frame = moving ? Math.floor(t / 1000 * 24) : playing ? Math.floor((t / 1000) * fps) % frames : 0;
       if (frame !== lastFrame) {
         lastFrame = frame;
         drawFrame(t);
       }
     };
     paint(start);
-    if (!playing) return () => { alive = false; };
+    if (!playing && !moving) return () => { alive = false; };
     let raf = window.requestAnimationFrame(function loop(t) {
       if (!alive) return;
       paint(t);
@@ -408,13 +435,16 @@ export default function SpriteCanvas({
     };
     // drawFrame 依赖 crop/frames/fps/width，都在下面的依赖里
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetsVersion, playing, frames, fps, crop, width, height, frameWidth]);
+  }, [assetsVersion, playing, moving, motionKind, frames, fps, crop, width, height, frameWidth, PAD]);
 
   return (
     <section className={`panel sprite-panel${ready ? " ready" : ""}`}>
       <h2>立绘</h2>
+      {sheet.controls && <div className="portrait-state-summary" aria-label="立绘表现">
+        {["pose", "expression"].map(key => <span className="muted small" key={key}>{sheet.controls?.[key]?.[String(context[key])] ?? String(context[key] ?? "")}</span>)}
+      </div>}
       <div className="clothing-condition-row" aria-label="衣物状态">
-        {[...new Set(layers.map(layer => layer.wear_field).filter((field): field is string => Boolean(field)))].map(field => (
+        {[...new Set(visible.map(item => item.layer.wear_field).filter((field): field is string => Boolean(field)))].map(field => (
           <span className="muted small" key={field}>
             {fields?.find(item => item.id === field)?.label ?? "衣物"}：{CLOTHING_CONDITION_LABELS[String(context[field] ?? "intact")] ?? "完好"}
           </span>
@@ -424,8 +454,8 @@ export default function SpriteCanvas({
         <canvas
           ref={canvasRef}
           className="sprite-canvas"
-          width={(crop.w > 0 ? crop.w : width) * RES}
-          height={(crop.h > 0 ? crop.h : height) * RES}
+          width={((crop.w > 0 ? crop.w : width) + PAD * 2) * RES}
+          height={((crop.h > 0 ? crop.h : height) + PAD * 2) * RES}
         />
         {!ready && !failed && <p className="muted small sprite-hint">正在载入立绘…</p>}
         {failed && <p className="muted small sprite-hint">这个内容包暂时没有可显示的图层</p>}

@@ -20,6 +20,7 @@
         "clothing.checked",
         "settlement.checked",
         "settlement.rejected",
+        "settlement.warning",
         "status.updated",
         "story.fact",
         "world.configured",

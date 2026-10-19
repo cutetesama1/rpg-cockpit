@@ -1,0 +1,111 @@
+{
+  "version": "0.7.3",
+  "backend_tests": {
+    "passed": 446,
+    "skipped": 12,
+    "failures": 0,
+    "optional_private_art_skips": 11
+  },
+  "frontend_tests": {
+    "passed": 20,
+    "failed": 0
+  },
+  "typescript_no_emit": true,
+  "vite_build": true,
+  "continuous_simulated_turns": 40,
+  "windows": {
+    "state_endpoint": true,
+    "engine_health": true,
+    "version": "0.7.3-builder",
+    "saves_endpoint": true,
+    "exit_cleanup": true,
+    "isolated_data_directory": true,
+    "bundled_standard_300_install": true,
+    "skill_library_endpoint": true,
+    "bundled_ui": true,
+    "desktop_launch": true,
+    "original_avatar": true
+  },
+  "android": {
+    "apks": [
+      {
+        "abi": "arm64-v8a",
+        "version_code": 26,
+        "signature_verified": true,
+        "same_signer_as_0_7_1": true,
+        "backend_source_and_skill_archives_match": true,
+        "public_original_avatar": true,
+        "private_sprite_tree_and_signing_secrets_absent": true
+      },
+      {
+        "abi": "universal",
+        "version_code": 26,
+        "signature_verified": true,
+        "same_signer_as_0_7_1": true,
+        "backend_source_and_skill_archives_match": true,
+        "public_original_avatar": true,
+        "private_sprite_tree_and_signing_secrets_absent": true
+      },
+      {
+        "abi": "x86_64",
+        "version_code": 26,
+        "signature_verified": true,
+        "same_signer_as_0_7_1": true,
+        "backend_source_and_skill_archives_match": true,
+        "public_original_avatar": true,
+        "private_sprite_tree_and_signing_secrets_absent": true
+      }
+    ],
+    "device_or_emulator_install_tested": false
+  },
+  "real_paid_llm_tested": false,
+  "public_portrait_is_original_static_sample": true,
+  "private_art_or_credentials_included": false,
+  "assets": [
+    {
+      "name": "RPG-Cockpit-v0.7.3-arm64.apk",
+      "bytes": 42813375,
+      "sha256": "29e2b32dfeb929b33232dbd23f5902feba42a3966ce0e09d5c8807f710190c87"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.3.apk",
+      "bytes": 53971486,
+      "sha256": "98e532193584a7bc638da1f5addc446841ea6b2832e045a551fbef64f9f02f4b"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.3-x86_64.apk",
+      "bytes": 42846119,
+      "sha256": "c2a5707be9a78e575b1dd35dbb0e2e76058a58a98996ff1c4abb6431d19f6bc1"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.3-Windows-x64-Setup.exe",
+      "bytes": 30632735,
+      "sha256": "854d903da1d07ca47fc1cbf8610f5d5d1e88b191fe3b490974ca14462b2e87a8"
+    },
+    {
+      "name": "RPG-300-Skills-v1.zip",
+      "bytes": 29441,
+      "sha256": "7576cc775e1a234e3219f6ffd912250b48a9652403bf72dcc8c09ac5405b39b8"
+    },
+    {
+      "name": "RPG-Skill-Library-Author-Template-v1.zip",
+      "bytes": 3687,
+      "sha256": "d46d4dad94e398f88430e0a04cf7ce059edae88159a36d0708298bf284792a0a"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.3-Windows-x64-Portable.zip",
+      "bytes": 30633946,
+      "sha256": "04782a2521bce802ff6dc55f01791c73ac288a7baf9b7eb3212fd44beb88930e"
+    },
+    {
+      "name": "RELEASE_NOTES.md",
+      "bytes": 4432,
+      "sha256": "3a5f062a3c931a6c69c00d12b180f3d37433f30a6aea8ba4e91af499372a64f7"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 783,
+      "sha256": "a2ff6d5a97e4aecbb9c8808e9dbd16820835ddd07ae83a9efd1a34a9771e6adb"
+    }
+  ]
+}

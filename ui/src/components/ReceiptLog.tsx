@@ -24,8 +24,11 @@ const TOOL_KINDS = new Set([
   "llm.usage",
   "scene.entered",
   "clothing.checked",
+  "settlement.checked",
+  "settlement.rejected",
+  "settlement.warning",
 ]);
-const ISSUE_KINDS = new Set(["tool.rejected", "turn.rolled_back", "narrative.checked"]);
+const ISSUE_KINDS = new Set(["tool.rejected", "turn.rolled_back", "narrative.checked", "settlement.rejected", "settlement.warning"]);
 
 function describe(event: EventRecord): string {
   const payload = event.payload ?? {};
@@ -69,6 +72,12 @@ function describe(event: EventRecord): string {
     }
     case "tool.rejected":
       return `拒绝 ${String(payload.tool ?? "")}：${String(payload.error ?? "")}`;
+    case "settlement.checked":
+      return `结算完成 · ${String(payload.operations ?? 0)} 项操作 · ${String(payload.attempts ?? 1)} 次尝试`;
+    case "settlement.rejected":
+      return `结算草案未提交 · ${String(payload.failed_at ?? "")}：${String(payload.error ?? "")}`;
+    case "settlement.warning":
+      return `待确认，相关状态保持原值：${Array.isArray(payload.uncertain) ? payload.uncertain.join("；") : ""}`;
     case "clothing.checked": {
       const changed = payload.changed_fields as string[] | undefined;
       return changed?.length ? `衣物结算 · 已更新 ${changed.length} 项` : "衣物结算 · 保持当前衣着";
