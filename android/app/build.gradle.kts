@@ -8,7 +8,9 @@ plugins {
 
 // P6：release 签名。keystore.properties 与 .jks 都进 .gitignore（不入库）；
 // 文件缺失时回落到 debug 签名，保证 clone 下来的人不配密钥也能 assembleRelease。
-val keystorePropsFile = rootProject.file("keystore/keystore.properties")
+// Optional external signing file keeps private keys outside the source checkout.
+val keystorePropsFile = providers.gradleProperty("rpgSigningProperties").orNull
+    ?.let { File(it) } ?: rootProject.file("keystore/keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
 }
@@ -21,8 +23,8 @@ android {
         applicationId = "com.rpgframework.cockpit"
         minSdk = 29
         targetSdk = 36
-        versionCode = 23
-        versionName = "0.7.0"
+        versionCode = 24
+        versionName = "0.7.1"
         ndk {
             // 两个 ABI 都要有对应的 pydantic-core wheel（local-wheels/ 里各一份）。
             abiFilters += listOf("arm64-v8a", "x86_64")
@@ -32,7 +34,9 @@ android {
     signingConfigs {
         if (keystorePropsFile.exists()) {
             create("release") {
-                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                val configuredStore = File(keystoreProps.getProperty("storeFile"))
+                storeFile = if (configuredStore.isAbsolute) configuredStore
+                    else File(keystorePropsFile.parentFile.parentFile, configuredStore.path)
                 storePassword = keystoreProps.getProperty("storePassword")
                 keyAlias = keystoreProps.getProperty("keyAlias")
                 keyPassword = keystoreProps.getProperty("keyPassword")
@@ -103,6 +107,8 @@ val backendAssets = layout.projectDirectory.dir("src/main/assets/backend")
 
 val syncBackend = tasks.register<Sync>("syncBackend") {
     into(backendAssets)
+    from(File(repoRoot, "LICENSE"))
+    from(File(repoRoot, "THIRD_PARTY_NOTICES.md"))
     from(File(repoRoot, "api")) { into("api") }
     from(File(repoRoot, "core")) { into("core") }
     from(File(repoRoot, "gateway")) { into("gateway") }

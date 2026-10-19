@@ -1,0 +1,77 @@
+{
+  "version": "0.7.1",
+  "windows": {
+    "state_endpoint": true,
+    "engine_health": true,
+    "version": "0.7.1-builder",
+    "saves_endpoint": true,
+    "exit_cleanup": true,
+    "isolated_data_directory": true,
+    "skill_library_endpoint": true,
+    "bundled_ui": true,
+    "desktop_launch": true,
+    "original_avatar": true
+  },
+  "android": {
+    "abis": [
+      "arm64-v8a",
+      "x86_64"
+    ],
+    "universal_apk": true,
+    "min_sdk": 29,
+    "target_sdk": 36,
+    "version_code": 24,
+    "signatures_verified": true,
+    "zip_crc_and_bundled_assets_verified": true,
+    "device_or_emulator_install_tested": false
+  },
+  "frontend_behavior_tests": {
+    "passed": 17,
+    "failed": 0
+  },
+  "typescript_no_emit": true,
+  "private_sprites_or_keys_bundled": false,
+  "real_network_llm_tested": false,
+  "assets": [
+    {
+      "name": "RPG-Cockpit-v0.7.1-arm64.apk",
+      "bytes": 42763948,
+      "sha256": "ae25d96b3937733124f0f6bfeca9d40edc962d8f76a7168250b08c5ca3290f6c"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.1.apk",
+      "bytes": 53922059,
+      "sha256": "be8a81e597d78db98a0bc35833c79c35c4fdc5e3777d6b8885f09c054b8e3984"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.1-x86_64.apk",
+      "bytes": 42796692,
+      "sha256": "9b07ca3ae57cfbcc1315a587f01f6d0f3c175096b6927c5387f5f295c3826fc5"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.1-Windows-x64-Setup.exe",
+      "bytes": 30584595,
+      "sha256": "52b2d1e1bd40e20f17bff58b09afdbba5a6a700a33fae1ec27e243f1dd62ef80"
+    },
+    {
+      "name": "RPG-300-Skills-v1.zip",
+      "bytes": 28601,
+      "sha256": "18685d1b1594aeca7a75be5fad73bb4585e7db8b3cffae7e2f26ffd5ad27981b"
+    },
+    {
+      "name": "RPG-Skill-Library-Author-Template-v1.zip",
+      "bytes": 3845,
+      "sha256": "64df5ec095597056fb20413829a5eae4760e6d39ab7694dbc11c2682088e6d56"
+    },
+    {
+      "name": "RPG-Cockpit-v0.7.1-Windows-x64-Portable.zip",
+      "bytes": 30584191,
+      "sha256": "b8aa19ceb2d4d210180a60490226b0fe3d2a0b2553b0a2ac060934905d0d0c33"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 699,
+      "sha256": "8a00304f29aaf1cf118c4a422cbfec1d9c4ced0a750d60202bb9fc22b9bd5364"
+    }
+  ]
+}

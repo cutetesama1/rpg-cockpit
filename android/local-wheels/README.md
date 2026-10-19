@@ -3,7 +3,7 @@
 Chaquopy 官方包仓库（<https://chaquo.com/pypi-13.1>）**没有** `pydantic` / `pydantic-core`，
 而 `pydantic` 又硬性依赖 `pydantic-core`（Rust 扩展），所以必须自己编一份 Android 版 wheel。
 
-这里的两个文件就是编好的成品（CPython 3.13、minSdk 29）：
+公开仓库不附带预编译 wheel。构建时需在本目录自行准备以下文件（CPython 3.13、minSdk 29），生成方法见下文：
 
 | 文件 | ABI |
 | --- | --- |

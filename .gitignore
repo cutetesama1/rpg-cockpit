@@ -27,3 +27,7 @@ saves/
 *.exe
 *.mp4
 *.wav
+
+# Local Android build inputs
+android/local-wheels/*.whl
+*.log

@@ -15,6 +15,18 @@ RPG 驾驶舱将自由叙事与游戏状态管理结合：叙事模型负责推�
 
 适合单人文字冒险、角色扮演、原创剧情试演、世界设定验证，以及轻量 RPG 原型开发。
 
+## 下载与安装
+
+当前公开版：**[v0.7.1 · Windows / Android](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.7.1)**。
+
+| 平台 | 下载 |
+| --- | --- |
+| Android 10+，多数手机 | [arm64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-arm64.apk) |
+| Android 通用包 | [通用 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1.apk) |
+| Windows 10/11 64位 | [桌面安装包](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-Windows-x64-Setup.exe) · [便携 ZIP](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.7.1/RPG-Cockpit-v0.7.1-Windows-x64-Portable.zip) |
+
+便携版请完整解压，运行 `rpg-cockpit.exe`；桌面窗口需要 WebView2 Runtime。进入设置后配置自己的模型 API。公开下载版默认使用原创静态示意角色，素材范围与本仓库一致；完整分层立绘库未附带。校验值和本次验证范围见 Release 说明。
+
 ## 你可以自定义什么
 
 | 内容 | 能力 |
