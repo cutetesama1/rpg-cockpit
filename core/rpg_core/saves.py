@@ -20,6 +20,7 @@ from typing import Any
 
 from .contracts import ContentPack
 from .runtime import GameSession
+from .visibility import player_events
 
 SAVE_VERSION = 1
 AUTO_SLOT = "auto"
@@ -262,7 +263,7 @@ def export_log(
         "llm": session.llm_status(),
         "settings": settings_view or {},
         "saves": saves or {},
-        "events": session.ledger.to_dicts(),
+        "events": player_events(session.ledger.events),
     }
     return redact(payload)
 

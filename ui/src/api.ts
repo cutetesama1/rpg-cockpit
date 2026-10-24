@@ -1,3 +1,4 @@
+import type { DirectorConfig, DirectorView, PlotClue, CheckResult } from "./types";
 import { consumeEventStream } from "./sse";
 import type {
   Action,
@@ -379,4 +380,44 @@ export async function saveWorldState(state: import('./types').StateConfig, curre
 }
 export async function repairInitialSkills() {
   return readJson<{ok:boolean;status:Status}>(await fetch('/api/world/skill-catalog/repair-initial',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}));
+}
+
+export async function getDirector(includeInternal = false): Promise<DirectorView> {
+  return readJson(await fetch(`/api/director${includeInternal ? "?include_internal=true" : ""}`));
+}
+export async function saveDirector(pack_id: string, config: DirectorConfig): Promise<DirectorView> {
+  return readJson(await fetch("/api/director", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack_id, config }) }));
+}
+export async function requestDirector(pack_id: string): Promise<DirectorView> {
+  return readJson(await fetch("/api/director/request", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack_id }) }));
+}
+export async function putDirectorClue(pack_id: string, clue: PlotClue): Promise<DirectorView> {
+  return readJson(await fetch("/api/director/clues", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack_id, clue }) }));
+}
+export async function rollDice(pack_id: string, event_id: string, check: { kind: "dice" | "probability"; dice?: string; target?: number; chance?: number }): Promise<{ result: CheckResult; reused: boolean }> {
+  return readJson(await fetch("/api/dice/roll", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack_id, event_id, check }) }));
+}
+
+export async function getAdjudications(includeInternal = false): Promise<import("./types").AdjudicationView> {
+  return readJson(await fetch(`/api/adjudications${includeInternal ? "?include_internal=true" : ""}`));
+}
+export async function previewAdjudication(pack_id: string, id: string, decision: import("./types").DecisionDraft, include_internal = false): Promise<import("./types").DecisionPreview> {
+  return sendJson(`/api/adjudications/${encodeURIComponent(id)}/preview`, "POST", { pack_id, decision, include_internal });
+}
+export async function decideAdjudication(pack_id: string, id: string, decision: import("./types").DecisionDraft, include_internal = false): Promise<import("./types").AdjudicationView & { reused: boolean; receipt_id: number }> {
+  return sendJson(`/api/adjudications/${encodeURIComponent(id)}/decide`, "POST", { pack_id, decision, include_internal });
+}
+
+export async function getAdjudicationEditor(): Promise<import("./adjudicationFields").EditorCatalog> {
+  return readJson(await fetch("/api/adjudications/editor"));
+}
+
+export async function previewCharacterCard(body: import('./types').CardUpload & {options:import('./types').CardOptions}): Promise<import('./types').CardPreview> {
+  return sendJson('/api/character-cards/preview','POST',body);
+}
+export async function importCharacterCard(body: import('./types').CardUpload & {options:import('./types').CardOptions;request_id:string;preview_token:string;expected_pack_id:string}): Promise<{ok:boolean;reused:boolean;imported_pack_id:string}> {
+  return sendJson('/api/character-cards/import','POST',body);
+}
+export async function getCurrentCharacterCard(): Promise<import('./types').CurrentCard> {
+  return readJson(await fetch('/api/character-cards/current'));
 }

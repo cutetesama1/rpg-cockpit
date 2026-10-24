@@ -1,0 +1,52 @@
+{
+  "version": "0.99beta",
+  "public_static_avatar": true,
+  "private_art_included": false,
+  "backend_tests": {
+    "passed": 590,
+    "skipped": 12,
+    "failed": 0
+  },
+  "frontend_tests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "typescript": true,
+  "vite": true,
+  "native": {
+    "version": "0.99beta",
+    "packaged_backend_started": true,
+    "frontend_matches_build": true,
+    "public_original_avatar_available": true,
+    "director_adjudication_npcs_world_memory_saves_skills_endpoints": true,
+    "correction_interface_present": false,
+    "external_model_used": false,
+    "android_device_install_tested": false
+  },
+  "apks": [
+    {
+      "abi": "arm64-v8a",
+      "version_code": 30,
+      "original_signer": true,
+      "public_avatar": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    },
+    {
+      "abi": "universal",
+      "version_code": 30,
+      "original_signer": true,
+      "public_avatar": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    },
+    {
+      "abi": "x86_64",
+      "version_code": 30,
+      "original_signer": true,
+      "public_avatar": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    }
+  ]
+}

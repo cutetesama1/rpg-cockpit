@@ -18,6 +18,7 @@ import QuickCreateDialog from "./components/QuickCreateDialog";
 import ReceiptLog from "./components/ReceiptLog";
 import SaveDialog from "./components/SaveDialog";
 import SettingsDrawer from "./components/SettingsDrawer";
+import AdjudicationCenter from "./components/AdjudicationCenter";
 import DebugConsole from "./components/DebugConsole";
 import UiIcon from "./components/UiIcon";
 import Sidebar from "./components/Sidebar";
@@ -132,6 +133,7 @@ export default function App() {
     task: false,
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [adjudicationOpen, setAdjudicationOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(
     () => new URLSearchParams(window.location.search).get("debug") === "1",
   );
@@ -628,7 +630,7 @@ export default function App() {
           onClose={() => setNavOpen(false)}
           onPickSkill={id => setSelectedSkills(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id])}
           onExtra={id => setExtras(prev => ({ ...prev, [id]: !prev[id] }))}
-          onSettings={() => setSettingsOpen(true)} onLibrary={openLibrary} onWorld={() => void openWorld()}
+          onAdjudication={() => setAdjudicationOpen(true)} onSettings={() => setSettingsOpen(true)} onLibrary={openLibrary} onWorld={() => void openWorld()}
           onCreate={() => setQuickOpen(true)} onSaves={() => setSavesOpen(true)} onDebug={() => setDebugOpen(true)}
           onWelcome={() => setWelcomeOpen(true)} onUndo={() => void undo()} onReset={() => void reset()} />
       </> : (
@@ -653,6 +655,7 @@ export default function App() {
           onToggle={() => setNavCollapsed((value) => !value)}
           onOpenLibrary={openLibrary}
           onOpenWorld={() => void openWorld()}
+          onOpenAdjudication={() => setAdjudicationOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenDebug={() => setDebugOpen(true)}
           onOpenSaves={() => setSavesOpen(true)}
@@ -1036,6 +1039,8 @@ export default function App() {
         onThemeChange={setTheme}
         status={status}
       />
+
+      <AdjudicationCenter open={adjudicationOpen} onClose={() => setAdjudicationOpen(false)} status={status} busy={busy || openingBusy} onChanged={refresh} />
 
       <SettingsDrawer
         open={settingsOpen}

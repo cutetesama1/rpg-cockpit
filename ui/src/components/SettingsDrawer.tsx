@@ -1,3 +1,4 @@
+import DirectorPanel from "./DirectorPanel";
 import SkillLibraryPanel from "./SkillLibraryPanel";
 import { SPRITE_VIEW_LABELS } from "../theme";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -288,7 +289,7 @@ export default function SettingsDrawer({
     }
   };
 
-  const patchRole = (role: "narrator" | "settler", patch: Partial<LlmProfile>) => {
+  const patchRole = (role: "narrator" | "settler" | "director", patch: Partial<LlmProfile>) => {
     setRoles((prev) =>
       prev ? { ...prev, [role]: { ...prev[role], ...patch } } : prev,
     );
@@ -684,6 +685,7 @@ export default function SettingsDrawer({
                   providers={providerNames}
                   onChange={(patch) => patchRole("settler", patch)}
                 />
+                <RoleEditor title="剧情导演 director" hint="导演选项关闭‘复用叙事模型’时使用此独立连接；只在触发条件满足时调用。" profile={roles.director} providers={providerNames} onChange={(patch) => patchRole("director", patch)} />
               </details>
             </section>
 
@@ -704,6 +706,8 @@ export default function SettingsDrawer({
                 恢复默认（脚本假模型）
               </button>
             </div>
+
+            <DirectorPanel key={status?.pack.id ?? "none"} status={status} onChanged={onChanged} />
 
             <section className="settings-section ui-theme-settings">
               <h3>外观 · 界面主题</h3>

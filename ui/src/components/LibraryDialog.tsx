@@ -1,3 +1,5 @@
+import PersonalityNpcPanel from "./PersonalityNpcPanel";
+import CharacterCardImporter from "./CharacterCardImporter";
 import { useEffect, useState } from "react";
 import { cloneGame, getLibrary, newGame, selectGame } from "../api";
 import type { GameInfo, LibraryView } from "../types";
@@ -30,6 +32,8 @@ export default function LibraryDialog({
   const [title, setTitle] = useState("");
   const [gameId, setGameId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [cardOpen,setCardOpen]=useState(false);
+  const [cardMode,setCardMode]=useState("full");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +48,7 @@ export default function LibraryDialog({
   useEffect(() => {
     if (!open) return;
     setMode(null);
+    setCardOpen(false);
     setSource(null);
     setTitle("");
     setGameId("");
@@ -121,6 +126,7 @@ export default function LibraryDialog({
         </header>
 
         <div className="modal-toolbar">
+          <button className="ghost" onClick={()=>setCardOpen(value=>!value)} disabled={busy}>{cardOpen?"收起角色卡导入":"导入角色卡 V2/V3"}</button>
           <button className="primary" onClick={beginNew} disabled={busy}>
             新建游戏
           </button>
@@ -139,6 +145,8 @@ export default function LibraryDialog({
             当前游戏的世界构筑
           </button>
         </div>
+
+        {cardOpen && <><label>角色卡导入模式<select aria-label="角色卡导入模式" value={cardMode} onChange={e=>setCardMode(e.target.value)}><option value="full">完整映射 · 创建新游戏</option><option value="personality">仅人格 · 多选加入当前世界 NPC</option></select></label>{cardMode==="full"?<CharacterCardImporter onCreated={()=>{onGameChanged();void load();}}/>:<PersonalityNpcPanel onChanged={()=>{onGameChanged();void load();}}/>}</>}
 
         {message && <p className="modal-message ok">{message}</p>}
         {error && <p className="modal-message bad">{error}</p>}

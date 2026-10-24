@@ -50,7 +50,8 @@ class LlmRouter:
         # 衣物阶段始终走后置结算；单模型时复用 narrator 的连接配置。
         clothing = request.get("phase") == "clothing"
         backend = request.get("phase") in ("clothing", "skill_selection", "skill_learning", "settlement")
-        profile = self.profile("narrator" if backend and not self.separated else role)
+        reuse_director = request.get('phase')=='director' and request.get('reuse_narrator',True)
+        profile = self.profile("narrator" if reuse_director or backend and not self.separated else role)
         provider = self.providers.get(profile.provider)
         if provider is None:
             raise RouterError(f"角色 {role} 配置的 provider 不存在：{profile.provider}")

@@ -1,0 +1,97 @@
+{
+  "$defs": {
+    "PersonalityNpc": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^npc_[a-f0-9]{20}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "personality": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Personality",
+          "type": "string"
+        },
+        "likes": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Likes",
+          "type": "array"
+        },
+        "dislikes": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Dislikes",
+          "type": "array"
+        },
+        "entrance_hint": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Entrance Hint",
+          "type": "string"
+        },
+        "min_turn": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Min Turn",
+          "type": "integer"
+        },
+        "min_progress": {
+          "default": 0,
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Min Progress",
+          "type": "integer"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "source_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "source_hash"
+      ],
+      "title": "PersonalityNpc",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "npcs": {
+      "items": {
+        "$ref": "#/$defs/PersonalityNpc"
+      },
+      "maxItems": 100,
+      "title": "Npcs",
+      "type": "array"
+    }
+  },
+  "title": "Roster",
+  "type": "object"
+}

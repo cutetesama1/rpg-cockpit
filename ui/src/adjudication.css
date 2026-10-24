@@ -1,0 +1,45 @@
+.drawer.adjudication-drawer { width: min(780px, 100vw); max-width: 100vw; box-sizing: border-box; }
+.adjudication-drawer .drawer-head small { color: var(--muted); letter-spacing: .12em; font-size: .65rem; }
+.adjudication-toolbar, .adjudication-tabs, .adjudication-field-editor { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adjudication-toolbar { margin: 18px 0; justify-content: space-between; }
+.adjudication-toolbar label { display: flex; gap: 8px; align-items: center; }
+.adjudication-tabs { padding-bottom: 14px; border-bottom: 1px solid var(--border, #ffffff20); }
+.adjudication-tabs button[aria-pressed="true"] { border-color: var(--accent, #d4b477); background: color-mix(in srgb, var(--accent, #d4b477) 15%, transparent); }
+.adjudication-list { display: grid; gap: 10px; margin: 18px 0; }
+.adjudication-card { padding: 14px 16px; border: 1px solid var(--border, #ffffff20); border-radius: 14px; background: color-mix(in srgb, var(--panel, #161d28) 82%, transparent); text-align: left; display: grid; gap: 7px; min-width: 0; overflow-wrap: anywhere; }
+.adjudication-card small { color: var(--muted, #9ea8ba); }
+.adjudication-card.selected { border-color: var(--accent, #d4b477); }
+.adjudication-editor { border-top: 1px solid var(--border, #ffffff20); padding-top: 18px; }
+.adjudication-editor > label, .adjudication-editor details label { display: grid; gap: 8px; margin: 14px 0; }
+.adjudication-editor textarea { min-height: 86px; width: 100%; box-sizing: border-box; resize: vertical; }
+.adjudication-editor details { margin: 16px 0; }
+.adjudication-editor summary { cursor: pointer; padding: 8px 0; }
+.adjudication-evidence { white-space: pre-wrap; line-height: 1.8; }
+.adjudication-field-editor > label { flex: 1 1 260px; }
+.adjudication-field-editor select, .adjudication-field-editor input { max-width: 100%; min-width: 0; }
+.adjudication-json { min-height: 150px !important; font: .8rem/1.6 monospace; }
+.adjudication-message, .adjudication-preview { padding: 14px; margin: 16px 0; border: 1px solid color-mix(in srgb, var(--accent, #d4b477) 40%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--accent, #d4b477) 7%, transparent); overflow-wrap: anywhere; }
+.adjudication-diffs { display: grid; gap: 8px; }
+.adjudication-diffs > div { display: grid; gap: 5px; padding: 10px; background: #00000018; border-radius: 8px; overflow-wrap: anywhere; }
+.adjudication-diffs span { white-space: pre-wrap; font-size: .88rem; }
+.adjudication-history { display: grid; gap: 12px; margin-top: 18px; }
+@media (max-width: 600px) {
+  .adjudication-drawer .drawer-body { padding: 16px; }
+  .adjudication-tabs { gap: 6px; }
+  .adjudication-tabs button { flex: 1 1 40%; }
+  .adjudication-editor .drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .adjudication-field-editor select, .adjudication-field-editor input { width: 100%; }
+}
+
+.adjudication-drawer .adjudication-toolbar label { flex-direction: row; align-items: center; }
+
+.adjudication-guide { padding:14px; border:1px solid var(--line); border-radius:12px; }
+.adjudication-guide summary { cursor:pointer; color:var(--accent); }
+.adjudication-guide p,.adjudication-guide li { line-height:1.8; }
+.adjudication-color { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.adjudication-color input[type=color] { width:58px; height:42px; padding:3px; }
+.adjudication-color label { max-width:70px; flex:1; }
+.adjudication-color input[type=number] { width:100%; box-sizing:border-box; }
+.adjudication-color output { width:100%; }
+
+.adjudication-field-value { display:grid; gap:8px; flex:1 1 260px; min-width:0; }

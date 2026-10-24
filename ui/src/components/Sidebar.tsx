@@ -10,6 +10,7 @@ interface SidebarProps {
   onOpenLibrary: () => void;
   onOpenWorld: () => void;
   onOpenSettings: () => void;
+  onOpenAdjudication: () => void;
   onOpenDebug: () => void;
   onOpenSaves: () => void;
   onOpenWelcome: () => void;
@@ -28,6 +29,7 @@ export default function Sidebar({
   onOpenLibrary,
   onOpenWorld,
   onOpenSettings,
+  onOpenAdjudication,
   onOpenDebug,
   onOpenSaves,
   onOpenWelcome,
@@ -91,6 +93,10 @@ export default function Sidebar({
         <button className="nav-item" title="存档 / 读档 / 导出脱敏日志" onClick={onOpenSaves}>
           <span className="nav-icon"><UiIcon name="save" /></span>
           <span className="nav-label">存档读档</span>
+        </button>
+        <button className="nav-item" title="处理待确认事项、查看裁定历史" onClick={onOpenAdjudication}>
+          <span className="nav-icon"><UiIcon name="book" /></span>
+          <span className="nav-label">玩家裁定{status.adjudication?.pending_count ? ` · ${status.adjudication.pending_count}` : ""}</span>
         </button>
         <button className="nav-item" title="模型 / 外观壁纸 / 调试" onClick={onOpenSettings}>
           <span className="nav-icon"><UiIcon name="settings" /></span>

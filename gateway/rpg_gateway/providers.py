@@ -189,6 +189,8 @@ class ScriptedProvider:
     )
 
     def complete(self, request: dict) -> LlmResponse:
+        if request.get('phase') == 'director':
+            return LlmResponse(narrator=NarratorOutput(narrative='{"candidates":[]}'),model='scripted-gm',provider=self.name)
         if request.get('phase') == 'settlement':
             from rpg_core.settlement import DOMAINS
             text=request['narrative'];ops=[]
@@ -484,9 +486,13 @@ class OpenAICompatibleProvider:
         tool_results = request.get("tool_results") or []
         tool_exchanges = request.get("tool_exchanges") or []
         retry_reason = request.get("retry_reason")
+        if request.get('phase') == 'director':
+            from rpg_core.plot_director import PROMPT as DIRECTOR_PROMPT
+            keys=('personality_npcs','story_progress','current_turn','dynamic_worldbook','reason','scene','worldbook','world_setting','characters','player','recent_events','facts','unresolved_clues','action','evaluated_ids','max_candidates')
+            return [{'role':'system','content':DIRECTOR_PROMPT},{'role':'user','content':json.dumps({k:request[k] for k in keys if k in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get('phase') == 'settlement':
             from rpg_core.settlement import PROMPT
-            keys=('narrative','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
+            keys=('world_rules','dynamic_worldbook','dynamic_worldbook_index','known_npcs','narrative','determined_events','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
             return [{'role':'system','content':PROMPT+'\n# 本世界结算语义（仅作效果与背景参考；旧版逐工具调用、输出格式指令不适用）\n'+str(request.get('rules') or '')+'\n# 最终协议提醒\n只提交一次 settle_turn 完整草案；字段、目录、已收费用与累计限额以本次输入为准。'},
                     {'role':'user','content':json.dumps({key:request[key] for key in keys if key in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get("phase") == "skill_selection":
@@ -552,6 +558,9 @@ class OpenAICompatibleProvider:
             "# 最近发生",
             recent,
         ]
+        if request.get("triggered_events"):
+            parts += ["# 本轮已触发事件及确定结果",json.dumps(request["triggered_events"],ensure_ascii=False,separators=(",",":")),
+                      "以上是后端已经检定的唯一结果，按其已确定的世界/NPC后果衔接本轮行动；不得重掷、改写结果或把它变成玩家自愿行动。没有列出的候选事件未触发，不得编造。"]
         if request.get("facts"):
             parts += ["# 已确认剧情事实",json.dumps(request["facts"],ensure_ascii=False,separators=(",",":"))]
         if request.get("wardrobe"):

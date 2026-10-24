@@ -1,0 +1,126 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "title": "Id",
+      "type": "string"
+    },
+    "expected_version": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Expected Version",
+      "type": "integer"
+    },
+    "action": {
+      "default": "upsert",
+      "enum": [
+        "upsert",
+        "archive",
+        "reveal"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "character",
+            "relationship",
+            "location",
+            "secret",
+            "fact"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Kind"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Content"
+    },
+    "keywords": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Keywords"
+    },
+    "visibility": {
+      "anyOf": [
+        {
+          "enum": [
+            "public",
+            "internal"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Visibility"
+    },
+    "refs": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Refs"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "title": "Change",
+  "type": "object"
+}

@@ -574,6 +574,16 @@
           "default": false,
           "title": "Adult",
           "type": "boolean"
+        },
+        "space": {
+          "default": "character",
+          "enum": [
+            "character",
+            "background",
+            "foreground"
+          ],
+          "title": "Space",
+          "type": "string"
         }
       },
       "required": [
@@ -724,6 +734,81 @@
             "$ref": "#/$defs/SpritePose"
           },
           "title": "Poses",
+          "type": "object"
+        },
+        "controls": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Controls",
+          "type": "object"
+        },
+        "motions": {
+          "additionalProperties": {
+            "enum": [
+              "none",
+              "sway",
+              "walk",
+              "run",
+              "jump",
+              "attack",
+              "cast",
+              "hurt"
+            ],
+            "type": "string"
+          },
+          "title": "Motions",
+          "type": "object"
+        },
+        "revision": {
+          "default": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "legacy_hashes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Legacy Hashes",
+          "type": "array"
+        },
+        "arm_preferences": {
+          "additionalProperties": {
+            "enum": [
+              "idle",
+              "hold"
+            ],
+            "type": "string"
+          },
+          "title": "Arm Preferences",
+          "type": "object"
+        },
+        "handheld_modes": {
+          "additionalProperties": {
+            "items": {
+              "enum": [
+                "idle",
+                "hold",
+                "cover"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Handheld Modes",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Labels",
           "type": "object"
         },
         "views": {
@@ -998,7 +1083,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/WardrobeSlot"
           },
-          "maxProperties": 8,
+          "maxProperties": 16,
           "minProperties": 1,
           "title": "Slots",
           "type": "object"
@@ -1092,6 +1177,28 @@
           "default": "",
           "title": "Category",
           "type": "string"
+        },
+        "case_sensitive": {
+          "default": true,
+          "title": "Case Sensitive",
+          "type": "boolean"
+        },
+        "selective": {
+          "default": false,
+          "title": "Selective",
+          "type": "boolean"
+        },
+        "secondary_keywords": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secondary Keywords",
+          "type": "array"
+        },
+        "insertion_order": {
+          "default": 0,
+          "title": "Insertion Order",
+          "type": "number"
         }
       },
       "required": [
@@ -1192,6 +1299,16 @@
         }
       ],
       "default": null
+    },
+    "personality_roster": {
+      "additionalProperties": true,
+      "title": "Personality Roster",
+      "type": "object"
+    },
+    "character_card": {
+      "additionalProperties": true,
+      "title": "Character Card",
+      "type": "object"
     },
     "asset_pack": {
       "anyOf": [

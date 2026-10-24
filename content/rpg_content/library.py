@@ -236,7 +236,7 @@ def _write_json(path: Path, data: dict) -> None:
 
 
 def _replace_and_validate(
-    pack_dir: Path, writes: dict[Path, str | None]
+    pack_dir: Path, writes: dict[Path, str | bytes | None]
 ) -> list[str]:
     """原子式：先备份，写入后重新加载校验；失败恢复并抛 PackError。返回 warning。"""
     backups: dict[Path, bytes | None] = {}
@@ -249,7 +249,8 @@ def _replace_and_validate(
                     path.unlink()
                 continue
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8")
+            if isinstance(content,bytes):path.write_bytes(content)
+            else:path.write_text(content, encoding="utf-8")
         pack = load_pack(pack_dir)  # validate=True：有 error 直接抛
     except Exception:
         for path, previous in backups.items():

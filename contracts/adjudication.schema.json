@@ -1,0 +1,86 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "maxLength": 120,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_.:-]+$",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "confirm",
+        "reject",
+        "modify",
+        "defer",
+        "resume",
+        "undo"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "reason": {
+      "default": "",
+      "maxLength": 500,
+      "title": "Reason",
+      "type": "string"
+    },
+    "operations": {
+      "anyOf": [
+        {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Operations"
+    },
+    "status_patch": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status Patch"
+    },
+    "preview_token": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Preview Token"
+    }
+  },
+  "required": [
+    "request_id",
+    "revision",
+    "action"
+  ],
+  "title": "Decision",
+  "type": "object"
+}

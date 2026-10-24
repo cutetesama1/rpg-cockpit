@@ -1,5 +1,5 @@
 {
-  "source_version": "0.7.3",
+  "source_version": "0.99beta",
   "github_published": true,
   "git_initialized": true,
   "license": "Apache-2.0 for first-party code and original sample graphics, matching the existing repository license",
@@ -17,6 +17,8 @@
   "new_app_binaries_built": true,
   "github_repository": "https://github.com/cutetesama1/rpg-cockpit",
   "publication_note": "The v0.7.3 release tag records the exact published source commit; source and public-build assets are verified independently.",
-  "release_verification": "docs/releases/v0.7.3-verification.json",
-  "release_url": "https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.7.3"
+  "release_verification": "docs/releases/v0.99beta-verification.json",
+  "release_url": "https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.99beta",
+  "public_portrait": "original static sample",
+  "third_party_sprite_tree_included": false
 }

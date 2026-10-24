@@ -27,6 +27,9 @@ def game(responses=None,separated=False,wardrobe=False):
     n=WireProvider('n',responses);s=WireProvider('s',responses)
     cfg=LlmRolesConfig(separated=separated,narrator=LlmProfile(provider='n'),settler=LlmProfile(provider='s'))
     pack=load_pack(ROOT/('packs/new-game' if wardrobe else 'packs/night-convenience-store'))
+    if wardrobe:
+        from test_portrait import fixture_pack
+        pack=fixture_pack()
     return GameSession(pack,LlmRouter(cfg,{'n':n,'s':s})),n,s
 
 @pytest.mark.parametrize('separated',[False,True])

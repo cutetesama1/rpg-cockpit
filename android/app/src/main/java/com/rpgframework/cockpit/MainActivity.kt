@@ -52,10 +52,43 @@ class MainActivity : AppCompatActivity() {
             fileChooserCallback = null
             if (callback == null) return@registerForActivityResult
             val uri = result.data?.data
-            if (result.resultCode == RESULT_OK && uri != null) {
-                callback.onReceiveValue(arrayOf(uri))
+            val clips = result.data?.clipData
+            if (result.resultCode == RESULT_OK && (uri != null || clips != null)) {
+                callback.onReceiveValue(if (clips != null) Array(clips.itemCount) { clips.getItemAt(it).uri } else arrayOf(uri!!))
             } else {
                 callback.onReceiveValue(null)
+            }
+        }
+
+    private var pendingArtifactUrl: String? = null
+    private var pendingArtifactBytes: ByteArray? = null
+    private val saveArtifactLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+            val sourceUrl = pendingArtifactUrl
+            val sourceBytes = pendingArtifactBytes
+            pendingArtifactUrl = null
+            pendingArtifactBytes = null
+            if (uri == null || (sourceUrl == null && sourceBytes == null)) return@registerForActivityResult
+            executor.execute {
+                try {
+                    val bytes = sourceBytes ?: run {
+                        val connection = URL(sourceUrl!!).openConnection() as HttpURLConnection
+                        connection.connectTimeout = 10_000
+                        connection.readTimeout = 20_000
+                        connection.instanceFollowRedirects = false
+                        try {
+                            check(connection.responseCode == 200) { "文件下载失败，请返回应用重新预览" }
+                            connection.inputStream.use { it.readBytes() }
+                        } finally { connection.disconnect() }
+                    }
+                    check(bytes.size <= 20 * 1024 * 1024) { "导出文件超过 20 MB" }
+                    contentResolver.openOutputStream(uri, "w")?.use { it.write(bytes) }
+                        ?: error("无法写入所选位置")
+                    handler.post { Toast.makeText(this, "文件已保存", Toast.LENGTH_SHORT).show() }
+                } catch (t: Throwable) {
+                    Log.e(TAG, "artifact save failed", t)
+                    handler.post { Toast.makeText(this, "文件保存失败：${t.message}", Toast.LENGTH_LONG).show() }
+                }
             }
         }
 
@@ -102,8 +135,30 @@ class MainActivity : AppCompatActivity() {
             settings.mediaPlaybackRequiresUserGesture = false
             setBackgroundColor(Color.parseColor("#11151b"))
             webViewClient = WebViewClient()
-            setDownloadListener { url, _, _, _, _ ->
+            setDownloadListener { url, _, disposition, mime, _ ->
                 val uri = Uri.parse(url)
+                if (pendingArtifactUrl != null || pendingArtifactBytes != null || pendingTemplateUrl != null) return@setDownloadListener
+                val page = Uri.parse(this.url ?: "")
+                val trustedPage = page.scheme == "http" && page.host == "127.0.0.1" && page.port == port
+                val jsonPrefix = "data:application/json;base64,"
+                if (trustedPage && url.startsWith(jsonPrefix)) {
+                    try {
+                        check(url.length <= 28 * 1024 * 1024) { "导出内容过大" }
+                        pendingArtifactBytes = android.util.Base64.decode(url.substring(jsonPrefix.length), android.util.Base64.DEFAULT)
+                        saveArtifactLauncher.launch("character-card-export.json")
+                    } catch (t: Throwable) {
+                        pendingArtifactBytes = null
+                        Toast.makeText(this@MainActivity, "无法导出文件：${t.message}", Toast.LENGTH_LONG).show()
+                    }
+                    return@setDownloadListener
+                }
+                if (uri.scheme == "http" && uri.host == "127.0.0.1" && uri.port == port &&
+                    uri.path in setOf("/api/character-cards/source", "/api/character-cards/source-file")) {
+                    pendingArtifactUrl = url
+                    try { saveArtifactLauncher.launch(android.webkit.URLUtil.guessFileName(url, disposition, mime)) }
+                    catch (t: Throwable) { pendingArtifactUrl = null; Log.e(TAG, "artifact picker failed", t) }
+                    return@setDownloadListener
+                }
                 if (pendingTemplateUrl == null && uri.scheme == "http" && uri.host == "127.0.0.1" &&
                     uri.port == port && uri.path == "/api/skill-libraries/template.zip") {
                     pendingTemplateUrl = url
@@ -131,14 +186,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "*/*"
-                        putExtra(
-                            Intent.EXTRA_MIME_TYPES,
-                            arrayOf(
-                                "application/zip",
-                                "application/x-zip-compressed",
-                                "application/octet-stream",
-                            ),
-                        )
+                        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
                     }
                     return try {
                         fileChooserLauncher.launch(intent)

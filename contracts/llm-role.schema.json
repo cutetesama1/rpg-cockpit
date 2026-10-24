@@ -47,6 +47,9 @@
     },
     "setup": {
       "$ref": "#/$defs/LlmProfile"
+    },
+    "director": {
+      "$ref": "#/$defs/LlmProfile"
     }
   },
   "title": "LlmRolesConfig",

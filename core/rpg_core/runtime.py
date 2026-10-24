@@ -26,6 +26,7 @@ from .scenes import (
     unmet_conditions,
 )
 from .state import cancelled_turns, initial_state, inventory_from_events, project
+from .visibility import player_events, player_visible
 
 
 @dataclass
@@ -77,7 +78,7 @@ class GameSession:
     def _record(self, **kwargs: Any) -> None:
         """写账本并通知事件订阅者（SSE）。"""
         event = self.ledger.append(**kwargs)  # type: ignore[arg-type]
-        if self.on_event is not None:
+        if self.on_event is not None and player_visible(event):
             try:
                 self.on_event(event.model_dump(mode="json"))
             except Exception:  # noqa: BLE001 - 订阅者异常不能影响游戏事务
@@ -195,7 +196,7 @@ class GameSession:
         return max((event.turn for event in self.ledger.events), default=0) + 1
 
     def events_of(self, turn: int) -> list[dict[str, Any]]:
-        return [e.model_dump(mode="json") for e in self.ledger.for_turn(turn)]
+        return player_events(self.ledger.for_turn(turn))
 
     # -- 场景 ------------------------------------------------------------
     @property
@@ -516,6 +517,12 @@ class GameSession:
         request = self._with_skill_catalog(self.assembler.build(
             turn=turn, action=action, state=working, events=self.ledger.events, scene_id=scene_used), skills)
         request['payments'] = payments_info
+        from .plot_director import prepare as prepare_director
+        director_events=prepare_director(self,turn=turn,action=action,working=working,scene_id=scene_used,totals=usage_totals)
+        if director_events:
+            request['triggered_events']=director_events
+            from .personality_npcs import narrator_brief
+            request['vocab']=self.assembler.vocab_brief()+narrator_brief(self.ledger.events)
         try:
             response = self._complete_narrator('narrator', request, turn)
             self._record_usage(turn, 'narrator', response, usage_totals)
@@ -546,6 +553,8 @@ class GameSession:
                 scene_id=scene_used,
             )
             retry_request = self._with_skill_catalog(retry_request, skills)
+            retry_request['payments'] = payments_info
+            if director_events:retry_request['triggered_events']=director_events
             retry = None
             try:
                 retry = self._complete_narrator("narrator", retry_request, turn)
@@ -655,6 +664,11 @@ class GameSession:
                 "narrative": str(existing.payload.get("narrative") or ""),
                 "options": list(existing.payload.get("options") or []),
             }
+        card_opening = self.pack.character_card.get('first_message', '')
+        if isinstance(card_opening, str) and card_opening.strip():
+            self._record(turn=0,kind='narrative.generated',role='narrator',payload={
+                'narrative':card_opening,'options':[],'opening':True,'source':'character_card'})
+            return {'ok':True,'generated':True,'narrative':card_opening,'options':[]}
         request = self.assembler.build(
             turn=0,
             action={"kind": "text", "text": ""},
@@ -733,6 +747,9 @@ class GameSession:
         turn = self.ledger.last_committed_turn()
         if turn == 0:
             return {"ok": False, "error": "没有可撤销的回合", **self.status()}
+        from .adjudication import blocks_gameplay_undo
+        if blocks_gameplay_undo(self, turn):
+            return {"ok": False, "error": "请先在玩家裁定中心撤销该回合之后的已确认裁定", **self.status()}
         self._record(
             turn=turn,
             kind="turn.rolled_back",
@@ -805,7 +822,7 @@ class GameSession:
                 if sprite is not None
                 else None
             ),
-            "events": [event.model_dump(mode="json") for event in self.ledger.events[-80:]],
+            "events": player_events(self.ledger.events[-80:]),
         }
 
     @staticmethod
@@ -952,6 +969,8 @@ class GameSession:
 
     def status(self) -> dict[str, Any]:
         from .settlement import facts
+        from .plot_director import view as director_view
+        from .adjudication import view as adjudication_view
         return {
             "turn": self.turn,
             "appearance_revision": self.appearance_revision(),
@@ -963,7 +982,9 @@ class GameSession:
             "opening": self.pack.opening.model_dump(mode="json"),
             "opening_generated": self.opening_event() is not None,
             "narrative_status": self.narrative_status(),
-            "events": self.ledger.to_dicts(),
+            "events": player_events(self.ledger.events),
+            "director": director_view(self),
+            "adjudication": adjudication_view(self),
             "replay": self.verify(),
             "fields": [f.model_dump(mode="json") for f in self.pack.state.fields],
             "layout": self.pack.ui.model_dump(mode="json"),

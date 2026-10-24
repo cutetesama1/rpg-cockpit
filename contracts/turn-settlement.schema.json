@@ -18,6 +18,7 @@
             "update_portrait",
             "set_value",
             "record_fact",
+            "update_worldbook",
             "roll"
           ],
           "title": "Name",
@@ -50,11 +51,63 @@
       ],
       "title": "Operation",
       "type": "object"
+    },
+    "Pending": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "visibility": {
+          "default": "public",
+          "enum": [
+            "public",
+            "internal"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "operations": {
+          "items": {
+            "$ref": "#/$defs/Operation"
+          },
+          "maxItems": 20,
+          "title": "Operations",
+          "type": "array"
+        },
+        "status_patch": {
+          "additionalProperties": true,
+          "title": "Status Patch",
+          "type": "object"
+        }
+      },
+      "required": [
+        "title",
+        "reason"
+      ],
+      "title": "Pending",
+      "type": "object"
     }
   },
   "additionalProperties": false,
   "properties": {
     "checked": {
+      "description": "逐项检查八个领域后填写：stats,status,inventory,flags,skills,wardrobe,scene,action",
       "items": {
         "type": "string"
       },
@@ -75,11 +128,21 @@
       "type": "object"
     },
     "uncertain": {
+      "description": "无法从正文或目录确定的事项及原因；不对这些事项执行猜测操作，不阻止其他已确认变化提交",
       "items": {
         "type": "string"
       },
       "maxItems": 20,
       "title": "Uncertain",
+      "type": "array"
+    },
+    "pending": {
+      "description": "有歧义且需要玩家裁定的事项；草案不自动执行，不得与 operations 重复结算",
+      "items": {
+        "$ref": "#/$defs/Pending"
+      },
+      "maxItems": 20,
+      "title": "Pending",
       "type": "array"
     }
   },

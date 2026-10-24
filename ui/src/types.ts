@@ -126,6 +126,7 @@ export interface LlmRoles {
   settler: LlmProfile;
   arbiter: LlmProfile;
   setup: LlmProfile;
+  director: LlmProfile;
 }
 
 export interface ProviderView {
@@ -286,7 +287,22 @@ export interface NarratorStatus {
   notes?: Record<string, string>;
 }
 
+export interface DirectorConfig {
+  enabled: boolean; use_narrator_model: boolean; on_scene_change: boolean;
+  on_milestone: boolean; on_clue_change: boolean; min_turn_gap: number; max_candidates: number;
+}
+export interface PlotClue { id: string; title: string; summary: string; status: "open" | "resolved" | "paused"; visibility: "public" | "internal"; }
+export interface CheckResult { event_id: string; kind: "dice" | "probability" | "certain"; dice?: string; total?: number; rolls?: number[]; kept?: number[]; passed?: boolean | null; }
+export interface DirectorView {
+  pack_id?: string; config: DirectorConfig; pending_manual: boolean; triggered_count: number;
+  clues: PlotClue[]; last_run: { turn: number; reason: string; failed: boolean } | null;
+  events: { id: string; title: string; outcome: string; visibility: "public" | "internal"; resolution: CheckResult | null }[];
+  audit?: EventRecord[];
+}
+
 export interface Status {
+  director?: DirectorView;
+  adjudication?: AdjudicationView;
   appearance_revision?: string;
   story_facts?: Record<string,{title:string;value:Scalar}>;
   turn: number;
@@ -336,6 +352,10 @@ export interface OpeningResult {
 export type SkillTarget = "self" | "enemy" | "scene" | "item" | "npc";
 
 export interface WorldbookEntry {
+  case_sensitive?: boolean;
+  selective?: boolean;
+  secondary_keywords?: string[];
+  insertion_order?: number;
   id: string;
   title: string;
   content: string;
@@ -654,3 +674,31 @@ export interface WorldSkillCatalog {
   ok: boolean; editable: boolean; selection: { method?: string; model?: string; reason?: string; initial_count?: number; pool_count?: number; warnings?: string[] };
   skills: CatalogEntry[];
 }
+
+export interface AdjudicationChange { domain: string; field: string; before: unknown; after: unknown }
+export interface AdjudicationItem {
+  id: string; title: string; reason: string; evidence: string; visibility: "public" | "internal";
+  operations: Record<string,unknown>[]; status_patch: Record<string,unknown>; source_turn: number;
+  state: "pending" | "deferred" | "confirmed" | "rejected"; version: number; stale: boolean; can_undo: boolean;
+}
+export interface AdjudicationView {
+  pack_id: string; revision: string; items: AdjudicationItem[]; pending_count: number; deferred_count: number;
+  history: { seq: number; id: string; action: string; reason: string; ts: string; before_state: string; title: string; source_withdrawn: boolean; changes: AdjudicationChange[] }[];
+}
+export interface DecisionDraft {
+  request_id: string; revision: string; action: "confirm" | "modify" | "reject" | "defer" | "resume" | "undo";
+  reason?: string; operations?: Record<string,unknown>[]; status_patch?: Record<string,unknown>; preview_token?: string;
+}
+export interface DecisionPreview {
+  pack_id: string; revision: string; preview_token: string; changes: AdjudicationChange[]; no_state_change: boolean;
+}
+
+export interface CardOptions { title:string; id:string; user_name:string; role:'npc'|'player'; greeting:number; include:string[] }
+export interface CardUpload { filename:string; data_base64:string }
+export interface CardPreview {
+  spec:string; spec_version:string; format:string; name:string; title:string; id:string; creator:string; creator_notes:string; character_version:string;
+  warnings:string[]; unsupported:{path:string;message:string}[]; raw_preserved:boolean; source_sha256:string; preview_token:string; active_pack_id:string;
+  greetings:{index:number;label:string;text:string}[]; selected_greeting:number; mappings:{source:string;target:string;enabled:boolean}[];
+  entry_mapping:{source_index:number;target_id:string|null}[]; worldbook_count:number; prompts:Record<string,string>; raw:Record<string,unknown>;
+}
+export interface CurrentCard { pack_id:string; card:{name:string; spec:string; creator:string; creator_notes:string; [key:string]:unknown}|null }

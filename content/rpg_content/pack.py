@@ -136,6 +136,8 @@ def load_pack(
 
     pack = ContentPack(
         manifest=manifest,
+        personality_roster=(_read_json(root / 'personality-npcs.json') if (root / 'personality-npcs.json').exists() else {}),
+        character_card=(_read_json(root / "character-card.json") if (root / "character-card.json").exists() else {}),
         state=state,
         skills=skills,
         skill_catalog=catalog,

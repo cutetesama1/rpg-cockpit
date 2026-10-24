@@ -287,6 +287,25 @@ EventKind = Literal[
     "settlement.checked",
     "settlement.rejected",
     "settlement.warning",
+    "adjudication.proposed",
+    "adjudication.decided",
+    "dice.seeded",
+    "dice.resolved",
+    "director.configured",
+    "director.requested",
+    "director.proposed",
+    "director.triggered",
+    "director.resolved",
+    "director.checkpoint",
+    "director.failed",
+    "plot.clue.updated",
+    "npc.roster.configured",
+    "npc.import.receipt",
+    "npc.entrance.planned",
+    "npc.introduced",
+    "worldbook.updated",
+    "worldbook.rejected",
+    "worldbook.proposal.receipt",
     "status.updated",
     "story.fact",
     "world.configured",
@@ -382,6 +401,10 @@ class WorldbookEntry(BaseModel):
     enabled: bool = True
     priority: int = 0
     category: str = ""
+    case_sensitive: bool = True
+    selective: bool = False
+    secondary_keywords: list[str] = Field(default_factory=list)
+    insertion_order: float = Field(default=0,allow_inf_nan=False)
 
 
 class ItemSpec(BaseModel):
@@ -617,6 +640,14 @@ class ContentPack(BaseModel):
     ui: UiLayout = Field(default_factory=UiLayout)
     # P7：可选立绘配置；没有就不显示（老包不受影响）
     sprites: Optional[SpriteSheet] = None
+    personality_roster: dict[str, Any] = Field(default_factory=dict)
+    character_card: dict[str, Any] = Field(default_factory=dict)
+    @field_validator('personality_roster')
+    @classmethod
+    def validate_personality_roster(cls,value):
+        from .personality_npcs import Roster
+        return Roster.model_validate(value).model_dump(mode='json')
+
     asset_pack: str | None = None
     wardrobe: Optional[WardrobeConfig] = None
     opening: OpeningScene = Field(
@@ -737,7 +768,7 @@ class SettlerOutput(BaseModel):
 # --------------------------------------------------------------------------
 # 7. LlmRole / Router
 # --------------------------------------------------------------------------
-LlmRoleName = Literal["narrator", "settler", "arbiter", "setup"]
+LlmRoleName = Literal["narrator", "settler", "arbiter", "setup", "director"]
 
 
 class LlmProfile(BaseModel):
@@ -763,6 +794,7 @@ class LlmRolesConfig(BaseModel):
     settler: LlmProfile = Field(default_factory=lambda: LlmProfile(temperature=0.0))
     arbiter: LlmProfile = Field(default_factory=LlmProfile)
     setup: LlmProfile = Field(default_factory=LlmProfile)
+    director: LlmProfile = Field(default_factory=lambda: LlmProfile(temperature=0.3))
 
 
 class ProviderSettings(BaseModel):

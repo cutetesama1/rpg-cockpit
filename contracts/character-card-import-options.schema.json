@@ -1,0 +1,59 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Title",
+      "type": "string"
+    },
+    "id": {
+      "default": "",
+      "maxLength": 64,
+      "title": "Id",
+      "type": "string"
+    },
+    "user_name": {
+      "default": "你",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "User Name",
+      "type": "string"
+    },
+    "role": {
+      "default": "npc",
+      "enum": [
+        "npc",
+        "player"
+      ],
+      "title": "Role",
+      "type": "string"
+    },
+    "greeting": {
+      "default": 0,
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Greeting",
+      "type": "integer"
+    },
+    "include": {
+      "items": {
+        "enum": [
+          "description",
+          "personality",
+          "scenario",
+          "examples",
+          "worldbook",
+          "system_prompt",
+          "post_history_instructions"
+        ],
+        "type": "string"
+      },
+      "maxItems": 7,
+      "title": "Include",
+      "type": "array"
+    }
+  },
+  "title": "CardOptions",
+  "type": "object"
+}

@@ -24,6 +24,8 @@ const TOOL_KINDS = new Set([
   "llm.usage",
   "scene.entered",
   "clothing.checked",
+  "director.triggered",
+  "director.resolved",
   "settlement.checked",
   "settlement.rejected",
   "settlement.warning",
@@ -53,9 +55,11 @@ function describe(event: EventRecord): string {
       return `习得技能 ${String(skill.name ?? skill.id ?? "")}${cost ? ` · 消耗 ${cost}` : ""}`;
     }
     case "roll.resolved": {
-      const rolled = (event.rolls?.[0] ?? {}) as { dice?: string; total?: number };
-      return `掷骰 ${rolled.dice ?? ""} → ${rolled.total ?? "?"}`;
+      const rolled = (event.rolls?.[0] ?? payload) as { dice?: string; total?: number; passed?: boolean; kind?: string };
+      return rolled.kind === "probability" ? `概率检定 → ${rolled.passed ? "成功" : "失败"}` : `掷骰 ${rolled.dice ?? ""} → ${rolled.total ?? "?"}`;
     }
+    case "director.triggered": return `导演事件触发 · ${String(payload.title ?? "")}`;
+    case "director.resolved": return `导演结果确定 · ${String(payload.title ?? "")} · ${String(payload.outcome ?? "")}`;
     case "tool.applied": {
       const tool = String(payload.tool ?? "tool");
       const changes = payload.changes as Record<string, Change> | undefined;

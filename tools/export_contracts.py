@@ -12,9 +12,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "core"))
 
 from rpg_core import contracts as c  # noqa: E402
-from rpg_core.settlement import Proposal  # noqa: E402
+from rpg_core.settlement import Proposal
+from rpg_core.personality_npcs import Roster
+from rpg_core.dynamic_worldbook import Change  # noqa: E402
 
 CONTRACTS = {
+    "personality-npcs": Roster,
+    "dynamic-worldbook-change": Change,
     "state-schema": c.StateSchema,
     "turn-settlement": Proposal,
     "mutator": c.MutatorSpec,

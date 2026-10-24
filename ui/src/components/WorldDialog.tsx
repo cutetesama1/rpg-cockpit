@@ -1,9 +1,11 @@
+import PersonalityNpcPanel from "./PersonalityNpcPanel";
+import DynamicWorldbookPanel from "./DynamicWorldbookPanel";
 import StateEditor from "./StateEditor";
 import { useEffect, useState } from "react";
 import { cloneGame, savePrompts, saveSkills, saveWorldbook, saveWorldState } from "../api";
 import type { WorldSkill, WorldView, WorldbookEntry } from "../types";
 
-type Tab = "worldbook" | "skills" | "prompts" | "state";
+type Tab = "npcs" | "dynamic" | "worldbook" | "skills" | "prompts" | "state";
 
 interface Props {
   open: boolean;
@@ -202,6 +204,8 @@ export default function WorldDialog({
         )}
 
         <nav className="tab-row">
+          <button className={tab==="npcs"?"tab active":"tab"} onClick={()=>setTab("npcs")}>人格 NPC</button>
+          <button className={tab==="dynamic"?"tab active":"tab"} onClick={()=>setTab("dynamic")}>动态世界书</button>
           <button className={tab === "state" ? "tab active" : "tab"} onClick={() => setTab("state")}>基础数值</button>
           <button className={tab === "worldbook" ? "tab active" : "tab"} onClick={() => setTab("worldbook")}>
             世界书 <span className="tab-count">{entries.length}</span>
@@ -217,6 +221,8 @@ export default function WorldDialog({
         {message && <p className="modal-message ok">{message}</p>}
         {error && <p className="modal-message bad">{error}</p>}
 
+        {tab === "npcs" && <div className="editor-body"><PersonalityNpcPanel key={world.pack_id} onChanged={()=>{void onReload();onGameChanged();}}/></div>}
+        {tab === "dynamic" && <div className="editor-body"><DynamicWorldbookPanel key={world.pack_id}/></div>}
         {tab === "state" && stateConfig && <div className="editor-body"><StateEditor value={stateConfig} onChange={setStateConfig} current={currentValues} onCurrent={setCurrentValues} disabled={!editable||busy}/><div className="modal-actions"><button className="primary" disabled={!editable||busy} onClick={()=>void save("state")}>{busy?"保存中…":"保存基础数值"}</button></div></div>}
         {tab === "worldbook" && (
           <div className="editor-body">
@@ -431,7 +437,7 @@ export default function WorldDialog({
 
         <footer className="modal-foot">
           <span>{editable ? "这是你自己的游戏，改动直接写进内容包目录。" : "内置包只读：复制后编辑。"}</span>
-          <span>保存后会话会重置到开场，让新设定立刻生效。</span>
+          <span>保存保留当前进度；世界记忆草案需在裁定中心确认。</span>
         </footer>
       </div>
     </div>

@@ -97,7 +97,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.7.3-builder"
+API_VERSION = "0.99beta-builder"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -639,8 +639,8 @@ def get_state() -> dict[str, Any]:
 def submit_action(body: ActionBody) -> dict[str, Any]:
     with manager.lock:
         result = manager.session.submit_action(body.action,body.request_id)
-        if result.ok:
-            manager.auto_save()
+        # Preserve private draw receipts even when a turn is rolled back.
+        manager.auto_save()
     return asdict(result)
 
 
@@ -681,8 +681,7 @@ def _session_stream(*, action: dict[str, Any] | None = None, request_id: str | N
                             payload = {**result, "status": session.status()}
                         else:
                             result = session.submit_action(action,request_id)
-                            if result.ok:
-                                manager.auto_save()
+                            manager.auto_save()
                             payload = asdict(result)
                     finally:
                         session.on_event, session.on_narrative = previous
@@ -1193,6 +1192,336 @@ def test_settings(body: SettingsUpdate | None = None) -> dict[str, Any]:
         }
     except Exception as exc:  # noqa: BLE001 - 测试端点把错误原样返回
         return {"ok": False, "error": str(exc)}
+
+
+# -- Optional plot director and deterministic dice ---------------------------
+from rpg_core.plot_director import DirectorConfig,PlotClue,configure as configure_director,view as director_view,put_clue,request_once
+from rpg_core.dice import Check,resolve as resolve_dice
+
+class DirectorUpdateBody(BaseModel):
+    pack_id: str
+    config: DirectorConfig
+
+class DirectorRequestBody(BaseModel):
+    pack_id: str
+
+class DirectorClueBody(BaseModel):
+    pack_id: str
+    clue: PlotClue
+
+class DiceBody(BaseModel):
+    pack_id: str
+    event_id: str = Field(min_length=1,max_length=160)
+    check: Check
+
+def require_current_pack(pack_id):
+    if pack_id!=manager.active_pack:raise HTTPException(409,"游戏已切换，请重新读取当前游戏")
+
+@app.get("/api/director")
+def get_director(include_internal: bool=False):
+    with manager.lock:return {"pack_id":manager.active_pack,**director_view(manager.session,include_internal=include_internal)}
+
+@app.put("/api/director")
+def set_director(body:DirectorUpdateBody):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        try:result=configure_director(manager.session,body.config)
+        except ValueError as exc:raise HTTPException(400,str(exc)) from None
+        manager.auto_save()
+        return {"pack_id":manager.active_pack,**result}
+
+@app.post("/api/director/request")
+def ask_director(body:DirectorRequestBody):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        try:result=request_once(manager.session)
+        except ValueError as exc:raise HTTPException(400,str(exc)) from None
+        manager.auto_save();return {"pack_id":manager.active_pack,**result}
+
+@app.put("/api/director/clues")
+def update_director_clue(body:DirectorClueBody):
+    with manager.lock:
+        require_current_pack(body.pack_id);put_clue(manager.session,body.clue);manager.auto_save()
+        return {"pack_id":manager.active_pack,**director_view(manager.session)}
+
+@app.post("/api/dice/roll")
+def manual_dice(body:DiceBody):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        if body.event_id.startswith(('director:','settlement:')):raise HTTPException(400,"手动检定不能使用系统事件命名空间")
+        try:result,reused=resolve_dice(manager.session,'manual:'+body.event_id,body.check,turn=0)
+        except ValueError as exc:raise HTTPException(409,str(exc)) from None
+        if not any(e.kind=='roll.resolved' and e.payload.get('event_id')==result['event_id'] for e in manager.session.ledger.events):
+            manager.session._record(turn=0,kind='roll.resolved',payload={**result,'origin':'manual'})
+        manager.auto_save();return {"result":result,"reused":reused}
+
+
+# -- Player adjudication center -------------------------------------------
+from rpg_core.adjudication import Decision,DecisionError,view as adjudication_view,preview as adjudication_preview,act as adjudication_act
+
+class AdjudicationBody(BaseModel):
+    model_config = {'extra': 'forbid'}
+    pack_id: str
+    include_internal: bool=False
+    decision: Decision
+
+@app.get('/api/adjudications/editor')
+def get_adjudication_editor():
+    from rpg_core.adjudication_editor import editor_catalog
+    with manager.lock:return editor_catalog(manager.session)
+
+@app.get('/api/adjudications')
+def get_adjudications(include_internal: bool=False):
+    with manager.lock:return adjudication_view(manager.session,include_internal=include_internal)
+
+@app.post('/api/adjudications/{item_id}/preview')
+def preview_adjudication(item_id: str,body: AdjudicationBody):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        try:return adjudication_preview(manager.session,item_id,body.decision,include_internal=body.include_internal)
+        except (ValueError,DecisionError) as exc:raise HTTPException(getattr(exc,'status',400),str(exc)) from None
+
+@app.post('/api/adjudications/{item_id}/decide')
+def decide_adjudication(item_id: str,body: AdjudicationBody):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        try:result=adjudication_act(manager.session,item_id,body.decision,include_internal=body.include_internal)
+        except (ValueError,DecisionError) as exc:raise HTTPException(getattr(exc,'status',400),str(exc)) from None
+        manager.auto_save()
+        return {**result,**adjudication_view(manager.session,include_internal=body.include_internal)}
+
+
+# -- Character Card V2/V3 ------------------------------------------------
+from rpg_content.character_cards import CardOptions,CardError,MAX_FILE,preview_card,create_card_pack
+
+class CharacterCardBody(BaseModel):
+    model_config={'extra':'forbid'}
+    filename: str=Field(default='',max_length=255)
+    data_base64: str=Field(min_length=1,max_length=28*1024*1024)
+    options: CardOptions=Field(default_factory=CardOptions)
+
+class CharacterCardImportBody(CharacterCardBody):
+    request_id: str=Field(min_length=1,max_length=120,pattern=r'^[a-zA-Z0-9_.:-]+$')
+    preview_token: str=Field(min_length=64,max_length=64)
+    expected_pack_id: str
+
+def _card_bytes(body):
+    try:raw=base64.b64decode(body.data_base64,validate=True)
+    except (ValueError,binascii.Error):raise HTTPException(400,'文件 Base64 编码不合法') from None
+    if len(raw)>MAX_FILE:raise HTTPException(400,'角色卡文件不能超过 20 MB')
+    return raw
+
+@app.post('/api/character-cards/preview')
+def preview_character_card(body:CharacterCardBody):
+    try:result=preview_card(_card_bytes(body),body.filename,body.options)
+    except ValueError as exc:raise HTTPException(400,str(exc)) from None
+    with manager.lock:return {**result,'active_pack_id':manager.active_pack}
+
+@app.post('/api/character-cards/import')
+def import_character_card(body:CharacterCardImportBody):
+    raw=_card_bytes(body)
+    try:preview=preview_card(raw,body.filename,body.options)
+    except ValueError as exc:raise HTTPException(400,str(exc)) from None
+    if preview['preview_token']!=body.preview_token:raise HTTPException(409,'文件或映射选项已变化，请重新预览后导入')
+    with manager.lock:
+        # Repeated network requests return their existing pack without resetting
+        # a game or switching away from a newer user choice.
+        for path in manager.user_dir.glob('*/character-card.json'):
+            try:metadata=json.loads(path.read_text(encoding='utf-8'))
+            except (OSError,ValueError):continue
+            if not isinstance(metadata,dict):continue
+            if metadata.get('request_id')==body.request_id:
+                if metadata.get('request_hash')!=body.preview_token:raise HTTPException(409,'该请求编号已用于不同导入')
+                return {'ok':True,'reused':True,'imported_pack_id':path.parent.name,'status':manager.session.status(),**manager.library_view()}
+        require_current_pack(body.expected_pack_id)
+        previous=(manager.pack_dir,manager.session,dict(manager.library))
+        from rpg_content.library import library_path
+        library_file=library_path();previous_library=library_file.read_bytes() if library_file.exists() else None
+        target=None
+        try:
+            target,preview=create_card_pack(raw,body.filename,body.options,manager.user_dir,body.request_id)
+            manager._activate(target)
+            manager.auto_save()
+        except (ValueError,PackError,OSError) as exc:
+            manager.pack_dir,manager.session,manager.library=previous
+            if target is not None and target.resolve().is_relative_to(manager.user_dir.resolve()) and target.resolve()!=manager.user_dir.resolve():shutil.rmtree(target)
+            if previous_library is not None:library_file.write_bytes(previous_library)
+            elif library_file.exists():library_file.unlink()
+            raise HTTPException(400,str(exc)) from None
+        return {'ok':True,'reused':False,'imported_pack_id':manager.active_pack,'warnings':preview['warnings'],'status':manager.session.status(),**manager.library_view()}
+
+@app.get('/api/character-cards/current')
+def current_character_card():
+    with manager.lock:
+        card=manager.session.pack.character_card
+        return {'pack_id':manager.active_pack,'card':{key:card[key] for key in ('name','spec','spec_version','creator','creator_notes','character_version','warnings','unsupported','mappings','options','filename') if key in card} if card else None}
+
+@app.get('/api/character-cards/source')
+def export_character_card(pack_id: str|None=None):
+    with manager.lock:
+        if pack_id is not None:require_current_pack(pack_id)
+        card=manager.session.pack.character_card
+        if not card or 'raw' not in card:raise HTTPException(404,'当前游戏没有角色卡原始数据')
+        return JSONResponse(card['raw'],headers={'Content-Disposition':'attachment; filename="character-card.json"'})
+
+@app.get('/api/character-cards/source-file')
+def export_original_character_card(pack_id: str|None=None):
+    with manager.lock:
+        if pack_id is not None:require_current_pack(pack_id)
+        card=manager.session.pack.character_card
+        path=manager.pack_dir/'character-card/source.bin'
+        if not card or not path.is_file():raise HTTPException(404,'原始二进制文件不可用；仍可导出保留的 JSON')
+        return FileResponse(path,filename=card.get('filename') or 'character-card.bin',media_type='application/octet-stream')
+
+
+# -- Personality-only NPCs and event-sourced world memory -----------------
+from rpg_core.personality_npcs import Roster,PersonalityNpc,extract_personality,view as npc_view,roster_for
+from rpg_core.dynamic_worldbook import Change as WorldMemoryChange,view as memory_view
+from rpg_core.adjudication import digest as data_digest,propose as propose_decision
+from rpg_core.settlement import Pending as PendingDecision,Operation as SettlementOperation
+
+class PersonalityFile(BaseModel):
+    model_config={'extra':'forbid'}
+    filename: str=Field(max_length=255)
+    data_base64: str=Field(min_length=1,max_length=28*1024*1024)
+
+class PersonalityPreview(BaseModel):
+    model_config={'extra':'forbid'}
+    files: list[PersonalityFile]=Field(min_length=1,max_length=10)
+    pack_id: str
+
+class PersonalityImport(PersonalityPreview):
+    request_id: str=Field(min_length=1,max_length=120,pattern=r'^[a-zA-Z0-9_.:-]+$')
+    preview_token: str=Field(min_length=64,max_length=64)
+    revision: str
+    npcs: list[PersonalityNpc]=Field(min_length=1,max_length=10)
+
+class PersonalityConfig(BaseModel):
+    model_config={'extra':'forbid'}
+    pack_id: str
+    revision: str
+    request_id: str=Field(min_length=1,max_length=120,pattern=r'^[a-zA-Z0-9_.:-]+$')
+    roster: Roster
+
+def _personality_preview(body):
+    items=[];sources={};total=0
+    for file in body.files:
+        raw=_card_bytes(file);total+=len(raw)
+        if total>60*1024*1024:raise ValueError('本批角色卡总大小不能超过60 MB')
+        item,original=extract_personality(raw,file.filename);key=item['npc']['id']
+        if key in sources:raise ValueError('同一角色卡重复选择，请只保留一份')
+        items.append(item);sources[key]=(raw,original,file.filename)
+    token=data_digest([body.pack_id,[(i['filename'],i['npc']['source_hash']) for i in items]])
+    return items,sources,token
+
+@app.get('/api/personality-npcs')
+def get_personality_npcs():
+    with manager.lock:return {**npc_view(manager.session),'editable':manager.editable()}
+
+@app.post('/api/personality-npcs/preview')
+def preview_personality_npcs(body:PersonalityPreview):
+    try:items,_,token=_personality_preview(body)
+    except ValueError as exc:raise HTTPException(400,str(exc)) from None
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        return {'items':items,'preview_token':token,**npc_view(manager.session),'editable':manager.editable()}
+
+def _npc_receipt(body,request_hash):
+    for event in manager.session.ledger.events:
+        if event.kind=='npc.import.receipt' and event.payload.get('request_id')==body.request_id:
+            if event.payload['request_hash']!=request_hash:raise HTTPException(409,'该请求编号已用于不同人物编辑')
+            return {'reused':True,**npc_view(manager.session),'editable':manager.editable()}
+    if body.revision!=npc_view(manager.session)['revision']:raise HTTPException(409,'候场人物列表已变化，请刷新后重新操作')
+    return None
+
+def _write_roster(body,roster,request_hash,sources=None):
+    from rpg_content.library import _replace_and_validate
+    writes={manager.pack_dir/'personality-npcs.json':json.dumps(roster.model_dump(mode='json'),ensure_ascii=False)}
+    for npc_id,(raw,original,filename) in (sources or {}).items():
+        # Source bytes and unsupported fields are archived, never sent to a model.
+        directory=manager.pack_dir/'personality-cards'/npc_id
+        writes[directory/'source.bin']=raw
+        writes[directory/'original.json']=json.dumps(original,ensure_ascii=False)
+        writes[directory/'metadata.json']=json.dumps({'filename':filename},ensure_ascii=False)
+    # _replace_and_validate supports text and rolls all files back on validation failure.
+    _replace_and_validate(manager.pack_dir,writes)
+    manager.session.pack.personality_roster=roster.model_dump(mode='json')
+    manager.session._record(turn=0,kind='npc.roster.configured',payload={'roster':roster.model_dump(mode='json'),'visibility':'internal'})
+    manager.session._record(turn=0,kind='npc.import.receipt',payload={'request_id':body.request_id,'request_hash':request_hash,'visibility':'internal'})
+    if roster.enabled:
+        from rpg_core.dice import ensure_seed
+        ensure_seed(manager.session)
+    manager.auto_save()
+    return {'reused':False,**npc_view(manager.session),'editable':manager.editable()}
+
+@app.post('/api/personality-npcs/import')
+def import_personality_npcs(body:PersonalityImport):
+    try:items,sources,token=_personality_preview(body)
+    except ValueError as exc:raise HTTPException(400,str(exc)) from None
+    if token!=body.preview_token:raise HTTPException(409,'角色卡文件已变化，请重新预览')
+    expected={i['npc']['id']:i['npc'] for i in items}
+    if any(n.id not in expected or n.source_hash!=expected[n.id]['source_hash'] for n in body.npcs):raise HTTPException(400,'人物必须来自本批预览的角色卡')
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        if not manager.editable():raise HTTPException(400,'内置游戏只读，请先复制成自己的游戏')
+        request_hash=data_digest(body.model_dump(mode='json'));receipt=_npc_receipt(body,request_hash)
+        if receipt:return receipt
+        existing={n.id:n for n in roster_for(manager.session).npcs};existing.update({n.id:n for n in body.npcs})
+        try:
+            roster=Roster(enabled=True,npcs=list(existing.values()))
+            return _write_roster(body,roster,request_hash,{n.id:sources[n.id] for n in body.npcs})
+        except (ValueError,OSError,PackError) as exc:raise HTTPException(400,str(exc)) from None
+
+@app.put('/api/personality-npcs')
+def configure_personality_npcs(body:PersonalityConfig):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        if not manager.editable():raise HTTPException(400,'内置游戏只读，请先复制成自己的游戏')
+        request_hash=data_digest(body.model_dump(mode='json'));receipt=_npc_receipt(body,request_hash)
+        if receipt:return receipt
+        old={n.id:n.source_hash for n in roster_for(manager.session).npcs}
+        if any(old.get(n.id)!=n.source_hash for n in body.roster.npcs):raise HTTPException(400,'新增人物请先导入角色卡，不能伪造来源')
+        try:return _write_roster(body,body.roster,request_hash)
+        except (ValueError,OSError,PackError) as exc:raise HTTPException(400,str(exc)) from None
+
+@app.get('/api/personality-npcs/source/{npc_id}')
+def export_personality_source(npc_id:str,pack_id:str):
+    with manager.lock:
+        require_current_pack(pack_id)
+        if npc_id not in {n.id for n in roster_for(manager.session).npcs}:raise HTTPException(404,'未找到角色卡')
+        path=manager.pack_dir/'personality-cards'/npc_id/'original.json'
+        if not path.is_file():raise HTTPException(404,'原始卡片不在本设备；存档保留的人格仍可使用')
+        return JSONResponse(json.loads(path.read_text(encoding='utf-8')),headers={'Content-Disposition':'attachment; filename="personality-card-original.json"'})
+
+class MemoryProposal(BaseModel):
+    model_config={'extra':'forbid'}
+    pack_id: str
+    request_id: str=Field(min_length=1,max_length=120,pattern=r'^[a-zA-Z0-9_.:-]+$')
+    change: WorldMemoryChange
+    reason: str=Field(min_length=1,max_length=500)
+
+@app.get('/api/world/dynamic')
+def get_dynamic_worldbook(include_internal:bool=False):
+    with manager.lock:return memory_view(manager.session,include_internal=include_internal)
+
+@app.post('/api/world/dynamic/propose')
+def propose_world_memory(body:MemoryProposal):
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        request_hash=data_digest(body.model_dump(mode='json'))
+        for e in manager.session.ledger.events:
+            if e.kind=='worldbook.proposal.receipt' and e.payload.get('request_id')==body.request_id:
+                if e.payload['request_hash']!=request_hash:raise HTTPException(409,'请求编号已用于不同世界书草案')
+                return {'ok':True,'reused':True}
+        from rpg_core.dynamic_worldbook import stage_change
+        try:_,payload=stage_change(manager.session,body.change.model_dump(exclude_none=True),evidence=body.reason,turn=-1)
+        except ValueError as exc:raise HTTPException(400,str(exc)) from None
+        entry=payload['entry'];visibility='internal' if entry['visibility']=='internal' or (payload['before'] or {}).get('visibility')=='internal' else 'public'
+        pending=PendingDecision(title='世界书：'+entry['title'],reason=body.reason,evidence=body.reason,visibility=visibility,
+            operations=[SettlementOperation(name='update_worldbook',args=body.change.model_dump(exclude_none=True),evidence=body.reason)])
+        propose_decision(manager.session,manager.session.turn,pending,len(manager.session.ledger.events),origin='world_builder')
+        manager.session._record(turn=0,kind='worldbook.proposal.receipt',payload={'request_id':body.request_id,'request_hash':request_hash,'visibility':'internal'})
+        manager.auto_save();return {'ok':True,'reused':False,'message':'已加入裁定中心，请预览差异后确认'}
 
 
 if UI_DIST.is_dir():

@@ -100,7 +100,7 @@ def merge_update(
         merged_roles = dict(merged.get("roles", {}))
         if "separated" in roles:
             merged_roles["separated"] = roles["separated"]
-        for role_name in ("narrator", "settler", "arbiter", "setup"):
+        for role_name in ("narrator", "settler", "arbiter", "setup", "director"):
             incoming_role = roles.get(role_name)
             if not isinstance(incoming_role, dict):
                 continue

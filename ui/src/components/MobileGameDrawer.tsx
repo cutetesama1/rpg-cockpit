@@ -21,6 +21,7 @@ interface Props {
   onPickSkill: (id: string) => void;
   onExtra: (id: ExtraAction) => void;
   onSettings: () => void;
+  onAdjudication: () => void;
   onLibrary: () => void;
   onWorld: () => void;
   onCreate: () => void;
@@ -62,6 +63,7 @@ export default function MobileGameDrawer(props: Props) {
         <section className="panel panel-compact mobile-extra-requests"><h2>本回合附加</h2><div>{([{ id: "inspect", label: "审视" }, { id: "status", label: "详情" }, { id: "task", label: "任务" }] as const).map(item => <label key={item.id}><input type="checkbox" checked={props.extras[item.id]} disabled={props.busy} onChange={() => props.onExtra(item.id)} />{item.label}</label>)}</div></section>
         <section className="panel panel-compact mobile-session-summary"><h2>当前进度</h2><p>回合 {props.status.turn} · {props.status.scene.title || props.status.scene.id}</p><p>{usage?.calls ?? 0} 次模型调用 · ${Number(usage?.cost_usd ?? 0).toFixed(4)}</p></section>
         <nav className="mobile-game-links" aria-label="游戏功能">
+          <button type="button" onClick={() => navigate(props.onAdjudication)}><UiIcon name="book" />玩家裁定{props.status.adjudication?.pending_count ? ` · ${props.status.adjudication.pending_count}` : ""}</button>
           <button type="button" onClick={() => navigate(props.onSaves)}><UiIcon name="save" />存档读档</button>
           <button type="button" onClick={() => navigate(props.onLibrary)}><UiIcon name="library" />游戏库</button>
           <button type="button" onClick={() => navigate(props.onWorld)}><UiIcon name="book" />世界构筑</button>
