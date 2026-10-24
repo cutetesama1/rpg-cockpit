@@ -22,6 +22,7 @@ const TOOL_KINDS = new Set([
   "skill.used",
   "skill.learned",
   "llm.usage",
+  "correction.applied",
   "scene.entered",
   "clothing.checked",
   "director.triggered",
@@ -86,6 +87,8 @@ function describe(event: EventRecord): string {
       const changed = payload.changed_fields as string[] | undefined;
       return changed?.length ? `衣物结算 · 已更新 ${changed.length} 项` : "衣物结算 · 保持当前衣着";
     }
+    case "correction.applied":
+      return payload.mode === "narrative" ? "玩家纠正 · 叙述已修订" : `玩家纠正 · ${Object.keys((payload.changes || {}) as object).length} 项数值变化`;
     case "narrative.generated":
       return "叙事生成";
     case "scene.entered": {

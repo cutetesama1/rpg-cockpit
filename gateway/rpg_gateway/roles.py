@@ -31,6 +31,8 @@ class LlmRouter:
         self.providers = providers
 
     def profile(self, role: str) -> LlmProfile:
+        if role == "corrector" and self.config.corrector is None:
+            role = "settler" if self.separated else "narrator"
         try:
             return getattr(self.config, role)
         except AttributeError as exc:
@@ -62,7 +64,7 @@ class LlmRouter:
             # max_tokens <= 0 表示不限制：完全不传给端点，避免截断长叙事
             **({"max_tokens": profile.max_tokens} if profile.max_tokens > 0 else {}),
         }
-        if backend:
+        if backend or role == "corrector":
             request["temperature"] = 0.0
         if clothing:
             request["temperature"] = 0.0

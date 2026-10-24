@@ -1,9 +1,13 @@
+import type { ReactNode } from "react";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { formatNarrativeDialogue } from "../narrativeFormatting";
 import type { ChatEntry } from "../chatHistory";
 import type { InputMode, Option } from "../types";
 const MODES: { id: InputMode; label: string }[] = [{ id: "action", label: "动作" }, { id: "speech", label: "话语" }, { id: "thought", label: "心理" }];
 interface Props {
+  correctionPanel?: ReactNode;
+  correcting?: boolean;
+  playbackControls?: ReactNode;
   packId: string;
   sendSerial: number;
   entries: ChatEntry[];
@@ -72,10 +76,11 @@ export default function MobileChat(props: Props) {
           {entry.role !== "notice" && <div className="chat-message-meta"><span>{entry.role === "user" ? "你" : entry.turn === 0 ? "开端" : "叙述"}</span>{entry.meta.map((item, i) => <span key={i}>{item}</span>)}{entry.failed && <span>未完成</span>}</div>}
           <p>{entry.role === "assistant" ? formatNarrativeDialogue(entry.text).split("\n").map((line, index, all) => <Fragment key={index}><span className={/^[\s]*[“「『"]/.test(line) ? "chat-dialogue-line" : undefined}>{line}</span>{index < all.length - 1 ? "\n" : ""}</Fragment>) : entry.text}</p>
         </article>)}
-        {props.busy && !props.entries.some(entry => entry.streaming) && <div className="chat-generating" role="status">正在叙述与结算…</div>}
+        {props.busy && !props.correcting && !props.entries.some(entry => entry.streaming) && <div className="chat-generating" role="status">正在叙述与结算…</div>}
       </div>
       {!atBottom && <button type="button" className="chat-to-latest" onClick={latest}>回到最新 ↓</button>}
-      <section className="chat-composer" aria-label="输入行动">
+      {props.playbackControls}
+      {props.correcting ? props.correctionPanel : <section className="chat-composer" aria-label="输入行动">
         {props.error && <p className="chat-error" role="alert">{props.error}</p>}
         {props.ready && <>
           {props.options.length > 0 && <div className="chat-suggestions" role="group" aria-label="AI 建议回答">
@@ -93,7 +98,7 @@ export default function MobileChat(props: Props) {
             <button className="primary chat-send" type="button" disabled={!props.canSend} onClick={props.onSend}>{props.busy ? "等待" : "发送"}</button>
           </div>
         </>}
-      </section>
+      </section>}
     </main>
   );
 }

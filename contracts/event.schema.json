@@ -17,6 +17,7 @@
         "scene.entered",
         "narrative.generated",
         "narrative.checked",
+        "correction.applied",
         "clothing.checked",
         "settlement.checked",
         "settlement.rejected",

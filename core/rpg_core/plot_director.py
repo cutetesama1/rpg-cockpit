@@ -97,7 +97,8 @@ review_turn 至少为 current_turn+2 且不超过 current_turn+50；不确定时
 
 def _valid_events(session):
     cancelled=cancelled_turns(session.ledger.events)
-    return [e for e in session.ledger.events if e.turn not in cancelled]
+    from .corrections import effective_narratives
+    return effective_narratives([e for e in session.ledger.events if e.turn not in cancelled])
 
 
 def config_for(session) -> DirectorConfig:

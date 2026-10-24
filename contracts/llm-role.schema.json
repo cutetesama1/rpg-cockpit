@@ -50,6 +50,17 @@
     },
     "director": {
       "$ref": "#/$defs/LlmProfile"
+    },
+    "corrector": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LlmProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "title": "LlmRolesConfig",

@@ -188,7 +188,7 @@ def preview(session, item_id, decision, *, include_internal=False):
 
 
 def _undo_allowed(session, receipt):
-    authority = {'worldbook.updated', 'npc.introduced', 'npc.roster.configured', 'turn.started', 'turn.committed', 'turn.rolled_back', 'tool.applied', 'skill.used', 'skill.learned', 'scene.entered', 'status.updated', 'story.fact', 'world.configured'}
+    authority = {'correction.applied', 'worldbook.updated', 'npc.introduced', 'npc.roster.configured', 'turn.started', 'turn.committed', 'turn.rolled_back', 'tool.applied', 'skill.used', 'skill.learned', 'scene.entered', 'status.updated', 'story.fact', 'world.configured'}
     cancelled = cancelled_turns(session.ledger.events)
     return not any(e.seq > receipt.seq and e.kind in authority and e.turn not in cancelled for e in session.ledger.events)
 

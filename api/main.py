@@ -62,6 +62,8 @@ from rpg_content.skill_library import (  # noqa: E402
 from rpg_gateway.skill_selection import configure_world_catalog  # noqa: E402
 from rpg_core.contracts import LlmSettings  # noqa: E402
 from rpg_core.runtime import GameSession  # noqa: E402
+from rpg_core.corrections import Correction, apply as apply_correction, undo as undo_correction
+from rpg_core.adjudication import DecisionError
 from rpg_core.saves import (  # noqa: E402
     AUTO_SLOT,
     delete_save,
@@ -97,7 +99,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.99beta-builder"
+API_VERSION = "0.991beta-builder"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -655,7 +657,7 @@ def generate_opening() -> dict[str, Any]:
     return {**result, "status": status}
 
 
-def _session_stream(*, action: dict[str, Any] | None = None, request_id: str | None = None) -> StreamingResponse:
+def _session_stream(*, action: dict[str, Any] | None = None, request_id: str | None = None, correction: Correction | None = None) -> StreamingResponse:
     """Public narrative snapshots are transient; only the final transaction is saved."""
     def generate():
         bus: "queue.Queue[tuple[str, Any]]" = queue.Queue()
@@ -674,7 +676,11 @@ def _session_stream(*, action: dict[str, Any] | None = None, request_id: str | N
                     session.on_event = lambda event: send("event", event)
                     session.on_narrative = lambda update: send("narrative", update)
                     try:
-                        if action is None:
+                        if correction is not None:
+                            result = apply_correction(session, correction)
+                            manager.auto_save()
+                            payload = {**result, "status": session.status()}
+                        elif action is None:
                             result = session.start_opening()
                             if result.get("ok"):
                                 manager.auto_save()
@@ -719,6 +725,39 @@ def submit_action_stream(body: ActionBody) -> StreamingResponse:
 @app.post("/api/opening/stream")
 def generate_opening_stream() -> StreamingResponse:
     return _session_stream()
+
+
+
+@app.post('/api/corrections')
+def correct_ai(body: Correction):
+    with manager.lock:
+        try:
+            result = apply_correction(manager.session, body)
+        except DecisionError as exc:
+            raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+        manager.auto_save()
+        return {**result, 'status': manager.session.status()}
+
+
+@app.post('/api/corrections/stream')
+def correct_ai_stream(body: Correction):
+    return _session_stream(correction=body)
+
+
+class CorrectionUndoBody(BaseModel):
+    pack_id: str
+    receipt_id: int
+
+
+@app.post('/api/corrections/undo')
+def correct_ai_undo(body: CorrectionUndoBody):
+    with manager.lock:
+        try:
+            result = undo_correction(manager.session, body.pack_id, body.receipt_id)
+        except DecisionError as exc:
+            raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+        manager.auto_save()
+        return {**result, 'status': manager.session.status()}
 
 
 @app.post("/api/undo")

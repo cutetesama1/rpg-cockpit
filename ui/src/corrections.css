@@ -1,0 +1,33 @@
+.correction-orb { position: fixed; z-index: 24; right: 25px; bottom: 25px; display: grid; place-items: center; width: 52px; height: 52px; min-height: 52px; padding: 0; border-radius: 50%; border: 1px solid var(--accent, #99cfb5); color: var(--accent, #bce7ce); background: linear-gradient(140deg, #294839f5, #13252bf5); box-shadow: 0 8px 27px #0005, inset 0 0 14px #b7dac111; transition: transform .15s; }
+.correction-orb:hover { transform: translateY(-2px); }
+.correction-panel { min-width: 0; margin-top: 16px; padding: 15px; border-radius: 18px; border: 1px solid #8dbf9f66; background: linear-gradient(135deg, #1e333af5, #111f2af7); box-shadow: 0 9px 28px #0002; animation: correction-in .16s ease-out; }
+.correction-panel header, .correction-panel header > div, .correction-panel footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.correction-panel header > div { justify-content: flex-start; color: #e1d5ac; }
+.correction-panel header button { min-height: 32px; width: 32px; padding: 0; }
+.correction-switch { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; background: #0003; border-radius: 13px; margin: 10px 0; }
+.correction-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border: 1px solid transparent; background: transparent; border-radius: 10px; color: #adbec7; }
+.correction-switch button.on { border-color: #9dcfb65c; background: #426b5c55; color: #e3eee3; box-shadow: 0 2px 7px #0003; }
+.correction-hint { color: #a9bfc3; font-size: 12px; line-height: 1.6; margin: 8px 0; }
+.correction-panel textarea { box-sizing: border-box; display: block; width: 100%; min-width: 0; min-height: 90px; max-height: 22vh; resize: vertical; padding: 13px; border-radius: 13px; border: 1px solid #8ba88f66; background: #08151cbb; color: #edf3e7; font: 15px/1.6 system-ui; }
+.correction-panel textarea:focus { outline: 2px solid #9dcab766; outline-offset: 2px; }
+.correction-persist { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 1.5; margin: 10px 0; color: #b3c7c8; }
+.correction-persist input { width: 16px; height: 16px; margin: 0; accent-color: #9ec6ae; }
+.correction-panel footer { margin-top: 10px; }
+.correction-panel footer span { font-size: 11px; color: #819d9f; }
+.correction-panel footer button { border-radius: 12px; min-height: 40px; }
+.correction-error { color: #efb4a8; font-size: 12px; overflow-wrap: anywhere; }
+.correction-result { padding: 9px 11px; margin-top: 9px; border: 1px solid #8dc6a733; border-radius: 11px; background: #6a9c7d12; color: #b7d3bf; font-size: 12px; max-height: 100px; overflow: auto; }
+.correction-result p { margin: 0 0 5px; }
+.correction-result span { display: inline-block; margin: 0 12px 5px 0; }
+.correction-result button { margin-left: 5px; }
+.playback-toolbar { display: flex; justify-content: flex-end; padding: 4px 9px; gap: 8px; color: #9fbdb0; font-size: 12px; }
+.playback-toolbar button { padding: 3px 10px; border-radius: 20px; min-height: 29px; }
+.desktop-history .chat-message { margin-bottom: 0; }
+.desktop-history .chat-message--notice { font-size: 12px; }
+.app.correcting .suggestions { display: none; }
+.mobile-chat .correction-panel { margin: 0; border-radius: 18px 18px 0 0; padding: 12px max(14px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); align-self: end; box-sizing: border-box; min-height: 0; max-height: min(480px, calc(var(--mobile-viewport-height, 100dvh) - 80px)); overflow-y: auto; }
+body[data-mobile-layout="true"] .correction-orb { bottom: calc(194px + env(safe-area-inset-bottom)); right: 17px; width: 45px; height: 45px; min-height: 45px; }
+body[data-mobile-layout="true"] .playback-toolbar { position: absolute; right: 12px; top: calc(12px + env(safe-area-inset-top)); z-index: 2; border-radius: 20px; background: #112127e8; }
+body[data-mobile-layout="true"] .correction-panel textarea { font-size: 16px; max-height: 19vh; }
+@keyframes correction-in { from { opacity: .4; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .correction-panel { animation: none; } .correction-orb { transition: none; } }

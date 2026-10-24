@@ -45,6 +45,8 @@ export interface ThemeSettings {
   fontTarget: FontTarget;
   /** 字号百分比，50..160（100 = 默认） */
   fontScale: number;
+  /** Characters per second; 0 displays received text immediately. */
+  textSpeed: number;
   /** 是否显示分层立绘 */
   showSprite: boolean;
   /** 是否渲染成人向立绘图层（默认关闭） */
@@ -64,6 +66,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   narrativeScroll: "auto",
   fontTarget: "narrative",
   fontScale: 100,
+  textSpeed: 60,
   showSprite: true,
   explicitLayers: false,
   spriteView: "full",
@@ -173,6 +176,7 @@ function loadStoredTheme(): ThemeSettings {
           : "auto",
       fontTarget: parsed.fontTarget === "all" ? "all" : "narrative",
       fontScale: clamp(Number(parsed.fontScale ?? DEFAULT_THEME.fontScale), 50, 160),
+      textSpeed: Number(parsed.textSpeed) === 0 ? 0 : clamp(Number(parsed.textSpeed ?? DEFAULT_THEME.textSpeed), 5, 200),
       showSprite: parsed.showSprite !== false,
       explicitLayers: parsed.explicitLayers === true,
       spriteView: normalizeSpriteView(parsed.spriteView),

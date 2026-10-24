@@ -189,6 +189,10 @@ class ScriptedProvider:
     )
 
     def complete(self, request: dict) -> LlmResponse:
+        if request.get('phase') == 'numeric_correction':
+            return LlmResponse(raw=json.dumps({'changes': [], 'explanation': '脚本演示模式不推断数值，请在设置中连接数值纠正模型。'}, ensure_ascii=False))
+        if request.get('phase') == 'narrative_correction':
+            return LlmResponse(narrator=NarratorOutput(narrative=request['current_narrative']))
         if request.get('phase') == 'director':
             return LlmResponse(narrator=NarratorOutput(narrative='{"candidates":[]}'),model='scripted-gm',provider=self.name)
         if request.get('phase') == 'settlement':
@@ -486,6 +490,14 @@ class OpenAICompatibleProvider:
         tool_results = request.get("tool_results") or []
         tool_exchanges = request.get("tool_exchanges") or []
         retry_reason = request.get("retry_reason")
+        if request.get('phase') == 'numeric_correction':
+            keys=('narrative','state','fields','resource_bindings')
+            return [{'role':'system','content':request['system_prompt']},
+                    {'role':'user','content':json.dumps({k:request[k] for k in keys},ensure_ascii=False,separators=(',',':'))}]
+        if request.get('phase') == 'narrative_correction':
+            keys=('current_narrative','current_options','instruction','state_brief','scene_brief','lore_brief')
+            return [{'role':'system','content':request['system_prompt']},
+                    {'role':'user','content':json.dumps({k:request[k] for k in keys if k in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get('phase') == 'director':
             from rpg_core.plot_director import PROMPT as DIRECTOR_PROMPT
             keys=('personality_npcs','story_progress','current_turn','dynamic_worldbook','reason','scene','worldbook','world_setting','characters','player','recent_events','facts','unresolved_clues','action','evaluated_ids','max_candidates')
@@ -753,6 +765,12 @@ class OpenAICompatibleProvider:
             max_tokens = 0
         if max_tokens > 0:
             payload["max_tokens"] = max_tokens
+        if request.get('phase') == 'numeric_correction':
+            from rpg_core.corrections import NumericCorrection
+            payload['tools']=[{'type':'function','function':{'name':'correct_values','description':'仅修改本次说明明确涉及的数值字段。','parameters':NumericCorrection.model_json_schema()}}]
+            payload['tool_choice']='auto'
+            if self.reasoning_effort: payload['reasoning_effort']=self.reasoning_effort
+            return payload
         if request.get('phase') == 'settlement':
             from rpg_core.settlement import Proposal
             payload['tools']=[{'type':'function','function':{'name':'settle_turn','description':'一次提交全部领域结算草案。','parameters':Proposal.model_json_schema()}}]

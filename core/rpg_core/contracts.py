@@ -283,6 +283,7 @@ EventKind = Literal[
     "scene.entered",
     "narrative.generated",
     "narrative.checked",
+    "correction.applied",
     "clothing.checked",
     "settlement.checked",
     "settlement.rejected",
@@ -768,7 +769,7 @@ class SettlerOutput(BaseModel):
 # --------------------------------------------------------------------------
 # 7. LlmRole / Router
 # --------------------------------------------------------------------------
-LlmRoleName = Literal["narrator", "settler", "arbiter", "setup", "director"]
+LlmRoleName = Literal["narrator", "settler", "arbiter", "setup", "director", "corrector"]
 
 
 class LlmProfile(BaseModel):
@@ -795,6 +796,8 @@ class LlmRolesConfig(BaseModel):
     arbiter: LlmProfile = Field(default_factory=LlmProfile)
     setup: LlmProfile = Field(default_factory=LlmProfile)
     director: LlmProfile = Field(default_factory=lambda: LlmProfile(temperature=0.3))
+    # None inherits the effective backend connection; the call remains independent.
+    corrector: LlmProfile | None = None
 
 
 class ProviderSettings(BaseModel):

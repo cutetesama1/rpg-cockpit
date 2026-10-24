@@ -421,3 +421,21 @@ export async function importCharacterCard(body: import('./types').CardUpload & {
 export async function getCurrentCharacterCard(): Promise<import('./types').CurrentCard> {
   return readJson(await fetch('/api/character-cards/current'));
 }
+
+export type CorrectionMode = "narrative" | "state";
+export interface CorrectionRequest {
+  pack_id: string; request_id: string; revision: string;
+  mode: CorrectionMode; instruction: string; persist: boolean;
+}
+export interface CorrectionResult {
+  ok: boolean; receipt_id: number; reused: boolean; mode: CorrectionMode;
+  narrative: string; explanation: string;
+  changes: Record<string, { field: string; before: unknown; after: number }>;
+  status: Status;
+}
+export function streamCorrection(body: CorrectionRequest, handlers: StreamHandlers = {}): Promise<CorrectionResult> {
+  return gameStream<CorrectionResult>("/api/corrections/stream", body, handlers);
+}
+export function undoCorrection(pack_id: string, receipt_id: number): Promise<{ok:boolean;status:Status}> {
+  return sendJson("/api/corrections/undo", "POST", {pack_id, receipt_id});
+}

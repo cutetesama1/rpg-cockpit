@@ -289,9 +289,9 @@ export default function SettingsDrawer({
     }
   };
 
-  const patchRole = (role: "narrator" | "settler" | "director", patch: Partial<LlmProfile>) => {
+  const patchRole = (role: "narrator" | "settler" | "director" | "corrector", patch: Partial<LlmProfile>) => {
     setRoles((prev) =>
-      prev ? { ...prev, [role]: { ...prev[role], ...patch } } : prev,
+      prev ? { ...prev, [role]: { ...(prev[role] ?? (prev.separated ? prev.settler : prev.narrator)), ...patch } } : prev,
     );
   };
 
@@ -444,7 +444,7 @@ export default function SettingsDrawer({
     <div className="drawer-mask" onClick={onClose}>
       <aside className="drawer" onClick={(event) => event.stopPropagation()}>
         <header className="drawer-head">
-          <h2>设置</h2>
+          <h2>设置 <small className="muted">0.991beta</small></h2>
           <button className="ghost small" onClick={onClose}>
             关闭
           </button>
@@ -686,6 +686,9 @@ export default function SettingsDrawer({
                   onChange={(patch) => patchRole("settler", patch)}
                 />
                 <RoleEditor title="剧情导演 director" hint="导演选项关闭‘复用叙事模型’时使用此独立连接；只在触发条件满足时调用。" profile={roles.director} providers={providerNames} onChange={(patch) => patchRole("director", patch)} />
+                <label className="checkbox-row"><input type="checkbox" checked={Boolean(roles.corrector)} onChange={event => setRoles({...roles,corrector:event.target.checked ? {...(roles.separated ? roles.settler : roles.narrator),temperature:0} : null})}/><span>数值纠正使用独立连接（关闭时复用后端连接，调用仍独立）</span></label>
+                {roles.corrector && <RoleEditor title="数值纠正 corrector" hint="只读这次纠正说明与当前数值，不携带历史，不进行正常回合结算。" profile={roles.corrector} providers={providerNames} onChange={patch => patchRole("corrector",patch)}/>}
+
               </details>
             </section>
 
@@ -821,7 +824,7 @@ export default function SettingsDrawer({
             <section className="settings-section">
               <h3>外观 · 叙事滚动</h3>
               <p className="muted small">
-                控制桌面叙述区滚动；手机使用独立的完整对话历史，始终可向上翻阅。设置存在本机浏览器。
+                控制桌面对话历史的滚动；电脑和手机均保留你的输入与 AI 回复，可向上翻阅。设置存在本机浏览器。
               </p>
               <div className="scroll-styles">
                 {SCROLL_STYLES.map((item) => (
@@ -838,6 +841,12 @@ export default function SettingsDrawer({
               </div>
             </section>
 
+            <section className="settings-section">
+              <h3>阅读 · 文字展示速度</h3>
+              <p className="muted small">只影响收到文字后的显示节奏，不改变模型生成、网络请求或后端结算速度。桌面与手机通用。</p>
+              <label><span>{theme.textSpeed === 0 ? "即时显示" : `${theme.textSpeed} 字符 / 秒`}</span><input aria-label="文字展示速度" type="range" min="0" max="200" step="5" value={theme.textSpeed} onChange={event => onThemeChange({...theme,textSpeed:Number(event.target.value)})}/></label>
+              <button className="ghost small" type="button" onClick={() => onThemeChange({...theme,textSpeed:0})}>即时显示</button>
+            </section>
             <section className="settings-section">
               <h3>外观 · 字体大小</h3>
               <p className="muted small">

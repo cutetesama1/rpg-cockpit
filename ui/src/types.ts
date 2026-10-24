@@ -127,6 +127,7 @@ export interface LlmRoles {
   arbiter: LlmProfile;
   setup: LlmProfile;
   director: LlmProfile;
+  corrector?: LlmProfile | null;
 }
 
 export interface ProviderView {
@@ -301,6 +302,7 @@ export interface DirectorView {
 }
 
 export interface Status {
+  correction_revision?: string;
   director?: DirectorView;
   adjudication?: AdjudicationView;
   appearance_revision?: string;

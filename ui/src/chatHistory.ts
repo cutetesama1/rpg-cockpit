@@ -26,10 +26,19 @@ export function actionMessage(action: Action, names: Record<string, string> = {}
 export function buildChatHistory(events: EventRecord[], names: Record<string, string> = {}): ChatEntry[] {
   const sorted = [...events].sort((a, b) => a.seq - b.seq);
   const undone = new Set(sorted.filter(e => e.kind === "turn.rolled_back" && e.payload.reason === "undo").map(e => e.turn));
-  const failed = new Set(sorted.filter(e => e.kind === "turn.rolled_back" && e.payload.reason !== "undo").map(e => e.turn));
+  const cancelled = new Set(sorted.filter(e => e.kind === "turn.rolled_back").map(e => e.turn));
+  const failed = new Set(sorted.filter(e => e.turn >= 0 && e.kind === "turn.rolled_back" && e.payload.reason !== "undo").map(e => e.turn));
   const entries: ChatEntry[] = [];
   for (const event of sorted) {
     if (undone.has(event.turn)) continue;
+    if (event.kind === "correction.applied") {
+      if (cancelled.has(event.turn) || cancelled.has(Number(event.payload.anchor))) continue;
+      const mode = event.payload.mode;
+      entries.push({id:`correction-user-${event.seq}`,turn:Number(event.payload.anchor),role:"user",text:String(event.payload.instruction || ""),meta:[mode === "narrative" ? "纠正叙述" : "纠正数值"]});
+      if (mode === "narrative") entries.push({id:`correction-ai-${event.seq}`,turn:Number(event.payload.anchor),role:"assistant",text:String(event.payload.narrative || ""),meta:["修订稿"]});
+      else entries.push({id:`correction-state-${event.seq}`,turn:Number(event.payload.anchor),role:"notice",text:`${String(event.payload.explanation || "数值纠正已完成")}（${Object.keys((event.payload.changes || {}) as object).length} 项变化）`,meta:[]});
+      continue;
+    }
     if (event.kind === "turn.started") {
       const action = event.payload.action as Action | undefined;
       if (!action || !["text", "skill", "option"].includes(action.kind)) continue;

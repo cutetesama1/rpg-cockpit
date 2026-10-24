@@ -43,6 +43,11 @@ import type {
 } from "./types";
 
 import MobileChat from "./components/MobileChat";
+import ChatMessage from "./components/ChatMessage";
+import CorrectionPanel, { CorrectionIcon } from "./components/CorrectionPanel";
+import { useTextPlayback } from "./useTextPlayback";
+import { streamCorrection, undoCorrection } from "./api";
+import type { CorrectionMode, CorrectionRequest, CorrectionResult } from "./api";
 import MobileGameDrawer from "./components/MobileGameDrawer";
 import { useMobileLayout, MOBILE_LAYOUT_QUERY } from "./useMobileLayout";
 import { actionMessage, buildChatHistory } from "./chatHistory";
@@ -133,6 +138,12 @@ export default function App() {
     task: false,
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [correctionResult, setCorrectionResult] = useState<CorrectionResult | null>(null);
+  const [correctionError, setCorrectionError] = useState<string | null>(null);
+  const correctionRequest = useRef<CorrectionRequest | null>(null);
+  const playbackSerial = useRef(0);
+  const [playback, setPlayback] = useState<{key:string;turn:number;text:string;mode:"normal"|"correction";receipt?:number} | null>(null);
   const [adjudicationOpen, setAdjudicationOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(
     () => new URLSearchParams(window.location.search).get("debug") === "1",
@@ -150,6 +161,11 @@ export default function App() {
   const [liveEvents, setLiveEvents] = useState<EventRecord[]>([]);
   const [liveNarrative, setLiveNarrative] = useState<NarrativeUpdate | null>(null);
   const [theme, setTheme] = useState<ThemeSettings>(() => loadTheme());
+  const paced = useTextPlayback(playback?.text ?? "", playback?.key ?? "idle", theme.textSpeed);
+  const captureNarrative = useCallback((update: NarrativeUpdate, key: string, mode: "normal" | "correction" = "normal") => {
+    setLiveNarrative(update);
+    setPlayback({key,turn:update.turn,text:update.text,mode});
+  }, []);
   const [spriteReload,setSpriteReload] = useState(0);
   const [spriteError,setSpriteError] = useState<string|null>(null);
   const [sprite, setSprite] = useState<{ pack: string; sheet: SpriteSheet | null } | null>(
@@ -181,12 +197,16 @@ export default function App() {
   }, [refresh]);
 
   const generateOpening = useCallback(async () => {
+    const key = `opening-${++playbackSerial.current}`;
+    setPlayback(null);
     setOpeningBusy(true);
     setOpeningError(null);
     setLiveNarrative(null);
     storyFollow.current = true;
     try {
-      const result = await streamOpening({ onNarrative: setLiveNarrative });
+      const result = await streamOpening({ onNarrative: update => captureNarrative(update,key) });
+      if (result.ok) setPlayback({key,turn:0,text:result.narrative || "",mode:"normal"});
+      else setPlayback(null);
       if (!result.ok) {
         setOpeningError(result.error || "开局生成失败，点「重试」再来一次");
       }
@@ -197,7 +217,7 @@ export default function App() {
       setOpeningBusy(false);
       setLiveNarrative(null);
     }
-  }, [refresh]);
+  }, [refresh, captureNarrative]);
 
   // 新游戏（第 0 回合、还没有开场叙述）自动生成开局；失败时留一个小的重试入口
   useEffect(() => {
@@ -286,6 +306,8 @@ export default function App() {
 
   const act = useCallback(
     async (action: Action) => {
+      const key = `action-${++playbackSerial.current}`;
+      setPlayback(null);
       setBusy(true);
       setError(null);
       setLiveEvents([]);
@@ -296,13 +318,14 @@ export default function App() {
       try {
         // SSE：回合内事件实时追加到小票，最终结果再统一刷新状态
         const result = await streamAction(action, {
-          onNarrative: setLiveNarrative,
+          onNarrative: update => captureNarrative(update,key),
           onEvent: (event) =>
             setLiveEvents((prev) =>
               prev.some((item) => item.seq === event.seq) ? prev : [...prev, event],
             ),
         });
         setLast(result);
+        setPlayback(result.ok ? {key,turn:result.turn,text:result.narrative,mode:"normal"} : null);
         if(result.ok && result.status) setStatus(result.status);
         if (!result.ok) {
           setError(result.errors.join("；") || "本回合失败");
@@ -311,6 +334,7 @@ export default function App() {
         return result.ok;
       } catch (err) {
         setError(String(err));
+        setPlayback(null);
         await refresh();
         return false;
       } finally {
@@ -320,7 +344,7 @@ export default function App() {
         setPendingAction(null);
       }
     },
-    [refresh],
+    [refresh, captureNarrative],
   );
 
   useEffect(() => {
@@ -366,28 +390,9 @@ export default function App() {
       };
     });
   }, [costPreview, status]);
-  const story = useMemo(() => {
-    const entries: { turn: number; narrative: string }[] = [];
-    for (const event of status?.events ?? []) {
-      if (event.kind !== "narrative.generated") continue;
-      const payload = event.payload as { narrative?: unknown };
-      const text = typeof payload.narrative === "string" ? payload.narrative : "";
-      if (text.trim()) entries.push({ turn: event.turn, narrative: text });
-    }
-    if (entries.length === 0 && status && (status.opening_generated || status.turn > 0)) {
-      const fallback = last?.narrative || status.scene?.text || status.opening.text;
-      if (fallback) entries.push({ turn: status.turn, narrative: fallback });
-    }
-    return entries;
-  }, [last, status]);
   /** 开局叙述就绪后才允许行动（旧存档 turn>0 视为已就绪） */
   const ready = Boolean(status?.opening_generated) || (status?.turn ?? 0) > 0;
 
-  useEffect(() => {
-    if (theme.narrativeScroll === "page") return;
-    const element = storyRef.current;
-    if (element && storyFollow.current) element.scrollTop = element.scrollHeight;
-  }, [story.length, liveNarrative?.text, theme.narrativeScroll, openingBusy]);
 
   const canSend =
     !busy &&
@@ -464,6 +469,8 @@ export default function App() {
       const result = await postUndo();
       if (!result.ok) setError(String(result.error ?? "没有可撤销的回合"));
       setLast(null);
+      setPlayback(null);
+      setCorrectionResult(null);
       await refresh();
     } catch (err) {
       setError(String(err));
@@ -479,6 +486,8 @@ export default function App() {
       await postReset();
       openingTried.current = false;
       setLast(null);
+      setPlayback(null);
+      setCorrectionResult(null);
       setDraft("");
       setTags([]);
       setTagHint("");
@@ -513,6 +522,9 @@ export default function App() {
   const onGameChanged = useCallback(async () => {
     openingTried.current = false;
     setLast(null);
+    setPlayback(null);
+    setCorrectionResult(null);
+    setCorrectionOpen(false);
     setDraft("");
     await refresh();
     await reloadWorld();
@@ -523,6 +535,8 @@ export default function App() {
       openingTried.current = false;
       setStatus(loaded);
       setLast(null);
+      setPlayback(null);
+      setCorrectionResult(null);
       setDraft("");
       setError(null);
       try {
@@ -540,6 +554,35 @@ export default function App() {
     inputRef.current?.focus();
   }, []);
 
+
+  const correct = async (mode: CorrectionMode, instruction: string, persist: boolean) => {
+    if (!status || busy || openingBusy) return;
+    setBusy(true); setCorrectionError(null); setCorrectionResult(null);
+    const key = `correction-${++playbackSerial.current}`;
+    if (mode === "narrative") { setPlayback(null); setLiveNarrative(null); }
+    const old = correctionRequest.current;
+    const request: CorrectionRequest = old && old.pack_id === status.pack.id && old.mode === mode && old.instruction === instruction && old.persist === persist ? old : {
+      pack_id:status.pack.id, revision:status.correction_revision || "", request_id:globalThis.crypto?.randomUUID?.() ?? `correct-${Date.now()}-${Math.random()}`, mode, instruction, persist,
+    };
+    correctionRequest.current = request;
+    try {
+      const result = await streamCorrection(request, {onNarrative:update => captureNarrative(update,key,"correction")});
+      setStatus(result.status); setLast(null); setCorrectionResult(result); correctionRequest.current = null;
+      if (mode === "narrative") setPlayback({key,turn:result.status.turn,text:result.narrative,mode:"correction",receipt:result.receipt_id});
+    } catch (err) {
+      setCorrectionError(String(err));
+      if (mode === "narrative") setPlayback(null);
+      if (!(err instanceof TypeError) && !/流式响应没有返回最终结果|network|fetch/i.test(String(err))) correctionRequest.current = null;
+      await refresh();
+    } finally { setBusy(false); setLiveNarrative(null); }
+  };
+  const reverseCorrection = async () => {
+    if (!status || !correctionResult || busy) return;
+    setBusy(true); setCorrectionError(null);
+    try { const result = await undoCorrection(status.pack.id,correctionResult.receipt_id); setStatus(result.status); setLast(null); setPlayback(null); setCorrectionResult(null); }
+    catch (err) { setCorrectionError(String(err)); await refresh(); }
+    finally { setBusy(false); }
+  };
   const chatEntries = useMemo(() => {
     const seen = new Set(status?.events.map(event => event.seq) ?? []);
     const events = [...(status?.events ?? []), ...liveEvents.filter(event => !seen.has(event.seq))];
@@ -552,12 +595,22 @@ export default function App() {
       const text = last?.narrative || status?.scene?.text || status?.opening.text;
       if (text) entries.push({ id: "legacy-narrative", turn: status?.turn ?? 0, role: "assistant", text, meta: [] });
     }
-    if (liveNarrative?.text && !entries.some(entry => entry.role === "assistant" && entry.turn === liveNarrative.turn)) {
+    if (playback?.mode !== "correction" && liveNarrative?.text && !entries.some(entry => entry.role === "assistant" && entry.turn === liveNarrative.turn)) {
       entries.push({ id: `live-narrative-${liveNarrative.turn}`, turn: liveNarrative.turn, role: "assistant", text: liveNarrative.text,
         meta: [liveNarrative.phase === "settling" ? "正在结算…" : "正在生成…"], streaming: true });
     }
-    return entries;
-  }, [status, liveEvents, pendingAction, last, liveNarrative]);
+    if (playback?.mode === "correction" && !playback.receipt && playback.text) entries.push({id:"correction-live",turn:playback.turn,role:"assistant",text:playback.text,meta:["正在修订…"],streaming:true});
+    return entries.map(entry => {
+      const target = playback?.mode === "correction" ? entry.id === (playback.receipt ? `correction-ai-${playback.receipt}` : "correction-live") : entry.role === "assistant" && entry.turn === playback?.turn && !entry.id.startsWith("correction-ai-");
+      return target && playback ? {...entry,text:paced.text,streaming:entry.streaming || paced.playing} : entry;
+    });
+  }, [status, liveEvents, pendingAction, last, liveNarrative, playback, paced.text, paced.playing]);
+
+  useEffect(() => {
+    if (theme.narrativeScroll === "page") return;
+    const element = storyRef.current;
+    if (element && storyFollow.current) element.scrollTop = element.scrollHeight;
+  }, [chatEntries, theme.narrativeScroll, openingBusy]);
 
   if (!status) {
     return (
@@ -602,9 +655,11 @@ export default function App() {
   };
 
   const wallpaper = wallpaperCss(theme);
+  const correctionPanel = <CorrectionPanel open={correctionOpen} busy={busy || openingBusy} packId={status.pack.id} result={correctionResult} error={correctionError} onClose={() => setCorrectionOpen(false)} onSubmit={(mode,text,persist) => void correct(mode,text,persist)} onUndo={() => void reverseCorrection()}/>;
+  const playbackControls = paced.playing && playback ? <div className="playback-toolbar"><button className="ghost small" type="button" onClick={paced.finish}>立即显示</button></div> : null;
 
   return (
-    <div className={`app${wallpaper ? " has-wallpaper" : ""}`}>
+    <div className={`app${wallpaper ? " has-wallpaper" : ""}${correctionOpen ? " correcting" : ""}`}>
       {wallpaper && (
         <div
           className="wallpaper"
@@ -619,7 +674,7 @@ export default function App() {
       )}
 
       {mobileLayout ? <>
-        <MobileChat sendSerial={sendSerial} packId={status.pack.id} entries={chatEntries} draft={draft} modes={inputModes}
+        <MobileChat correctionPanel={correctionPanel} correcting={correctionOpen} playbackControls={playbackControls} sendSerial={sendSerial} packId={status.pack.id} entries={chatEntries} draft={draft} modes={inputModes}
           busy={busy} ready={ready} openingBusy={openingBusy} openingError={openingError}
           error={error} canSend={canSend} options={options} pickedCount={selectedSkills.length}
           extrasCount={selectedExtras.length} menuOpen={navOpen} onOpenMenu={() => setNavOpen(true)}
@@ -748,9 +803,10 @@ export default function App() {
                     </span>
                   )}
                 </h2>
+                {playbackControls}
                 <div
                   ref={storyRef}
-                  className={`story-log story-scroll-${theme.narrativeScroll}`}
+                  className={`story-log desktop-history story-scroll-${theme.narrativeScroll}`}
                   onScroll={() => { const node = storyRef.current; if (node) storyFollow.current = node.scrollHeight - node.scrollTop - node.clientHeight < 72; }}
                 >
                   {!ready && !liveNarrative?.text ? (
@@ -780,26 +836,15 @@ export default function App() {
                       )}
                     </div>
                   ) : (
-                    story.map((entry, index) => (
-                      <article className="story-entry" key={`${entry.turn}-${index}`}>
-                        <span className="story-entry-turn">
-                          {entry.turn === 0 ? "开端" : `第 ${entry.turn} 回合`}
-                        </span>
-                        <p>{formatNarrativeDialogue(entry.narrative)}</p>
-                      </article>
-                    ))
+                    chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry}/>)
                   )}
-                  {liveNarrative?.text && !story.some(entry => entry.turn === liveNarrative.turn) && <article className="story-entry narrative-preview" aria-label="正在生成的叙述">
-                    <span className="story-entry-turn">{liveNarrative.turn === 0 ? "开端" : `第 ${liveNarrative.turn} 回合`}</span>
-                    <p>{formatNarrativeDialogue(liveNarrative.text)}</p>
-                    <span className="narrative-phase">{liveNarrative.phase === "settling" ? "正在结算…" : "正在生成…"}</span>
-                  </article>}
                   {last && !last.ok && (
                     <p className="muted">本回合已回滚，状态未改变。</p>
                   )}
                 </div>
 
-                {ready && (
+                {correctionPanel}
+                {ready && !correctionOpen && (
                 <div className="action-dock composer">
                 <h2>你的行动</h2>
                 <div className="tag-tools" role="group" aria-label="文字分段标记">
@@ -986,6 +1031,8 @@ export default function App() {
         </div>
       </div>
       )}
+
+      {!correctionOpen && <button type="button" className="correction-orb" aria-label="打开 AI 纠正框" title="纠正 AI" disabled={busy || openingBusy || !ready} onClick={() => {setNavOpen(false);setCorrectionOpen(true);}}><CorrectionIcon/></button>}
 
       <LibraryDialog
         open={libraryOpen}

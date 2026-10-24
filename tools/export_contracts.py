@@ -15,8 +15,11 @@ from rpg_core import contracts as c  # noqa: E402
 from rpg_core.settlement import Proposal
 from rpg_core.personality_npcs import Roster
 from rpg_core.dynamic_worldbook import Change  # noqa: E402
+from rpg_core.corrections import Correction, NumericCorrection
 
 CONTRACTS = {
+    "ai-correction": Correction,
+    "numeric-correction": NumericCorrection,
     "personality-npcs": Roster,
     "dynamic-worldbook-change": Change,
     "state-schema": c.StateSchema,

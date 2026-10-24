@@ -44,3 +44,12 @@ test("uncertain settlement is visible and survives reload; undo and failed turns
   assert.equal(history([...ledger,e(5,1,"turn.rolled_back",{reason:"undo"})]).length,0);
   assert.ok(!history([...ledger,e(5,1,"turn.rolled_back",{reason:"guardrail_or_llm_failure"})]).some(m=>m.text.includes("待确认")));
 });
+
+test("correction inputs and revised replies remain chronological and auxiliary undo hides them", () => {
+  const ledger=[e(1,0,"narrative.generated",{narrative:"原文"}),e(2,-1,"correction.applied",{mode:"narrative",anchor:0,instruction:"改为第一人称",narrative:"修订稿"})];
+  assert.deepEqual(history(ledger).map(m=>m.text),["原文","改为第一人称","修订稿"]);
+  assert.deepEqual(history([...ledger,e(3,-1,"turn.rolled_back",{reason:"correction_undo"})]).map(m=>m.text),["原文"]);
+  const stats=[e(4,-2,"correction.applied",{mode:"state",anchor:1,instruction:"恢复体力",changes:{hp:{}},explanation:"已恢复"})];
+  assert.deepEqual(history(stats).map(m=>m.role),["user","notice"]);
+  assert.equal(history([...stats,e(5,1,"turn.rolled_back",{reason:"undo"})]).length,0);
+});

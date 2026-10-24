@@ -9,7 +9,7 @@ from rpg_core.contracts import LlmSettings
 from .providers import OpenAICompatibleProvider, ScriptedProvider
 from .roles import LlmProvider, LlmRouter
 
-ROLE_NAMES = ("narrator", "settler", "arbiter", "setup")
+ROLE_NAMES = ("narrator", "settler", "arbiter", "setup", "corrector")
 
 
 def build_providers(settings: LlmSettings) -> dict[str, LlmProvider]:
@@ -39,6 +39,7 @@ def validate_settings(settings: LlmSettings) -> None:
         pass
     for role in ROLE_NAMES:
         profile = getattr(settings.roles, role)
+        if profile is None: continue
         if profile.provider in ("", "scripted"):
             continue
         cfg = settings.providers.get(profile.provider)

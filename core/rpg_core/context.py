@@ -74,6 +74,8 @@ class ContextAssembler:
         return "\n\n".join(parts)
 
     def recent_brief(self, events: list[Event]) -> str:
+        from .corrections import effective_narratives
+        events = effective_narratives(events)
         from .state import cancelled_turns
         cancelled = cancelled_turns(events)
         from .visibility import player_visible
@@ -100,6 +102,8 @@ class ContextAssembler:
         max_entries: int = 8,
     ) -> list[dict[str, Any]]:
         """常驻条目 + 关键词命中条目（按优先级排序、最多 max_entries 条）。"""
+        from .corrections import effective_narratives
+        recent_events = effective_narratives(recent_events or [])
         entries = sorted([entry for entry in self.pack.worldbook if entry.enabled], key=lambda entry: entry.insertion_order)
         action = action or {}
         haystack_parts = [
@@ -193,6 +197,8 @@ class ContextAssembler:
         retry_reason: str | None = None,
         scene_id: str | None = None,
     ) -> dict[str, Any]:
+        from .corrections import preferences
+        preference = preferences(events)
         current_scene_id = scene_id or self.pack.opening.id
         scene = find_scene(self.pack, current_scene_id) or self.pack.opening
         lore = self.select_lore(
@@ -207,7 +213,7 @@ class ContextAssembler:
             "role": "narrator",
             "phase": "narration",
             "allow_tools": False,
-            "system_prompt": self.system_prompt(),
+            "system_prompt": self.system_prompt() + ("\n# 玩家后续叙述要求（覆盖默认人称、语气与分段要求；不覆盖世界硬事实，不授予状态修改权限）\n" + preference if preference else ""),
             "state": self.state_snapshot(state),
             "state_brief": self.state_brief(state),
             "wardrobe": self._wardrobe_snapshot(state),

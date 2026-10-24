@@ -633,7 +633,8 @@ class GameSession:
 
     # -- 开局叙述（AI 生成，不改状态、不占回合） ---------------------------
     def opening_event(self) -> Event | None:
-        for event in reversed(self.ledger.events):
+        from .corrections import effective_narratives
+        for event in reversed(effective_narratives(self.ledger.events)):
             if event.kind == "narrative.generated" and event.payload.get("opening"):
                 return event
         return None
@@ -750,6 +751,8 @@ class GameSession:
         from .adjudication import blocks_gameplay_undo
         if blocks_gameplay_undo(self, turn):
             return {"ok": False, "error": "请先在玩家裁定中心撤销该回合之后的已确认裁定", **self.status()}
+        from .corrections import undo_anchored
+        undo_anchored(self, turn)
         self._record(
             turn=turn,
             kind="turn.rolled_back",
@@ -957,7 +960,8 @@ class GameSession:
             if opening is not None and opening.payload.get("options"):
                 return list(opening.payload.get("options") or [])
             return [o.model_dump(mode="json") for o in self._scene().options]
-        for event in reversed(self.ledger.events):
+        from .corrections import effective_narratives
+        for event in reversed(effective_narratives(self.ledger.events)):
             if event.kind == "narrative.generated" and event.turn == self.turn:
                 return list(event.payload.get("options", []))
         return []
@@ -985,6 +989,7 @@ class GameSession:
             "events": player_events(self.ledger.events),
             "director": director_view(self),
             "adjudication": adjudication_view(self),
+            "correction_revision": __import__("rpg_core.adjudication", fromlist=["revision"]).revision(self),
             "replay": self.verify(),
             "fields": [f.model_dump(mode="json") for f in self.pack.state.fields],
             "layout": self.pack.ui.model_dump(mode="json"),

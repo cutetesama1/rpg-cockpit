@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "NumericChange": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Value"
+        },
+        "evidence": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "value",
+        "evidence"
+      ],
+      "title": "NumericChange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "changes": {
+      "items": {
+        "$ref": "#/$defs/NumericChange"
+      },
+      "maxItems": 40,
+      "title": "Changes",
+      "type": "array"
+    },
+    "explanation": {
+      "default": "",
+      "maxLength": 1000,
+      "title": "Explanation",
+      "type": "string"
+    }
+  },
+  "title": "NumericCorrection",
+  "type": "object"
+}
