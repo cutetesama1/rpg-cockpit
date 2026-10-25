@@ -1,0 +1,60 @@
+{
+  "version": "0.991beta-api-fix",
+  "public_base": "v0.991beta",
+  "user_agent": "RPG-Cockpit/0.991beta-api-fix",
+  "public_static_avatar": true,
+  "private_art_included": false,
+  "backend_tests": {
+    "passed": 616,
+    "skipped": 12,
+    "failed": 0
+  },
+  "ua_transport_tests": 8,
+  "frontend_tests": {
+    "passed": 28,
+    "failed": 0
+  },
+  "typescript": true,
+  "vite": true,
+  "native": {
+    "packaged_runtime_starts": true,
+    "frontend_matches_final_build": true,
+    "models_list_through_ua_gated_gateway": true,
+    "settings_connection_test_uses_explicit_user_agent": true,
+    "public_original_avatar_available": true,
+    "existing_public_apis_preserved": true,
+    "streamed_opening_uses_explicit_user_agent": true,
+    "cloudflare_1010_diagnostics_visible_and_secret_free": true,
+    "user_agent": "RPG-Cockpit/0.991beta-api-fix",
+    "gateway_requests": 6,
+    "external_paid_api_tested": false,
+    "reported_third_party_gateway_tested": false,
+    "physical_android_device_tested": false
+  },
+  "apks": [
+    {
+      "abi": "arm64-v8a",
+      "version_name": "0.991beta-api-fix",
+      "version_code": 32,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    },
+    {
+      "abi": "universal",
+      "version_name": "0.991beta-api-fix",
+      "version_code": 32,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    },
+    {
+      "abi": "x86_64",
+      "version_name": "0.991beta-api-fix",
+      "version_code": 32,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "private_art_and_signing_secrets_absent": true
+    }
+  ]
+}

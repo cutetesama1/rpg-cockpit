@@ -12,6 +12,7 @@ import time
 import urllib.error
 import urllib.request
 from typing import Any
+from .http_identity import api_headers, cloudflare_1010_hint
 
 DEFAULT_TIMEOUT = 10.0
 MAX_MODELS = 500
@@ -61,9 +62,7 @@ def list_endpoint_models(
     任何失败都抛 `ModelListError`，消息可直接展示给用户。
     """
     url = models_url(base_url)
-    headers = {"Accept": "application/json"}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    headers = api_headers(api_key, content_type=None)
 
     request = urllib.request.Request(url, headers=headers, method="GET")
     started = time.perf_counter()
@@ -71,7 +70,11 @@ def list_endpoint_models(
         with urllib.request.urlopen(request, timeout=timeout) as response:
             raw = response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:300]
+        detail = exc.read(65536).decode("utf-8", errors="replace")
+        cf_hint = cloudflare_1010_hint(exc.code, detail, exc.headers)
+        if cf_hint:
+            raise ModelListError(f"读取模型列表失败：HTTP {exc.code} {cf_hint}") from exc
+        detail = detail[:300]
         head = detail.lstrip()[:15].lower()
         if head.startswith("<!doctype") or head.startswith("<html"):
             detail = " ".join(detail.lstrip()[:80].split())

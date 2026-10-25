@@ -11,6 +11,7 @@ from typing import Any, Callable, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from .streaming import partial_narrative, sse_data
+from .http_identity import api_headers, cloudflare_1010_hint
 
 from rpg_core.contracts import (
     MUTATORS,
@@ -804,9 +805,7 @@ class OpenAICompatibleProvider:
 
     # -- 调用 ------------------------------------------------------------
     def _request(self, body: bytes) -> str:
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        headers = api_headers(self.api_key)
         req = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=body,
@@ -817,7 +816,11 @@ class OpenAICompatibleProvider:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return resp.read().decode("utf-8", errors="replace")
         except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:300]
+            detail = exc.read(65536).decode("utf-8", errors="replace")
+            cf_hint = cloudflare_1010_hint(exc.code, detail, exc.headers)
+            if cf_hint:
+                raise RuntimeError(f"模型调用失败：HTTP {exc.code} {cf_hint}") from exc
+            detail = detail[:300]
             hint = _html_hint(detail)
             if hint:
                 detail = " ".join(detail.lstrip()[:80].split())
@@ -927,9 +930,7 @@ class OpenAICompatibleProvider:
 
 
     def _request_stream(self, payload: dict, on_text: Callable[[str], None]) -> str:
-        headers = {"Content-Type": "application/json", "Accept": "text/event-stream"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        headers = api_headers(self.api_key, accept="text/event-stream")
         req = urllib.request.Request(
             f"{self.base_url}/chat/completions",
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -996,7 +997,11 @@ class OpenAICompatibleProvider:
                     "content": content, "tool_calls": [calls[key] for key in sorted(calls)],
                 }}]}, ensure_ascii=False)
         except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:300]
+            detail = exc.read(65536).decode("utf-8", errors="replace")
+            cf_hint = cloudflare_1010_hint(exc.code, detail, exc.headers)
+            if cf_hint:
+                raise RuntimeError(f"模型调用失败：HTTP {exc.code} {cf_hint}") from exc
+            detail = detail[:300]
             if exc.code in (400, 422, 501) and "stream" in detail.lower():
                 raise _StreamUnsupported(detail, options="stream_options" in detail.lower()) from exc
             message = f"模型调用失败：HTTP {exc.code} {_html_hint(detail)}{detail}"
