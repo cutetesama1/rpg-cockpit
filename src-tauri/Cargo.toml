@@ -1,6 +1,6 @@
 [package]
 name = "rpg-cockpit"
-version = "0.997.0"
+version = "0.998.0"
 description = "叙事驾驶舱 · 桌面外壳（Tauri + Python sidecar）"
 authors = ["RPG Framework"]
 edition = "2021"

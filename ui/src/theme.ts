@@ -14,11 +14,12 @@ export const FONT_TARGETS: { id: FontTarget; label: string; hint: string }[] = [
 
 export const SCROLL_STYLES: { id: ScrollStyle; label: string; hint: string }[] = [
   { id: "auto", label: "略长时滚动", hint: "叙述超过区域高度才出现滚动条，并自动跟到最新一段" },
-  { id: "always", label: "固定滚动区", hint: "叙述始终装在一个固定高度的区域里，多长都在里面滚" },
-  { id: "page", label: "整页滚动", hint: "叙述区不限高，整个页面一起往下滚" },
+  { id: "always", label: "停留当前位置", hint: "生成回复时保持当前阅读位置，点击“回到最新”追上新内容" },
+  { id: "page", label: "连续阅读", hint: "在连续时间线中阅读；上翻历史时暂停跟随，回到底部继续跟随" },
 ];
 
 export const UI_THEMES = [
+  { id: "cockpit", label: "轻量驾驶舱", detail: "雾蓝 · 石墨灰", colors: ["#171c24", "#91b2cc", "#e0e8ed"] },
   { id: "jade", label: "翠金星穹", detail: "深翠 · 香槟金", colors: ["#0b171b", "#82c9ae", "#d2bd89"] },
   { id: "lunar", label: "月海银蓝", detail: "午夜蓝 · 月光银", colors: ["#0c1528", "#92bded", "#c5d5ee"] },
   { id: "amethyst", label: "紫晶秘仪", detail: "墨紫 · 浅玫瑰金", colors: ["#191225", "#c3a2eb", "#e1bfca"] },
@@ -27,7 +28,7 @@ export const UI_THEMES = [
 export type UiThemeId = (typeof UI_THEMES)[number]["id"];
 
 export function normalizeUiTheme(value: unknown): UiThemeId {
-  return UI_THEMES.some(item => item.id === value) ? value as UiThemeId : "jade";
+  return UI_THEMES.some(item => item.id === value) ? value as UiThemeId : "cockpit";
 }
 
 export interface ThemeSettings {
@@ -58,8 +59,8 @@ export interface ThemeSettings {
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
-  uiTheme: "jade",
-  wallpaper: "observatory",
+  uiTheme: "cockpit",
+  wallpaper: "none",
   custom: null,
   dim: 0.25,
   blur: 0,

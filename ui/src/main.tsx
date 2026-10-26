@@ -9,6 +9,7 @@ import "./mobileChat.css";
 import "./uiThemes.css";
 import "./mobileComposer.css";
 import "./corrections.css";
+import "./compactCockpit.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

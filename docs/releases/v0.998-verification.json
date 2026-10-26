@@ -1,0 +1,38 @@
+{
+  "release_version": "0.998",
+  "reused_existing_export": true,
+  "rebuilt": false,
+  "original_directory": "D:\\work\\RPG-Cockpit-Compact-UI",
+  "original_verification": "ORIGINAL-VERIFICATION.json",
+  "original_checksums_verified": true,
+  "apks": [
+    {
+      "source_name": "RPG-Cockpit-0.991beta-Compact-UI-arm64.apk",
+      "internal_version": "0.991beta-compact-ui",
+      "version_code": 35,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
+    },
+    {
+      "source_name": "RPG-Cockpit-0.991beta-Compact-UI-universal.apk",
+      "internal_version": "0.991beta-compact-ui",
+      "version_code": 35,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
+    },
+    {
+      "source_name": "RPG-Cockpit-0.991beta-Compact-UI-x86_64.apk",
+      "internal_version": "0.991beta-compact-ui",
+      "version_code": 35,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
+    }
+  ],
+  "original_installer_bytes_unchanged": true,
+  "source_binary_asset_sets_differ": true,
+  "new_paid_api_tested": false,
+  "new_physical_device_tested": false
+}

@@ -23,8 +23,8 @@ android {
         applicationId = "com.rpgframework.cockpit"
         minSdk = 29
         targetSdk = 36
-        versionCode = 43
-        versionName = "0.997"
+        versionCode = 44
+        versionName = "0.998"
         ndk {
             // 两个 ABI 都要有对应的 pydantic-core wheel（local-wheels/ 里各一份）。
             abiFilters += listOf("arm64-v8a", "x86_64")

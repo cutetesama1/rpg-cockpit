@@ -9,9 +9,9 @@ globalThis.localStorage={getItem:()=>stored,setItem:(_key,value)=>{stored=value;
 globalThis.window={location:{search:""}};
 test("old and invalid settings migrate while preserving wallpaper and font preferences",()=>{
  stored=JSON.stringify({wallpaper:'dusk',fontScale:50,custom:'data:image/png;base64,AA',uiTheme:'unknown'});
- const theme=loadTheme();assert.equal(theme.uiTheme,'jade');assert.equal(theme.wallpaper,'dusk');assert.equal(theme.fontScale,50);assert.equal(theme.custom,'data:image/png;base64,AA');
+ const theme=loadTheme();assert.equal(theme.uiTheme,'cockpit');assert.equal(theme.wallpaper,'dusk');assert.equal(theme.fontScale,50);assert.equal(theme.custom,'data:image/png;base64,AA');
 });
-test("all four themes persist independently of wallpaper",()=>{
+test("all themes persist independently of wallpaper",()=>{
  for(const item of UI_THEMES){const theme={...loadTheme(),uiTheme:item.id};saveTheme(theme);assert.equal(loadTheme().uiTheme,item.id);assert.equal(loadTheme().wallpaper,'dusk');}
- assert.equal(UI_THEMES.length,4);
+ assert.equal(UI_THEMES.length,5);
 });

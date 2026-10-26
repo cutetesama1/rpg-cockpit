@@ -9,6 +9,7 @@ import InventoryPanel from "./InventoryPanel";
 import UiIcon from "./UiIcon";
 interface Props {
   open: boolean;
+  docked?: boolean;
   spriteError?: string|null;
   onRetrySprite?:()=>void;
   status: Status;
@@ -40,7 +41,7 @@ export default function MobileGameDrawer(props: Props) {
     pane.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const keys = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); props.onClose(); }
-      if (event.key !== "Tab") return;
+      if (props.docked || event.key !== "Tab") return;
       const items = Array.from(pane.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), summary, a[href], [tabindex="0"]') ?? []).filter(item => item.getClientRects().length > 0);
       const first = items[0], last = items[items.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
@@ -48,13 +49,13 @@ export default function MobileGameDrawer(props: Props) {
     };
     window.addEventListener("keydown", keys);
     return () => { window.removeEventListener("keydown", keys); before?.focus({ preventScroll: true }); };
-  }, [props.open]);
+  }, [props.open, props.docked]);
   if (!props.open) return null;
   const navigate = (action: () => void) => { props.onClose(); action(); };
   const usage = props.status.usage;
-  return <div className="mobile-game-overlay">
+  return <div className={`mobile-game-overlay${props.docked ? " is-docked" : ""}`}>
     <div className="mobile-game-backdrop" onClick={props.onClose} aria-hidden="true" />
-    <aside ref={pane} id="mobile-game-sidebar" className="mobile-game-sidebar" role="dialog" aria-modal="true" aria-label="游戏侧栏">
+    <aside ref={pane} id="mobile-game-sidebar" className="mobile-game-sidebar" role={props.docked ? "complementary" : "dialog"} aria-modal={props.docked ? undefined : true} aria-label="游戏侧栏">
       <header className="mobile-game-sidebar-head"><strong>{props.status.pack.title}</strong><button type="button" aria-label="关闭游戏侧栏" onClick={props.onClose}>✕</button></header>
       <div className="mobile-game-sidebar-content">
         {props.theme.showSprite && props.sheet && <SpriteCanvas sheet={props.sheet} state={props.status.state} explicit={props.theme.explicitLayers} view={props.theme.spriteView} forcedPose={props.theme.spriteView.startsWith("closeup_") ? props.theme.spriteView : undefined} animated={props.theme.spriteAnimated} fields={props.status.fields} />}

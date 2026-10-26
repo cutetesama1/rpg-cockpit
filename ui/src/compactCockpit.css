@@ -1,0 +1,133 @@
+/* Compact cockpit: shared reading surface for desktop, touch screens and APK. */
+:root[data-ui-theme="cockpit"] {
+  --bg:#171c24; --panel:#202834; --panel-2:#273442; --line:#344251;
+  --text:#e0e8ed; --muted:#9faec0; --accent:#91b2cc; --brass:#91b2cc;
+  --theme-heading:#e0e8ed; --theme-glow:#253343; --theme-input:#1a222d;
+  --theme-user:#27394a; --theme-primary:#91b2cc; --theme-primary-end:#91b2cc;
+  --theme-panel-top:#202834; --theme-edge:#4e6478; --theme-shadow:#0002;
+}
+.compact-cockpit.app { position:fixed; inset:0; height:100dvh; min-height:0; overflow:hidden; background:var(--bg); color:var(--text); }
+.compact-cockpit.app.has-wallpaper { background:transparent; }
+.compact-cockpit .cockpit-chat { width:100%; max-width:none; height:100%; display:grid; grid-template-rows:auto minmax(0,1fr) auto; isolation:isolate; }
+.compact-cockpit .cockpit-topbar { display:flex; align-items:center; gap:14px; min-height:76px; padding:12px 30px; border-bottom:1px solid var(--line); background:var(--bg); }
+.compact-cockpit .chat-menu-button { position:static; flex:none; display:grid; place-items:center; width:44px; height:44px; min-height:44px; padding:10px; border:0; border-radius:12px; box-shadow:none; background:transparent; color:var(--muted); }
+.compact-cockpit .chat-menu-button:hover { background:var(--panel); color:var(--text); }
+.cockpit-topbar svg { width:23px; height:23px; }
+.cockpit-identity { display:grid; gap:3px; min-width:0; flex:1; }
+.cockpit-identity small { color:var(--muted); font-size:10px; letter-spacing:.17em; }
+.cockpit-identity h1 { font-size:calc(14px * var(--ui-font-scale,1)); font-weight:500; line-height:1.5; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cockpit-turn { display:flex; align-items:baseline; gap:8px; border-left:1px solid var(--line); padding-left:20px; color:var(--muted); font-size:12px; white-space:nowrap; }
+.cockpit-turn b { color:var(--text); font-size:17px; font-weight:500; font-variant-numeric:tabular-nums; }
+.chat-reading-area { position:relative; min-height:0; overflow:hidden; }
+.compact-cockpit .chat-transcript { height:100%; padding:28px max(28px,calc((100% - 720px)/2)) 26px; scroll-padding-top:24px; }
+.cockpit-thread-label { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:calc(11px * var(--ui-font-scale,1)); margin-bottom:30px; min-width:0; }
+.cockpit-thread-label > span:nth-child(2) { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cockpit-thread-label > button { display:flex; align-items:center; gap:6px; margin-left:auto; padding:4px 0 4px 10px; background:none; border:0; color:var(--muted); min-height:32px; flex-shrink:0; font-size:11px; }
+.cockpit-thread-label svg { width:13px; height:13px; }
+.cockpit-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.compact-cockpit .chat-message { margin:0 0 30px; }
+.compact-cockpit .chat-message--assistant { background:none; border:0; border-radius:0; padding:0; box-shadow:none; }
+.compact-cockpit .chat-message-meta { margin-bottom:12px; color:var(--muted); gap:8px; font-size:calc(11px * var(--ui-font-scale,1)); }
+.compact-cockpit .chat-message-meta > span:first-child { display:flex; align-items:center; gap:8px; color:var(--muted); }
+.compact-cockpit .chat-message-meta svg { width:16px; height:16px; color:var(--accent); }
+.compact-cockpit .chat-message--assistant > p { line-height:1.95; letter-spacing:.015em; }
+.compact-cockpit .chat-message--user { margin-left:auto; max-width:86%; border:0; border-radius:17px 17px 4px 17px; padding:12px 16px; background:var(--theme-user); box-shadow:none; }
+.compact-cockpit .chat-message--user .chat-message-meta { margin-bottom:5px; }
+.compact-cockpit .chat-dialogue-line { display:inline-block; width:100%; padding:9px 13px; margin:5px 0; border-radius:10px; color:var(--text); background:var(--panel); line-height:1.85; }
+.compact-cockpit .backend-notes, .compact-cockpit .inline-answers { background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:none; color:var(--muted); }
+.compact-cockpit .backend-notes summary, .compact-cockpit .inline-answers summary { min-height:44px; padding:11px 13px; color:var(--muted); letter-spacing:0; }
+.compact-cockpit .inline-answers summary { color:var(--text); }
+.compact-cockpit .inline-answer { background:transparent; border-color:var(--line); color:var(--text); }
+.compact-cockpit .inline-answer small { color:var(--muted); }
+.compact-cockpit .inline-answer-buttons button { min-height:40px; min-width:62px; background:var(--panel-2); color:var(--text); border:1px solid var(--line); }
+.compact-cockpit .inline-answer-buttons button:first-child { background:var(--accent); color:#132737; border-color:transparent; }
+.compact-cockpit .chat-opening { min-height:38vh; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:20px 0; }
+.compact-cockpit .chat-opening > svg { width:32px; height:32px; color:var(--accent); margin-bottom:16px; }
+.compact-cockpit .chat-opening h2 { font-size:clamp(20px,3vw,28px); font-weight:500; color:var(--text); letter-spacing:.03em; margin:0 0 12px; }
+.compact-cockpit .chat-opening p { margin:0 0 24px; line-height:1.8; }
+.compact-cockpit button.primary { background:var(--accent); border-color:transparent; color:#132737; box-shadow:none; border-radius:12px; }
+.compact-cockpit .chat-generating { color:var(--muted); padding:0 0 18px; }
+.compact-cockpit .chat-to-latest { right:max(24px,calc((100% - 720px)/2)); bottom:18px; border:1px solid var(--line); background:var(--panel); color:var(--text); min-height:40px; font-size:12px; box-shadow:0 3px 14px #0002; }
+.compact-cockpit .playback-toolbar { position:absolute; top:auto; right:16px; bottom:10px; background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:3px; }
+.compact-cockpit .cockpit-chat .chat-composer { margin:0; padding:12px max(28px,calc((100% - 720px)/2)) 16px; border:0; border-top:1px solid var(--line); border-radius:0; background:var(--bg); box-shadow:none; max-height:46dvh; overflow-y:auto; }
+.compact-cockpit .chat-composer .chat-suggestions { gap:8px; padding:0 0 8px; }
+.compact-cockpit .chat-composer .chat-suggestions button { min-height:36px; border:1px solid transparent; padding:7px 11px; border-radius:10px; background:var(--panel); color:var(--muted); box-shadow:none; font-size:calc(12px * var(--ui-font-scale,1)); }
+.compact-cockpit .chat-suggestions button > span { color:var(--accent); margin-left:3px; }
+.compact-cockpit .chat-composer .chat-input-modes { padding:0 0 5px; gap:16px; flex-wrap:nowrap; min-height:39px; }
+.compact-cockpit .chat-composer .chat-input-modes label { padding:0; border:0; min-height:38px; color:var(--muted); background:none; font-size:calc(12px * var(--ui-font-scale,1)); }
+.compact-cockpit .chat-composer .chat-input-modes label:has(input:checked) { background:none; border:0; color:var(--text); }
+.compact-cockpit .chat-input-modes input { width:14px; height:14px; }
+.compact-cockpit .chat-correct-button { display:grid; place-items:center; min-height:36px; min-width:36px; padding:7px; margin-left:auto; border:0; background:none; color:var(--muted); border-radius:50%; }
+.compact-cockpit .chat-composer .chat-input-row { gap:8px; padding:6px 7px 6px 13px; border:1px solid var(--line); border-radius:19px; background:var(--panel); box-shadow:none; }
+.compact-cockpit .chat-composer .chat-input-row:focus-within { border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 10%,transparent); }
+.compact-cockpit .chat-composer .chat-input-row textarea { min-height:46px; border-radius:0; padding:10px 0; font:calc(16px * var(--ui-font-scale,1))/1.6 system-ui,sans-serif; }
+.compact-cockpit .chat-composer .chat-input-row .chat-send { min-width:42px; width:42px; min-height:42px; height:42px; padding:10px; margin-bottom:2px; display:grid; place-items:center; border-radius:13px; box-shadow:none; }
+.chat-send svg { width:22px; height:22px; }
+.cockpit-selection { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; color:var(--muted); font-size:11px; margin-bottom:8px; }
+.cockpit-selection .chat-picked { min-height:32px; border-radius:10px; padding:4px 9px; background:var(--theme-user); color:var(--text); }
+.cockpit-selection .short { color:#efb4a8; }
+.cockpit-composer-idle { color:var(--muted); text-align:center; font-size:12px; letter-spacing:.12em; margin:7px 0; }
+.cockpit-advanced { color:var(--muted); font-size:11px; margin-top:8px; }
+.cockpit-advanced > summary { cursor:pointer; padding:3px 1px; min-height:24px; }
+.cockpit-advanced > summary > span { float:right; font-size:10px; opacity:.8; }
+.cockpit-advanced .tag-tools { display:flex; align-items:center; flex-wrap:wrap; gap:7px; padding-top:8px; }
+.cockpit-advanced .tag-tools-hint { flex-basis:100%; font-size:11px; }
+.cockpit-advanced .tag-tools button { min-height:34px; font-size:12px; }
+.cockpit-advanced .tag-chips { margin:8px 0; }
+.compact-cockpit .correction-panel { background:var(--bg); border:0; border-top:1px solid var(--line); border-radius:0; padding:14px max(28px,calc((100% - 720px)/2)) 18px; max-height:60dvh; box-shadow:none; animation:none; }
+.compact-cockpit .correction-panel header > div { color:var(--text); }
+.compact-cockpit .correction-panel textarea { background:var(--panel); color:var(--text); border-color:var(--line); }
+.compact-cockpit .correction-hint, .compact-cockpit .correction-persist, .compact-cockpit .correction-panel footer span { color:var(--muted); }
+.compact-cockpit .correction-switch { background:var(--panel); }
+.compact-cockpit .correction-switch button.on { background:var(--theme-user); color:var(--text); border-color:var(--line); box-shadow:none; }
+.compact-cockpit .adjudication-orb { display:none; }
+.compact-cockpit .mobile-game-sidebar { background:var(--panel); border-color:var(--line); box-shadow:12px 0 40px #0003; padding:0 16px calc(16px + env(safe-area-inset-bottom)); }
+.compact-cockpit .mobile-game-sidebar-head { padding:16px 0; border-bottom:1px solid var(--line); margin-bottom:16px; font-size:14px; color:var(--text); }
+.compact-cockpit .mobile-game-sidebar-head button { border:0; background:transparent; color:var(--muted); }
+.compact-cockpit .mobile-game-sidebar .panel { border:0; background:transparent; box-shadow:none; padding:8px 0 16px; border-bottom:1px solid var(--line); border-radius:0; }
+.compact-cockpit .mobile-game-sidebar .panel::before, .compact-cockpit .mobile-game-sidebar .panel h2::after { display:none; }
+.compact-cockpit .mobile-game-sidebar .panel h2 { font-size:12px; font-weight:500; letter-spacing:.07em; color:var(--muted); }
+.compact-cockpit .mobile-game-sidebar .sprite-stage { background:var(--theme-input); border:0; border-radius:16px; }
+.compact-cockpit .mobile-game-links { grid-template-columns:1fr 1fr; gap:4px; }
+.compact-cockpit .mobile-game-links > button { border:0; background:transparent; color:var(--muted); border-radius:10px; font-size:12px; }
+.compact-cockpit .mobile-game-links > button:hover { background:var(--panel-2); color:var(--text); }
+.compact-cockpit .mobile-settings-button { border:1px solid var(--line); background:var(--panel-2); border-radius:12px; color:var(--text); }
+.compact-cockpit .mobile-ledger { color:var(--muted); }
+.compact-cockpit .mobile-ledger .receipt { box-shadow:none; border-color:var(--line); background:var(--theme-input); }
+.compact-cockpit button:focus-visible, .compact-cockpit summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+/* Wallpaper stays visible behind an opaque reading column; controls remain legible. */
+.compact-cockpit.has-wallpaper .cockpit-chat { background:color-mix(in srgb,var(--bg) 84%,transparent); }
+.compact-cockpit.has-wallpaper .cockpit-topbar, .compact-cockpit.has-wallpaper .chat-composer { background:color-mix(in srgb,var(--bg) 94%,transparent); }
+@media (min-width:1025px) and (pointer:fine) {
+  .compact-cockpit.cockpit-sidebar-open .cockpit-chat { margin-left:356px; width:calc(100% - 356px); }
+  .compact-cockpit .mobile-game-overlay.is-docked { left:16px; top:16px; bottom:16px; right:auto; width:324px; z-index:30; }
+  .compact-cockpit .is-docked .mobile-game-backdrop { display:none; }
+  .compact-cockpit .is-docked .mobile-game-sidebar { width:100%; height:100%; border:1px solid var(--line); border-radius:18px; animation:none; box-shadow:none; }
+}
+@media (max-width:1024px), (pointer:coarse) {
+  body[data-mobile-layout="true"] .compact-cockpit.app { inset:auto; left:0; right:0; top:var(--mobile-viewport-top,0px); height:var(--mobile-viewport-height,100dvh); }
+  .compact-cockpit .cockpit-topbar { min-height:68px; padding:8px max(16px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left)); gap:10px; }
+  .cockpit-turn { font-size:11px; padding-left:12px; gap:5px; }
+  .cockpit-turn b { font-size:15px; }
+  .compact-cockpit .chat-transcript { padding:20px max(20px,env(safe-area-inset-right)) 22px max(20px,env(safe-area-inset-left)); }
+  .cockpit-thread-label { margin-bottom:24px; }
+  .compact-cockpit .cockpit-chat .chat-composer { padding:9px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); max-height:calc(var(--mobile-viewport-height,100dvh) * .48); }
+  .compact-cockpit .correction-panel { max-height:calc(var(--mobile-viewport-height,100dvh) * .65); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); }
+  .compact-cockpit .chat-message { margin-bottom:26px; }
+  .compact-cockpit .chat-to-latest { right:18px; }
+  .compact-cockpit .mobile-game-sidebar { width:min(88vw,380px); }
+  body[data-keyboard-open="true"] .compact-cockpit .cockpit-topbar { min-height:52px; padding-top:4px; padding-bottom:4px; }
+  body[data-keyboard-open="true"] .compact-cockpit .cockpit-identity small { display:none; }
+  body[data-keyboard-open="true"] .compact-cockpit .chat-suggestions { display:none; }
+  body[data-keyboard-open="true"] .compact-cockpit .cockpit-chat .chat-composer { padding-bottom:8px; max-height:calc(var(--mobile-viewport-height,100dvh) * .5); }
+  body[data-keyboard-open="true"] .compact-cockpit .cockpit-advanced > summary { min-height:20px; }
+}
+@media (orientation:landscape) and (max-height:560px) {
+  .compact-cockpit .cockpit-topbar { min-height:48px; padding-top:3px; padding-bottom:3px; }
+  .compact-cockpit .cockpit-identity small { display:none; }
+  .compact-cockpit .chat-suggestions, .compact-cockpit .cockpit-advanced { display:none; }
+  .compact-cockpit .cockpit-chat .chat-composer { padding-top:4px; padding-bottom:5px; max-height:calc(var(--mobile-viewport-height,100dvh) * .52); }
+  .compact-cockpit .chat-composer .chat-input-modes { min-height:30px; padding:0; }
+  .compact-cockpit .chat-input-modes label { min-height:30px; }
+}
+@media (prefers-reduced-motion:reduce) { .compact-cockpit *, .compact-cockpit *::after { animation:none !important; scroll-behavior:auto !important; } }
