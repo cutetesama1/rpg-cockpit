@@ -1,6 +1,6 @@
 {
   "source_version": "0.999",
-  "github_published": false,
+  "github_published": true,
   "git_initialized": true,
   "license": "Apache-2.0 for first-party code and original sample graphics, matching the existing repository license",
   "new_brand_assets_included": true,
@@ -16,10 +16,12 @@
   "full_runtime_test_suite_run_on_this_export": true,
   "new_app_binaries_built": true,
   "github_repository": "https://github.com/cutetesama1/rpg-cockpit",
-  "publication_note": "The v0.7.3 release tag records the exact published source commit; source and public-build assets are verified independently.",
+  "publication_note": "Numerical GitHub releases reuse preserved export binaries unchanged. Public source uses original sample artwork; see release provenance for differences.",
   "release_verification": "docs/releases/v0.991beta-api-fix-verification.json",
   "release_url": "https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.999",
   "public_portrait": "original static sample",
   "third_party_sprite_tree_included": false,
-  "user_agent": "RPG-Cockpit/0.991beta-api-fix"
+  "user_agent": "RPG-Cockpit/0.991beta-api-fix",
+  "binary_internal_version": "0.991beta-all-ui-styles",
+  "binaries_rebuilt": false
 }
