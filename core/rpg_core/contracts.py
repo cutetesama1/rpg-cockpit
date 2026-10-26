@@ -289,6 +289,7 @@ EventKind = Literal[
     "settlement.rejected",
     "settlement.warning",
     "settlement.estimated",
+    "settlement.currency",
     "settlement.deferred",
     "item.registered",
     "adjudication.proposed",

@@ -1,11 +1,15 @@
+import { lastNarrativeIds } from "../narrativeReview";
 import ChatMessage from "./ChatMessage";
 import type { ReactNode } from "react";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { formatNarrativeDialogue } from "../narrativeFormatting";
 import type { ChatEntry } from "../chatHistory";
-import type { InputMode, Option } from "../types";
+import type { AdjudicationView, FieldDef, InputMode, Option } from "../types";
 const MODES: { id: InputMode; label: string }[] = [{ id: "action", label: "动作" }, { id: "speech", label: "话语" }, { id: "thought", label: "心理" }];
 interface Props {
+  adjudication?: AdjudicationView;
+  fields?: FieldDef[];
+  onReviewChanged: () => Promise<void>;
   correctionPanel?: ReactNode;
   correcting?: boolean;
   playbackControls?: ReactNode;
@@ -32,6 +36,7 @@ interface Props {
   onPickSuggestion: (option: Option) => void;
 }
 export default function MobileChat(props: Props) {
+  const decisionOwners = lastNarrativeIds(props.entries);
   const log = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);
@@ -73,7 +78,7 @@ export default function MobileChat(props: Props) {
           <p>{props.openingBusy ? "正在生成开局…" : props.openingError || "世界已创建，点击按钮生成开场"}</p>
           {!props.openingBusy && <button className="primary generate-world" type="button" onClick={props.onRetryOpening}>{props.openingError ? "重试生成世界" : "生成世界"}</button>}
         </div>}
-        {props.entries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={props.packId} automatic={entry.id === props.entries.filter(e => e.role === 'assistant').slice(-1)[0]?.id}/>)}
+        {props.entries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={props.packId} adjudication={decisionOwners.get(entry.turn) === entry.id ? props.adjudication : undefined} fields={props.fields} busy={props.busy} onChanged={props.onReviewChanged} automatic={entry.id === props.entries.filter(e => e.role === 'assistant').slice(-1)[0]?.id}/>)}
         {props.busy && !props.correcting && !props.entries.some(entry => entry.streaming) && <div className="chat-generating" role="status">正在叙述与结算…</div>}
       </div>
       {!atBottom && <button type="button" className="chat-to-latest" onClick={latest}>回到最新 ↓</button>}

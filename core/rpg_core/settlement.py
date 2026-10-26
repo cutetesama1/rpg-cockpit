@@ -8,10 +8,10 @@ from .guardrails import GuardrailError
 from .state import cancelled_turns
 
 DOMAINS=('stats','status','inventory','flags','skills','wardrobe','scene','action')
-NAMES=('damage','heal','add_stat','set_stat','add_item','set_flag','enter_scene','learn_skill','learn_catalog_skills','update_clothing','update_portrait','set_value','record_fact','update_worldbook','roll','acquire_item')
+NAMES=('damage','heal','add_stat','set_stat','add_item','set_flag','enter_scene','learn_skill','learn_catalog_skills','update_clothing','update_portrait','set_value','record_fact','update_worldbook','roll','acquire_item','credit_currency')
 class Operation(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    name: Literal['damage','heal','add_stat','set_stat','add_item','set_flag','enter_scene','learn_skill','learn_catalog_skills','update_clothing','update_portrait','set_value','record_fact','update_worldbook','roll','acquire_item']
+    name: Literal['damage','heal','add_stat','set_stat','add_item','set_flag','enter_scene','learn_skill','learn_catalog_skills','update_clothing','update_portrait','set_value','record_fact','update_worldbook','roll','acquire_item','credit_currency']
     args: dict[str,Any]=Field(default_factory=dict)
     evidence: str=Field(min_length=1,max_length=500)
     source: Literal['narrative','skill_cost']='narrative'
@@ -101,6 +101,8 @@ from .dynamic_worldbook import PROMPT as WORLD_MEMORY_PROMPT
 PROMPT += WORLD_MEMORY_PROMPT
 from .accuracy_policy import PROMPT as ACCURACY_PROMPT
 PROMPT += ACCURACY_PROMPT
+from .currency import PROMPT as CURRENCY_PROMPT
+PROMPT += CURRENCY_PROMPT
 
 def facts(session, *, include_internal=False):
     cancelled=cancelled_turns(session.ledger.events);result={}
@@ -165,6 +167,8 @@ def settle(session,turn,narrative,working,skills,scene_id,totals):
     policy=options(session)
     request['player_input']=current_input(session,turn)
     request['policy']=policy
+    from .currency import context as currency_context
+    request['currency_context']=currency_context(session)
     if request['player_input']:
         lore=session.assembler.select_lore(action={'text':narrative+'\n'+json.dumps(request['player_input'],ensure_ascii=False)},recent_events=[])
         request['world_rules']['entries']=[e for e in lore if not e['id'].startswith('dynamic.')]
@@ -224,6 +228,17 @@ def settle(session,turn,narrative,working,skills,scene_id,totals):
                                     except ValueError:pass  # Let the clothing tool preserve its specific error code.
 
                         if name=='enter_scene':args['scene_id']=unique_ref(args.get('scene_id',''),[{'id':s['id'],'name':s['title']} for s in request['scenes']])
+                    if name=='credit_currency':
+                        from .currency import resolve as resolve_currency
+                        money,note=resolve_currency(session,args,fuzzy=policy['fuzzy_identification'] or turn<0)
+                        if note['mode']=='world_conversion' and turn>=0:
+                            question=f"是否按世界内兑换规则，将 {note['source_amount']}{note['source_unit']} 记为 {note['delta']}{note['display_unit']}？"
+                            proposal.pending.append(Pending(title='货币兑换待确认',question=question,reason=note['conversion_reason'],evidence=op.evidence,operations=[op]))
+                            continue
+                        name='add_stat';args=money
+                        if policy['fuzzy_identification'] or turn<0:
+                            executor.limits.max_delta_per_turn.pop(money['field'],None)
+                        staged.append(('settlement.currency',note))
                     if op.estimated:
                         if turn>=0 and not policy['fuzzy_identification'] or not op.estimate_reason.strip() or name not in ('damage','heal','add_stat','set_stat','acquire_item','add_item'):
                             raise ValueError('估算需要开启模糊鉴定、合法操作和明确估算依据')

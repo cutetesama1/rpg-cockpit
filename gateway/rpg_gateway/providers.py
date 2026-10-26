@@ -519,7 +519,7 @@ class OpenAICompatibleProvider:
             return [{'role':'system','content':DIRECTOR_PROMPT},{'role':'user','content':json.dumps({k:request[k] for k in keys if k in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get('phase') == 'settlement':
             from rpg_core.settlement import PROMPT
-            keys=('player_input','policy','world_rules','dynamic_worldbook','dynamic_worldbook_index','known_npcs','narrative','determined_events','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
+            keys=('player_input','policy','currency_context','world_rules','dynamic_worldbook','dynamic_worldbook_index','known_npcs','narrative','determined_events','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
             return [{'role':'system','content':PROMPT+'\n# 本世界结算语义（仅作效果与背景参考；旧版逐工具调用、输出格式指令不适用）\n'+str(request.get('rules') or '')+'\n# 最终协议提醒\n只提交一次 settle_turn 完整草案；字段、目录、已收费用与累计限额以本次输入为准。'},
                     {'role':'user','content':json.dumps({key:request[key] for key in keys if key in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get("phase") == "skill_selection":

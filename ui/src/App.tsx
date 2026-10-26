@@ -44,6 +44,7 @@ import type {
 
 import MobileChat from "./components/MobileChat";
 import ChatMessage from "./components/ChatMessage";
+import { lastNarrativeIds } from "./narrativeReview";
 import InventoryPanel from "./components/InventoryPanel";
 import CorrectionPanel, { CorrectionIcon } from "./components/CorrectionPanel";
 import { useTextPlayback } from "./useTextPlayback";
@@ -647,6 +648,7 @@ export default function App() {
     latency_ms: 0,
   };
 
+  const decisionOwners = lastNarrativeIds(chatEntries);
   const wallpaper = wallpaperCss(theme);
   const correctionPanel = <CorrectionPanel open={correctionOpen} busy={busy || openingBusy} packId={status.pack.id} result={correctionResult} error={correctionError} onClose={() => setCorrectionOpen(false)} onSubmit={(mode,text,persist) => void correct(mode,text,persist)} onUndo={() => void reverseCorrection()}/>;
   const playbackControls = paced.playing && playback ? <div className="playback-toolbar"><button className="ghost small" type="button" onClick={paced.finish}>立即显示</button></div> : null;
@@ -667,7 +669,7 @@ export default function App() {
       )}
 
       {mobileLayout ? <>
-        <MobileChat correctionPanel={correctionPanel} correcting={correctionOpen} playbackControls={playbackControls} sendSerial={sendSerial} packId={status.pack.id} entries={chatEntries} draft={draft} modes={inputModes}
+        <MobileChat adjudication={status.adjudication} fields={status.fields} onReviewChanged={refresh} correctionPanel={correctionPanel} correcting={correctionOpen} playbackControls={playbackControls} sendSerial={sendSerial} packId={status.pack.id} entries={chatEntries} draft={draft} modes={inputModes}
           busy={busy} ready={ready} openingBusy={openingBusy} openingError={openingError}
           error={error} canSend={canSend} options={options} pickedCount={selectedSkills.length}
           extrasCount={selectedExtras.length} menuOpen={navOpen} onOpenMenu={() => setNavOpen(true)}
@@ -830,7 +832,7 @@ export default function App() {
                       {!openingBusy && !openingError && <button type="button" className="primary generate-world" onClick={() => void generateOpening()}>生成世界</button>}
                     </div>
                   ) : (
-                    chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={status.pack.id} automatic={entry.id === chatEntries.filter(e => e.role === "assistant").slice(-1)[0]?.id}/>)
+                    chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={status.pack.id} adjudication={decisionOwners.get(entry.turn) === entry.id ? status.adjudication : undefined} fields={status.fields} busy={busy || openingBusy} onChanged={refresh} automatic={entry.id === chatEntries.filter(e => e.role === "assistant").slice(-1)[0]?.id}/>)
                   )}
                   {last && !last.ok && (
                     <p className="muted">本回合已回滚，状态未改变。</p>

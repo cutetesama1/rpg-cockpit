@@ -18,3 +18,8 @@ test('keyboard closure restores height, overlay keyboard and viewport panning ar
   assert.deepEqual(visibleViewport({innerHeight:844,innerWidth:390,keyboardTop:500,visualOffsetTop:20}),{height:480,top:20});
   assert.equal(visibleViewport({innerHeight:844,innerWidth:390,visualHeight:400,scale:2}).height,844);
 });
+
+
+test('native viewport overrides stale keyboard height and browser panning on keyboard closure',()=>{
+  assert.deepEqual(visibleViewport({innerHeight:844,innerWidth:390,visualHeight:480,visualOffsetTop:160,native:{widthPx:390,heightPx:844,keyboardVisible:false}}),{height:844,top:0});
+});

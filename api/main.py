@@ -99,7 +99,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.996"
+API_VERSION = "0.997"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -1337,6 +1337,24 @@ def decide_adjudication(item_id: str,body: AdjudicationBody):
         except (ValueError,DecisionError) as exc:raise HTTPException(getattr(exc,'status',400),str(exc)) from None
         manager.auto_save()
         return {**result,**adjudication_view(manager.session,include_internal=body.include_internal)}
+
+
+class AdjudicationAnswerBody(BaseModel):
+    model_config={'extra':'forbid'}
+    pack_id: str
+    revision: str=Field(min_length=1,max_length=64)
+    request_id: str=Field(min_length=1,max_length=120,pattern=r'^[a-zA-Z0-9_.:-]+$')
+    accepted: bool=Field(strict=True)
+
+@app.post('/api/adjudications/{item_id}/answer')
+def answer_adjudication(item_id: str,body: AdjudicationAnswerBody):
+    from rpg_core.adjudication import answer
+    with manager.lock:
+        require_current_pack(body.pack_id)
+        try:result=answer(manager.session,item_id,body.accepted,body.request_id,body.revision)
+        except (ValueError,DecisionError) as exc:raise HTTPException(getattr(exc,'status',400),str(exc)) from None
+        manager.auto_save()
+        return {**result,**adjudication_view(manager.session)}
 
 
 # -- Character Card V2/V3 ------------------------------------------------

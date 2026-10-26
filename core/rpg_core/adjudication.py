@@ -147,8 +147,7 @@ def _validate(session, item, decision):
     if decision.action == 'confirm':
         if decision.operations is not None or decision.status_patch is not None:
             raise DecisionError('确认不能夹带修改，请先保存修改并重新预览')
-        from .accuracy_policy import acquisition_only
-        if not acquisition_only(item) and (item.get('basis') != digest(snapshot(session)) or item['anchor'] != session.turn):
+        if not _rebasable(session,item) and (item.get('basis') != digest(snapshot(session)) or item['anchor'] != session.turn):
             raise DecisionError('原状态或游戏进度已变化，请先修改并按当前状态重新校对', 409)
         operations = copy.deepcopy(item['operations']); patch = item['status_patch']
         narrative = item['evidence']; reason = decision.reason.strip()
@@ -201,7 +200,7 @@ def _undo_allowed(session, receipt):
     return not any(e.seq > receipt.seq and e.kind in authority and e.turn not in cancelled for e in session.ledger.events)
 
 
-def act(session, item_id, decision, *, include_internal=False):
+def act(session, item_id, decision, *, include_internal=False, quick_answer_hash=None):
     request_hash = digest([item_id, decision.model_dump(mode='json'), include_internal])
     for event in session.ledger.events:
         if event.kind == 'adjudication.decided' and event.payload.get('request_id') == decision.request_id:
@@ -215,6 +214,7 @@ def act(session, item_id, decision, *, include_internal=False):
                'request_id': decision.request_id, 'request_hash': request_hash,
                'item_visibility': item['visibility'], 'visibility': 'internal',
                'before_state': item['state'], 'source_turn': item['source_turn'], 'changes': []}
+    if quick_answer_hash:payload['quick_answer_hash']=quick_answer_hash
     staged = []
     if action in ('confirm', 'modify'):
         result = preview(session, item_id, decision, include_internal=include_internal)
@@ -258,8 +258,7 @@ def view(session, *, include_internal=False):
     result = []; basis = digest(snapshot(session))
     for item in visible.values():
         row = copy.deepcopy(item)
-        from .accuracy_policy import acquisition_only
-        row['stale'] = not acquisition_only(row) and (row.get('basis') != basis or row['anchor'] != session.turn)
+        row['stale'] = not _rebasable(session,row) and (row.get('basis') != basis or row['anchor'] != session.turn)
         row.pop('basis', None)
         if row['state'] in ('confirmed', 'rejected'):
             receipt = next(e for e in reversed(session.ledger.events) if e.kind == 'adjudication.decided' and e.payload.get('id') == row['id'])
@@ -280,3 +279,33 @@ def view(session, *, include_internal=False):
 
 def blocks_gameplay_undo(session, turn):
     return any(item['state'] == 'confirmed' and item.get('anchor', item['source_turn']) >= turn for item in items_for(session).values())
+
+
+def _rebasable(session,item):
+    from .accuracy_policy import acquisition_only
+    if acquisition_only(item):return True
+    ops=item.get('operations',[])
+    if not ops and not item.get('status_patch') and item.get('basis'):return True
+    return bool(ops) and not item.get('status_patch') and item.get('anchor')==session.turn and all(
+        op.get('name') in ('damage','heal','add_stat','credit_currency') and op.get('source','narrative')=='narrative' for op in ops)
+
+
+def answer(session,item_id,accepted,request_id,expected_revision):
+    """One explicit yes/no click; preview+validation+receipt under the API lock.
+
+    The immutable quick-answer hash makes response-loss retries idempotent even
+    after the original preview revision has advanced. No model is invoked.
+    """
+    fingerprint=digest([session.pack.manifest.id,item_id,accepted,request_id,expected_revision])
+    for event in session.ledger.events:
+        if event.kind=='adjudication.decided' and event.payload.get('request_id')==request_id:
+            if event.payload.get('quick_answer_hash')!=fingerprint:raise DecisionError('该请求编号已用于另一项裁定',409)
+            if event.payload.get('item_visibility')=='internal':raise DecisionError('未找到该待裁定事项',404)
+            return {'reused':True,'receipt_id':event.seq}
+    item=_get(session,item_id,False)
+    if item['state']!='pending':raise DecisionError('此问题已经处理，请刷新',409)
+    decision=Decision(request_id=request_id,revision=expected_revision,action='confirm' if accepted else 'reject',reason='玩家在叙述下方选择'+('是' if accepted else '否'))
+    if accepted:
+        token=preview(session,item_id,decision)['preview_token']
+        decision=decision.model_copy(update={'preview_token':token})
+    return act(session,item_id,decision,quick_answer_hash=fingerprint)

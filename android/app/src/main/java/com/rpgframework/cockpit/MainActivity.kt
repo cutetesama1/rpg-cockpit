@@ -143,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor(Color.parseColor("#11151b"))
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    publishViewport()
+                    publishViewport(force = true)
                 }
             }
             setDownloadListener { url, _, disposition, mime, _ ->
@@ -227,15 +227,33 @@ class MainActivity : AppCompatActivity() {
         startBackend()
     }
 
-    private fun publishViewport() {
+    private var lastViewportSignature = ""
+    private var queuedViewportSignature = ""
+    private val viewportDispatch = Runnable {
+        queuedViewportSignature = ""
+        if (!::webView.isInitialized || webView.width <= 0 || webView.height <= 0) return@Runnable
+        val signature = "${webView.width}:${webView.height}:$imeVisible"
+        if (signature == lastViewportSignature) return@Runnable
+        lastViewportSignature = signature
+        Log.d(TAG, "viewport committed ${webView.width}x${webView.height} keyboard=$imeVisible")
+        webView.evaluateJavascript("window.__rpgNativeViewport={widthPx:${webView.width},heightPx:${webView.height},keyboardVisible:$imeVisible};window.dispatchEvent(new Event('rpg-native-viewport'));", null)
+    }
+
+    private fun publishViewport(force: Boolean = false) {
         if (!::webView.isInitialized || webView.width <= 0 || webView.height <= 0) return
-        val script = "window.__rpgNativeViewport={widthPx:${webView.width},heightPx:${webView.height},keyboardVisible:$imeVisible};window.dispatchEvent(new Event('rpg-native-viewport'));"
-        webView.evaluateJavascript(script, null)
+        val signature = "${webView.width}:${webView.height}:$imeVisible"
+        if (force) lastViewportSignature = ""
+        if (signature == lastViewportSignature || signature == queuedViewportSignature) return
+        queuedViewportSignature = signature
+        handler.removeCallbacks(viewportDispatch)
+        handler.postDelayed(viewportDispatch, 80)
     }
 
     private fun installKeyboardInsets(root: View) {
         var barsBottom = 0
         var imeBottom = 0
+        var animating = false
+        var pendingInsets: WindowInsetsCompat? = null
         fun applyInsets(insets: WindowInsetsCompat) {
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -249,31 +267,53 @@ class MainActivity : AppCompatActivity() {
             webView.post { publishViewport() }
         }
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
-            applyInsets(insets)
+            pendingInsets = insets
+            if (!animating) applyInsets(insets)
             insets
         }
         ViewCompat.setWindowInsetsAnimationCallback(root, object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
-            override fun onProgress(insets: WindowInsetsCompat, runningAnimations: MutableList<WindowInsetsAnimationCompat>): WindowInsetsCompat {
-                applyInsets(insets)
-                return insets
+            override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                if (animation.typeMask and WindowInsetsCompat.Type.ime() != 0) animating = true
+            }
+            override fun onProgress(insets: WindowInsetsCompat, runningAnimations: MutableList<WindowInsetsAnimationCompat>): WindowInsetsCompat = insets
+            override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                if (animation.typeMask and WindowInsetsCompat.Type.ime() != 0) {
+                    animating = false
+                    (ViewCompat.getRootWindowInsets(root) ?: pendingInsets)?.let { applyInsets(it) }
+                }
             }
         })
-        // Some OEM keyboards report visible-window changes without IME Insets.
-        root.viewTreeObserver.addOnGlobalLayoutListener {
-            if (imeBottom == 0) {
-                val visible = Rect()
-                root.getWindowVisibleDisplayFrame(visible)
-                val location = IntArray(2)
-                root.getLocationOnScreen(location)
-                val overlap = (location[1] + root.height - visible.bottom).coerceAtLeast(0)
-                val fallback = if (overlap > root.height * 0.15) overlap else 0
-                imeVisible = fallback > 0
-                val bottom = maxOf(barsBottom, fallback)
-                if (root.paddingBottom != bottom) root.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, bottom)
-            }
+        // Legacy/OEM fallback runs only when the OS visible window changes.
+        // Changing our own padding cannot schedule another fallback adjustment.
+        var lastFrame = ""
+        val fallback = Runnable {
+            if (animating || imeBottom > 0) return@Runnable
+            val visible = Rect()
+            root.getWindowVisibleDisplayFrame(visible)
+            val location = IntArray(2)
+            root.getLocationOnScreen(location)
+            val overlap = (location[1] + root.height - visible.bottom).coerceAtLeast(0)
+            val keyboard = if (overlap > root.height * 0.15) overlap else 0
+            imeVisible = keyboard > 0
+            val bottom = maxOf(barsBottom, keyboard)
+            if (root.paddingBottom != bottom) root.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, bottom)
             publishViewport()
         }
-        webView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> publishViewport() }
+        root.viewTreeObserver.addOnGlobalLayoutListener {
+            val visible = Rect()
+            root.getWindowVisibleDisplayFrame(visible)
+            val frame = "${visible.left}:${visible.top}:${visible.right}:${visible.bottom}:${root.height}"
+            if (frame != lastFrame) {
+                lastFrame = frame
+                if (!animating && imeBottom == 0) {
+                    handler.removeCallbacks(fallback)
+                    handler.postDelayed(fallback, 100)
+                }
+            }
+        }
+        webView.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) publishViewport()
+        }
         ViewCompat.requestApplyInsets(root)
     }
 
@@ -333,6 +373,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(viewportDispatch)
         executor.shutdownNow()
         super.onDestroy()
     }

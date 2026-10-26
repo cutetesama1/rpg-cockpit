@@ -1,5 +1,6 @@
 import type { Action, EventRecord, InputMode } from "./types";
 export interface ChatEntry {
+  backendNotes?: string[];
   streaming?: boolean;
   id: string;
   turn: number;
@@ -29,6 +30,7 @@ export function buildChatHistory(events: EventRecord[], names: Record<string, st
   const cancelled = new Set(sorted.filter(e => e.kind === "turn.rolled_back").map(e => e.turn));
   const failed = new Set(sorted.filter(e => e.turn >= 0 && e.kind === "turn.rolled_back" && e.payload.reason !== "undo").map(e => e.turn));
   const entries: ChatEntry[] = [];
+  const backendNotes = new Map<number,string[]>();
   for (const event of sorted) {
     if (undone.has(event.turn)) continue;
     if (event.kind === "correction.applied") {
@@ -51,12 +53,20 @@ export function buildChatHistory(events: EventRecord[], names: Record<string, st
       if (typeof text === "string" && text.trim()) entries.push({ id: `ai-${event.seq}`, turn: event.turn, role: "assistant", text, meta: [] });
     } else if (event.kind === "settlement.warning" && !failed.has(event.turn)) {
       const notes = event.payload.uncertain;
-      if (Array.isArray(notes) && notes.length) entries.push({ id: `settlement-warning-${event.seq}`, turn: event.turn,
-        role: "notice", text: `待确认，相关状态保持原值：${notes.filter(note => typeof note === "string").join("；")}`, meta: [] });
+      if (Array.isArray(notes) && notes.length) {
+        backendNotes.set(event.turn, [...(backendNotes.get(event.turn) ?? []), ...notes.filter((note): note is string => typeof note === "string")]);
+      }
+    } else if (event.kind === "settlement.currency" && !failed.has(event.turn)) {
+      const p=event.payload;
+      const note=p.mode === "world_nominal" ? `${String(p.source_amount)}${String(p.source_unit)}按世界金钱口径记账（显示单位：${String(p.display_unit || "当前货币")}），未执行现实汇率兑换。` : p.mode === "world_conversion" ? `已按世界内兑换依据记账：${String(p.source_amount)}${String(p.source_unit)} → ${String(p.delta)}${String(p.display_unit || "当前货币")}。` : "";
+      if (note) backendNotes.set(event.turn,[...(backendNotes.get(event.turn) ?? []),note]);
     } else if (event.kind === "turn.rolled_back" && failed.has(event.turn)) {
       const errors = event.payload.errors;
       entries.push({ id: `error-${event.seq}`, turn: event.turn, role: "notice", text: `本回合未完成，状态已回滚。${Array.isArray(errors) ? errors.join("；") : ""}`, meta: [] });
     }
   }
-  return entries;
+  const last = new Map<number,string>();
+  for (const entry of entries) if (entry.role === "assistant") last.set(entry.turn,entry.id);
+  return entries.map(entry => entry.id === last.get(entry.turn) && backendNotes.has(entry.turn)
+    ? {...entry,backendNotes:Array.from(new Set(backendNotes.get(entry.turn)))} : entry);
 }

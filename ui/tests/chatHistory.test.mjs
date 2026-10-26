@@ -39,7 +39,7 @@ test("untrusted prose stays plain text and AI-only legacy saves do not invent us
 test("uncertain settlement is visible and survives reload; undo and failed turns hide it", () => {
   const ledger=[e(1,1,"turn.started",{action:{kind:"text",text:"继续"}}),e(2,1,"settlement.warning",{uncertain:["新披风没有目录映射"]}),e(3,1,"narrative.generated",{narrative:"你擦伤了手臂。"}),e(4,1,"turn.committed",{})];
   const chat=history(ledger);
-  assert.equal(chat.length,3);assert.equal(chat[1].role,"notice");assert.match(chat[1].text,/待确认.*新披风/);
+  assert.equal(chat.length,2);assert.equal(chat[1].role,"assistant");assert.match(chat[1].backendNotes[0],/新披风/);
   assert.deepEqual(history(JSON.parse(JSON.stringify(ledger))),chat);
   assert.equal(history([...ledger,e(5,1,"turn.rolled_back",{reason:"undo"})]).length,0);
   assert.ok(!history([...ledger,e(5,1,"turn.rolled_back",{reason:"guardrail_or_llm_failure"})]).some(m=>m.text.includes("待确认")));

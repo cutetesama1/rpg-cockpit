@@ -81,6 +81,8 @@ function describe(event: EventRecord): string {
       return `结算完成 · ${String(payload.operations ?? 0)} 项操作 · ${String(payload.attempts ?? 1)} 次尝试`;
     case "settlement.rejected":
       return `结算草案未提交 · ${String(payload.failed_at ?? "")}：${String(payload.error ?? "")}`;
+    case "settlement.currency":
+      return `金钱记账 · ${String(payload.source_amount)}${String(payload.source_unit)} → ${String(payload.delta)}${String(payload.display_unit ?? "")}（${payload.mode === "world_nominal" ? "世界货币口径" : "本世界币种"}）`;
     case "settlement.warning":
       return `待确认，相关状态保持原值：${Array.isArray(payload.uncertain) ? payload.uncertain.join("；") : ""}`;
     case "clothing.checked": {

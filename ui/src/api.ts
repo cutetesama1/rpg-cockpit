@@ -399,6 +399,10 @@ export async function rollDice(pack_id: string, event_id: string, check: { kind:
   return readJson(await fetch("/api/dice/roll", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack_id, event_id, check }) }));
 }
 
+export async function answerAdjudication(itemId: string, body: {pack_id:string;revision:string;request_id:string;accepted:boolean}): Promise<import("./types").AdjudicationView & {reused:boolean}> {
+  return sendJson(`/api/adjudications/${encodeURIComponent(itemId)}/answer`, "POST", body);
+}
+
 export async function getAdjudications(includeInternal = false): Promise<import("./types").AdjudicationView> {
   return readJson(await fetch(`/api/adjudications${includeInternal ? "?include_internal=true" : ""}`));
 }

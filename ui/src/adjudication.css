@@ -60,3 +60,20 @@ body[data-mobile-layout="true"] .adjudication-orb { right:71px; bottom:calc(194p
 .inventory-panel summary { cursor:pointer; display:flex; justify-content:space-between; gap:10px; }
 .inventory-panel summary small { color:var(--muted); }
 .inventory-panel p { display:flex; justify-content:space-between; gap:12px; overflow-wrap:anywhere; }
+
+.backend-notes,.inline-answers{margin:12px 0;border:1px solid var(--line,#7b9a8533);border-radius:12px;background:color-mix(in srgb,var(--panel,#14252b) 92%,transparent);overflow:hidden}
+.backend-notes>summary,.inline-answers>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;min-height:44px;box-sizing:border-box;cursor:pointer;list-style:none;font-size:.8rem;color:var(--muted,#a7b8af)}
+.backend-notes>summary::-webkit-details-marker,.inline-answers>summary::-webkit-details-marker{display:none}
+.backend-notes[open]>summary>span,.inline-answers[open]>summary>span{transform:rotate(180deg)}
+.backend-notes ul{margin:0;padding:0 18px 14px 32px;line-height:1.8;font-size:.8rem;color:var(--muted,#a7b8af);overflow-wrap:anywhere}
+.inline-answers{margin-top:18px}
+.inline-answers>summary{color:var(--accent,#b5cdb4)}
+.inline-answer-list{padding:0 14px}
+.inline-answer{padding:14px 0;border-top:1px solid var(--line,#7b9a8526)}
+.inline-answer>p{font-size:.9rem!important;line-height:1.65!important;white-space:pre-wrap}
+.inline-answer>small{display:block;margin-top:7px;font-size:.75rem;color:var(--muted,#a7b8af);line-height:1.65;overflow-wrap:anywhere}
+.inline-answer-buttons{display:flex;gap:10px;margin-top:12px}
+.inline-answer-buttons button{min-width:76px;min-height:42px;border-radius:12px;font-size:.85rem}
+.inline-answer-buttons button:first-child{background:color-mix(in srgb,var(--accent,#b5cdb4) 16%,transparent);border-color:var(--accent,#b5cdb4)}
+.inline-answer-result{display:block;color:var(--accent,#b5cdb4);font-size:.8rem;margin-top:10px}
+.inline-answer-message{margin:0!important;padding:12px 14px;font-size:.8rem!important;line-height:1.7!important;color:var(--muted,#a7b8af)}

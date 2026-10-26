@@ -1,6 +1,6 @@
 [project]
 name = "rpg-framework"
-version = "0.996.0"
+version = "0.997.0"
 description = "通用 AI 文字冒险 RPG 框架 · P0 骨架"
 requires-python = ">=3.11"
 
