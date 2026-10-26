@@ -836,7 +836,7 @@ export default function App() {
                       )}
                     </div>
                   ) : (
-                    chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry}/>)
+                    chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={status.pack.id} automatic={entry.id === chatEntries.filter(e => e.role === "assistant").slice(-1)[0]?.id}/>)
                   )}
                   {last && !last.ok && (
                     <p className="muted">本回合已回滚，状态未改变。</p>

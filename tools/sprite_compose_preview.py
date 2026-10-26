@@ -85,7 +85,24 @@ def conditions_pass(conds, ctx) -> bool:
     return all(compare(ctx.get(c["field"]), c["op"], c["value"]) for c in conds)
 
 
+def portrait_context(state, sheet=None):
+    ctx = dict(state)
+    pose = ctx.get('pose', 'stand')
+    ctx.setdefault('eye_state', 'auto');ctx.setdefault('gaze', 'forward')
+    ctx['portrait_left_arm'] = ctx.get('left_arm') if ctx.get('left_arm') not in (None, 'auto') else 'cover' if pose=='guard' else 'idle'
+    ctx['portrait_right_arm'] = ctx.get('right_arm') if ctx.get('right_arm') not in (None, 'auto') else 'cover' if pose=='guard' else 'hold' if pose in ('hold','attack','cast') or ctx.get('handheld') not in (None,'none') else 'idle'
+    held=ctx.get('handheld','none')
+    if sheet and ctx.get('right_arm') in (None,'auto') and held!='none':
+        modes=sheet.get('handheld_modes',{}).get(held,[])
+        if modes and (pose not in ('guard','attack','cast') or ctx['portrait_right_arm'] not in modes):ctx['portrait_right_arm']=sheet.get('arm_preferences',{}).get(held,'hold')
+    ctx['portrait_mouth'] = ctx.get('mouth_shape', 'auto')
+    if ctx['portrait_mouth']=='auto' and pose=='talk':ctx['portrait_mouth']='chew'
+    ctx['_portrait_resolved'] = True
+    return ctx
+
+
 def visible(layer, ctx, explicit: bool) -> bool:
+    if not ctx.get('_portrait_resolved'):ctx=portrait_context(ctx)
     if layer.get("adult") and not explicit:
         return False
     if not conditions_pass(layer.get("when"), ctx):
@@ -104,7 +121,7 @@ def resolve(template: str, ctx) -> str:
 
 def compose(pack: Path, sheet: dict, state: dict, *, explicit=False, view="full", frame=0, fields=None):
     """Mirror SpriteCanvas: state defaults/rules, camera, source stride, tint/mask."""
-    ctx = dict(state)
+    ctx = portrait_context(state,sheet)
     for field in fields or []:
         options = field.get("enum_values") or []
         value = ctx.get(field["id"])
@@ -156,7 +173,7 @@ def compose(pack: Path, sheet: dict, state: dict, *, explicit=False, view="full"
         dx, dy = layer.get("x", 0), layer.get("y", 0)
         for y in range(ch):
             for x in range(cw):
-                r, g, b, a = image.rgba_at(cx + x - dx + offset(image), cy + y - dy, tint, layer.get("tint_field") in ("outfit_color", "pants_color"))
+                r, g, b, a = image.rgba_at(cx + x - dx + offset(image), cy + y - dy, tint, (bool(layer.get("wear_field")) or layer.get("tint_field") in ("outfit_color", "pants_color")))
                 mix = clothing_wear_pixel(cx + x - dx + offset(image), cy + y - dy, ctx.get(layer.get("wear_field"), "intact"))
                 if a and mix:
                     r, g, b = [int(c * (1 - mix) + w * mix) for c, w in zip((r, g, b), (60, 52, 45))]

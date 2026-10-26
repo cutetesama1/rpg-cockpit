@@ -123,6 +123,17 @@ def test_existing_game_not_overwritten_and_newer_version_is_importable_with_warn
     assert (path/'character-card.json').read_bytes()==before
 
 
-def test_placeholder_expansion_is_bounded_before_allocating_large_output():
+def test_placeholder_expansion_is_bounded_before_allocating_large_output(monkeypatch):
+    monkeypatch.setattr("rpg_content.character_cards.MAX_EXPANDED_TEXT",1024)
     value=card();value['data']['nickname']='名'*200;value['data']['description']='{{char}}'*31000
     with pytest.raises(CardError,match='展开'):preview_card(encoded(value),'expansion.json',CardOptions())
+
+
+@pytest.mark.parametrize('format',['json','png','charx'])
+def test_character_card_json_over_four_mb_is_accepted_without_losing_data(format):
+    value=card();value['data']['extensions']['large_preserved']='x'*(4*1024*1024+1)
+    raw=encoded(value) if format=='json' else png(ccv3=value) if format=='png' else charx(value)
+    parsed,kind,_=parse_card(raw,'large.'+format)
+    assert kind==format and parsed==value
+    result=preview_card(raw,'large.'+format,CardOptions())
+    assert result['raw']['data']['extensions']['large_preserved']==value['data']['extensions']['large_preserved']

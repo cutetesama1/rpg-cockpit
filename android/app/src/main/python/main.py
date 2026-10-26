@@ -95,6 +95,19 @@ def _free_port(preferred: int = PREFERRED_PORT) -> int:
         return int(sock.getsockname()[1])
 
 
+def _native_preflight() -> None:
+    try:
+        import pydantic_core
+        from pydantic_core import ArgsKwargs, SchemaValidator
+        from pydantic import BaseModel
+        class Probe(BaseModel):
+            value: int
+        assert Probe(value=1).value == 1
+        _log(f"native dependency ready: pydantic-core {pydantic_core.__version__}")
+    except (ImportError, OSError, AssertionError) as exc:
+        raise RuntimeError("安卓原生依赖未正确加载：请安装包含本机架构的修复版 APK；重新填写 API 或删除存档无法解决。" + str(exc)) from exc
+
+
 def start_server(files_dir: str) -> int:
     """启动本地 FastAPI 服务并返回端口号（幂等）。"""
     global _server, _thread, _port, _api
@@ -106,6 +119,7 @@ def start_server(files_dir: str) -> int:
     _log(f"files base = {base}")
     _log(f"backend root = {backend}")
 
+    _native_preflight()
     _api = _load_app(backend)
     _log(f"fastapi app loaded: {getattr(_api, 'API_VERSION', '?')}")
 

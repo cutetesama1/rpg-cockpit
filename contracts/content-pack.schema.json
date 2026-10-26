@@ -756,11 +756,43 @@
               "jump",
               "attack",
               "cast",
-              "hurt"
+              "hurt",
+              "read",
+              "bow",
+              "dodge",
+              "cheer",
+              "rest"
             ],
             "type": "string"
           },
           "title": "Motions",
+          "type": "object"
+        },
+        "catalog_version": {
+          "default": 0,
+          "title": "Catalog Version",
+          "type": "integer"
+        },
+        "motion_notes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Motion Notes",
+          "type": "object"
+        },
+        "pose_arms": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "enum": [
+                "idle",
+                "cover",
+                "hold"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Pose Arms",
           "type": "object"
         },
         "revision": {

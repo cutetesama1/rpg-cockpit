@@ -191,6 +191,7 @@ def test_custom_director_model_is_optional_and_json_only():
     payload=OpenAICompatibleProvider(base_url='http://unused',model='test')._payload(d.requests[0])
     assert 'tools' not in payload and len(payload['messages'])==2
 
+@pytest.mark.usefixtures("strict_settlement")
 def test_settlement_repair_and_whole_turn_retry_do_not_reroll():
     g,p=game()
     text='你观察着码头，风吹过栏杆。'

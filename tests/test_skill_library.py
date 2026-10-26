@@ -145,6 +145,7 @@ def test_post_narrative_learning_uses_canonical_definition_and_use_cost_once(wor
     game.undo();assert not game.all_skills() and entry.skill.id not in game.executor.skill_ids
 
 @pytest.mark.parametrize('bad',['override','desire','negative','unknown_ref','prerequisite'])
+@pytest.mark.usefixtures("strict_settlement")
 def test_invalid_learning_is_atomic_and_retracts_preview(world,library,bad):
     ref=library.manifest.id+':magic_fire_low_01';text='你经过练习，终于学会了火弹。';ids=('magic_fire_low_01',)
     extra={}
@@ -161,6 +162,7 @@ def test_invalid_learning_is_atomic_and_retracts_preview(world,library,bad):
     assert updates[-1]['text']==''
     assert not any(e.kind=='skill.learned' for e in game.ledger.events)
 
+@pytest.mark.usefixtures("strict_settlement")
 def test_preset_world_blocks_legacy_generated_skill(world,library):
     arbitrary=LlmResponse(tool_calls=[ToolCall(id='invent',name='learn_skill',args={'id':'made_up','name':'模型自造技能'})])
     game,_=game_with_catalog(world,library,[arbitrary,say('你试着学习。')])
