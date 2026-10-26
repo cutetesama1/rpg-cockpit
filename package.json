@@ -1,7 +1,7 @@
 {
   "name": "rpg-framework",
   "private": true,
-  "version": "0.994.0",
+  "version": "0.995.0",
   "description": "叙事驾驶舱桌面壳（Tauri v2）——仅用于打包/运行桌面版，前端在 ui/ 里构建",
   "scripts": {
     "desktop:dev": "tauri dev",

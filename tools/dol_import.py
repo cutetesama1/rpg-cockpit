@@ -151,6 +151,10 @@ def _discover(dol_img: Path, with_clothes: bool) -> tuple[list[tuple[Path, str]]
                                   "arms": [], "upper_parts": [], "hair_offsets": {},
                                   "closeup_chest": [], "closeup_mouth": [], "closeup_arse": []}
 
+    from dol_clothing_geometry import read_metadata, panel_for
+    html = dol_img.parent / "Degrees of Lewdity.html"
+    geometry = read_metadata(html) if html.is_file() else {"upper": {}, "lower": {}}
+    info["upper_geometry"] = geometry["upper"]
     body_dir = dol_img / "body"
     for name in _stems(body_dir):
         if name.startswith("base-") and name != "base-head":
@@ -299,7 +303,9 @@ def _discover(dol_img: Path, with_clothes: bool) -> tuple[list[tuple[Path, str]]
                     for size in range(7):
                         if not panels:
                             break
-                        selected = min(panels, key=lambda n: (abs(n - size), n))
+                        selected = panel_for(size, panels, geometry["upper"].get(name))
+                        if selected is None or selected not in panels:
+                            continue
                         dst = f"ui/sprites/clothes/upper/{name}/panel-{selected}.png"
                         files.append((panels[selected], dst))
                         info["upper_parts"].append((name, "front", size, dst))
@@ -336,7 +342,7 @@ def _build_layers(info: dict) -> list[dict]:
     for style, part, length, src in info.get("hair_parts", []):
         add({"id": f"hair_{part}_{_slug(style)}_{length}",
              "src": src,
-             "z": {"back": 8, "fringe": 55, "sides": 9}[part],
+             "z": {"back": 8, "fringe": 56, "sides": 55}[part],
              "tint_field": "hair_color",
              "y": info.get("hair_offsets", {}).get(f"{style}/{length}", 0),
              "when": [_cond("hair_style", "==", style), _cond("hair_length", "==", length)]})
@@ -374,7 +380,7 @@ def _build_layers(info: dict) -> list[dict]:
         if size is not None:
             conditions.append(_cond("breast_size", "==", size))
         add({"id": f"upper_piece_{_slug(garment)}_{part}_{size}", "src": src,
-             "z": 51 if part == "front" else 52,
+             "z": 51 if part == "front" else 49,
              "tint_field": "outfit_color", "wear_field": "upper_condition", "when": conditions})
 
 

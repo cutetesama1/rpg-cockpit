@@ -139,11 +139,11 @@ def upgrade(pack:Path,dol:Path):
     for body in fields['body_type']['enum_values']:
         for side,modes in [('left',['cover']),('right',['cover','hold'])]:
             for mode in modes:
-                candidates=[img/'body'/f'{side}arm{mode}-{body}.png',img/'body'/f'{side}-arm-{mode}.png']
+                candidates=[img/'body'/f'{side}-arm-{mode}.png',img/'body'/f'{side}arm{mode}-{body}.png']
                 src=next((p for p in candidates if p.exists()),None)
                 if src is None:continue
                 relative=copy(src,f'ui/sprites/portrait/arms/{side}-{mode}-{body}.png')
-                add(f'arm_{side}_{mode}_{body}',relative,53,[condition('body_type',body),condition(f'portrait_{side}_arm',mode)])
+                add(f'arm_{side}_{mode}_{body}',relative,52,[condition('body_type',body),condition(f'portrait_{side}_arm',mode)])
     for garment in fields['upper']['enum_values']:
         directory=img/'clothes/upper'/garment
         for side,modes in [('left',['cover']),('right',['cover','hold'])]:

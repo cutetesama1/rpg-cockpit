@@ -24,6 +24,6 @@ def read_metadata(html: Path):
 def panel_for(size,panels,metadata=None):
     """Null means no overlay, never the nearest larger panel."""
     setting=(metadata or {}).get('breast_img')
-    if isinstance(setting,dict):return setting.get(size)
+    if isinstance(setting,dict):return setting.get(size,setting.get(str(size)))
     if setting==0:return None
     return size if size in panels else None
