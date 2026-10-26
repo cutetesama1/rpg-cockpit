@@ -1,0 +1,61 @@
+{
+  "additionalProperties": false,
+  "description": "Compatible speech API; secrets never leave the backend.",
+  "properties": {
+    "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "mode": {
+      "default": "imported",
+      "enum": [
+        "imported",
+        "automatic"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "base_url": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Base Url",
+      "type": "string"
+    },
+    "api_key": {
+      "default": "",
+      "maxLength": 4000,
+      "title": "Api Key",
+      "type": "string"
+    },
+    "model": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Model",
+      "type": "string"
+    },
+    "voice": {
+      "default": "alloy",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Voice",
+      "type": "string"
+    },
+    "speed": {
+      "default": 1.0,
+      "maximum": 4,
+      "minimum": 0.25,
+      "title": "Speed",
+      "type": "number"
+    },
+    "timeout": {
+      "default": 60,
+      "maximum": 180,
+      "minimum": 1,
+      "title": "Timeout",
+      "type": "number"
+    }
+  },
+  "title": "VoiceSettings",
+  "type": "object"
+}

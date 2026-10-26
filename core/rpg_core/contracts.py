@@ -769,7 +769,7 @@ class SettlerOutput(BaseModel):
 # --------------------------------------------------------------------------
 # 7. LlmRole / Router
 # --------------------------------------------------------------------------
-LlmRoleName = Literal["narrator", "settler", "arbiter", "setup", "director", "corrector"]
+LlmRoleName = Literal["narrator", "settler", "arbiter", "setup", "director", "corrector", "voice_cast"]
 
 
 class LlmProfile(BaseModel):
@@ -798,6 +798,7 @@ class LlmRolesConfig(BaseModel):
     director: LlmProfile = Field(default_factory=lambda: LlmProfile(temperature=0.3))
     # None inherits the effective backend connection; the call remains independent.
     corrector: LlmProfile | None = None
+    voice_cast: LlmProfile | None = None
 
 
 class ProviderSettings(BaseModel):
@@ -821,6 +822,19 @@ class ProviderSettings(BaseModel):
     retry_backoff_ms: int = Field(default=500, ge=0, le=10000)
 
 
+class VoiceSettings(BaseModel):
+    """Compatible speech API; secrets never leave the backend."""
+    model_config = ConfigDict(extra="forbid")
+    enabled: bool = False
+    mode: Literal["imported", "automatic"] = "imported"
+    base_url: str = Field(default="", max_length=2000)
+    api_key: str = Field(default="", max_length=4000)
+    model: str = Field(default="", max_length=200)
+    voice: str = Field(default="alloy", min_length=1, max_length=200)
+    speed: float = Field(default=1.0, ge=0.25, le=4, allow_inf_nan=False)
+    timeout: float = Field(default=60, ge=1, le=180, allow_inf_nan=False)
+
+
 class LlmSettings(BaseModel):
     """持久化模型设置：角色 → profile，provider 名 → 端点信息。
 
@@ -830,6 +844,7 @@ class LlmSettings(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    speech: VoiceSettings = Field(default_factory=VoiceSettings)
     roles: LlmRolesConfig = Field(default_factory=LlmRolesConfig)
     providers: dict[str, ProviderSettings] = Field(
         default_factory=lambda: {"openai": ProviderSettings()}

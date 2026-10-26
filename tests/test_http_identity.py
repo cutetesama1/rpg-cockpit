@@ -1,9 +1,11 @@
 import io,json,threading,urllib.error,urllib.request
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import pytest
+from rpg_core.contracts import VoiceSettings
 from rpg_gateway import default_settings,merge_update,build_router
 from rpg_gateway.providers import OpenAICompatibleProvider
 from rpg_gateway.model_list import list_endpoint_models,ModelListError
+from rpg_gateway.speech import synthesize
 from rpg_gateway.http_identity import USER_AGENT,cloudflare_1010_hint
 
 class Gateway(BaseHTTPRequestHandler):
@@ -65,17 +67,25 @@ def test_stream_fallback_keeps_identity(gateway):
 
 def test_all_model_roles_use_application_ua(gateway):
     base,server=gateway
-    roles=('narrator','settler','director','setup','arbiter','corrector')
+    roles=('narrator','settler','director','setup','arbiter','corrector','voice_cast')
     settings=merge_update(default_settings(),{'roles':{'separated':True,**{r:{'provider':'own','model':'own-model'} for r in roles}},'providers':{'own':{'preset':'custom','base_url':base,'api_key':'test-key-only','model':'own-model','max_retries':0}}})
     router=build_router(settings)
     for role in roles:router.complete(role,{'allow_tools':False})
-    assert len(server.received)==6 and all(r['ua']==USER_AGENT for r in server.received)
+    assert len(server.received)==7 and all(r['ua']==USER_AGENT for r in server.received)
 
-@pytest.mark.parametrize('kind',['models','complete','stream'])
+def test_speech_uses_same_identity_and_audio_accept(gateway):
+    base,server=gateway
+    audio,mime=synthesize(VoiceSettings(base_url=base,api_key='speech-test-only',model='own-speech'),'你好。','voice')
+    assert audio.startswith(b'ID3') and mime=='audio/mpeg'
+    assert server.received[-1]['ua']==USER_AGENT and server.received[-1]['authorization']=='Bearer speech-test-only'
+    assert 'audio/mpeg' in server.received[-1]['accept']
+
+@pytest.mark.parametrize('kind',['models','complete','stream','speech'])
 def test_cloudflare_1010_is_explicit_and_does_not_echo_secrets(gateway,kind):
     base,server=gateway;server.block=True
     with pytest.raises((RuntimeError,ValueError)) as caught:
         if kind=='models':list_endpoint_models(base,'never-display-key')
+        elif kind=='speech':synthesize(VoiceSettings(base_url=base,api_key='never-display-key',model='speech'),'你好。','voice')
         else:
             provider=OpenAICompatibleProvider(base,api_key='never-display-key',model='own-model',max_retries=0)
             provider.complete({'allow_tools':False}) if kind=='complete' else provider.stream({'allow_tools':False},lambda text:None)

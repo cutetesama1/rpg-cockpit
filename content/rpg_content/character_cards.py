@@ -6,7 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 MAX_FILE=20*1024*1024
-MAX_JSON=4*1024*1024
+MAX_EXPANDED_TEXT=64*1024*1024
 VERSION=1
 MAPPINGS=('description','personality','scenario','examples','worldbook','system_prompt','post_history_instructions')
 
@@ -25,7 +25,6 @@ def _hash(value):return hashlib.sha256(value).hexdigest()
 def _dump(value):return json.dumps(value,ensure_ascii=False,sort_keys=True,allow_nan=False,separators=(',',':'))
 
 def _json(raw):
-    if len(raw)>MAX_JSON:raise CardError('角色卡 JSON 不能超过 4 MB')
     def pairs(items):
         result={}
         for key,value in items:
@@ -84,7 +83,6 @@ def _charx(raw):
                 seen.add(f.filename)
                 if f.flag_bits&1:raise CardError('暂不支持加密 CHARX，请先解密导出')
             if 'card.json' not in seen:raise CardError('CHARX 根目录缺少 card.json')
-            if archive.getinfo('card.json').file_size>MAX_JSON:raise CardError('CHARX 中 card.json 不能超过 4 MB')
             return _json(archive.read('card.json')), [f.filename for f in files if not f.is_dir()]
     except (zipfile.BadZipFile,NotImplementedError,RuntimeError,OSError) as exc:raise CardError(f'CHARX 无法读取：{exc}') from None
 
@@ -147,7 +145,7 @@ def preview_card(raw,filename,options:CardOptions):
         for match in re.finditer(pattern,value,flags=re.I):
             replacement=nickname if (match.group(1) or match.group(2)).lower() in ('char','bot') else user
             length+=len(replacement)-len(match.group(0))
-        if length>MAX_JSON or expanded_budget+length>MAX_JSON*2:raise CardError('角色卡占位符展开后的文本过长，请缩短昵称或模板内容')
+        if length>MAX_EXPANDED_TEXT or expanded_budget+length>MAX_EXPANDED_TEXT:raise CardError('角色卡占位符展开后的文本过长，请缩短昵称或模板内容')
         expanded_budget+=length
         return re.sub(r'\{\{\s*(char|user)\s*\}\}|<(BOT|CHAR|USER)>',lambda m:nickname if (m.group(1) or m.group(2)).lower() in ('char','bot') else user,value,flags=re.I)
     for greeting in greetings:greeting['text']=render(greeting['text'])

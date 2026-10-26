@@ -1,6 +1,6 @@
 /* Phone UI is a separate conversation surface, not a compressed dashboard. */
 body[data-mobile-layout="true"] { overflow: hidden; overscroll-behavior: none; }
-body[data-mobile-layout="true"] .app { height: var(--mobile-viewport-height, 100dvh); min-height: 0; }
+body[data-mobile-layout="true"] .app { position:fixed; left:0; right:0; top:var(--mobile-viewport-top,0px); width:100%; box-sizing:border-box; height: var(--mobile-viewport-height, 100dvh); min-height: 0; }
 .mobile-chat {
   height: 100%; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto;
   position: relative; max-width: 900px; margin: auto; overflow: hidden;
@@ -84,3 +84,5 @@ body[data-mobile-layout="true"] .app { height: var(--mobile-viewport-height, 100
   .mobile-game-sidebar .sprite-stage { max-height: none !important; height: 210px; }
 }
 @media (prefers-reduced-motion: reduce) { .mobile-game-sidebar { animation: none; } }
+
+body[data-mobile-layout="true"][data-keyboard-open="true"] .chat-composer { padding-bottom:8px; }

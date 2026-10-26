@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Mapping
 
-USER_AGENT = 'RPG-Cockpit/0.992'
+USER_AGENT = 'RPG-Cockpit/0.993'
 
 def api_headers(api_key: str = '', *, accept: str = 'application/json', content_type: str | None = 'application/json') -> dict[str, str]:
     headers = {'User-Agent': USER_AGENT, 'Accept': accept}

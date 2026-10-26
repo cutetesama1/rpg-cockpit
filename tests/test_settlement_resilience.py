@@ -28,7 +28,7 @@ def test_uncertain_item_does_not_undo_confirmed_damage_and_survives_replay():
 
 def test_uncertain_cannot_hide_an_invalid_operation_or_partial_commit():
     bad=with_uncertain(response([op('damage',{'amount':2}),op('set_stat',{'field':'missing','value':3})]),'未知信息')
-    g,_,_=game([bad]);result=g.submit_action({'text':'继续'})
+    g,_,_=game([bad]);g.router.settlement_options={'relaxed_validation':False};result=g.submit_action({'text':'继续'})
     assert not result.ok and g.state['hp']==20
     assert not any(e.kind in ('tool.applied','settlement.warning') for e in g.ledger.events)
 
@@ -68,6 +68,7 @@ def test_story_fact_id_is_stable_and_never_grants_a_system_flag(key):
 @pytest.mark.parametrize('key',['',None,3,'story.'])
 def test_empty_or_nontext_fact_ids_still_fail_atomically(key):
     g,_,_=game([response([op('damage',{'amount':2}),op('record_fact',{'id':key,'value':True})])])
+    g.router.settlement_options={'relaxed_validation':False}
     assert not g.submit_action({'text':'继续'}).ok and g.state['hp']==20
 
 

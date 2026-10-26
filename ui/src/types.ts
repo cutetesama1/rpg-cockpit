@@ -128,6 +128,7 @@ export interface LlmRoles {
   setup: LlmProfile;
   director: LlmProfile;
   corrector?: LlmProfile | null;
+  voice_cast?: LlmProfile | null;
 }
 
 export interface ProviderView {
@@ -192,6 +193,7 @@ export interface ModelCatalog {
 }
 
 export interface SettingsView {
+  speech: SpeechSettings;
   ok: boolean;
   roles: LlmRoles;
   providers: Record<string, ProviderView>;
@@ -201,10 +203,13 @@ export interface SettingsView {
 }
 
 export interface SettingsUpdate {
+  speech?: Partial<SpeechSettings> & { api_key?: string };
+  test_role?: string;
   roles?: LlmRoles;
   providers?: Record<
     string,
     {
+      copy_from?: string;
       base_url?: string;
       model?: string;
       preset?: string;
@@ -704,3 +709,13 @@ export interface CardPreview {
   entry_mapping:{source_index:number;target_id:string|null}[]; worldbook_count:number; prompts:Record<string,string>; raw:Record<string,unknown>;
 }
 export interface CurrentCard { pack_id:string; card:{name:string; spec:string; creator:string; creator_notes:string; [key:string]:unknown}|null }
+
+
+export interface SpeechSettings {
+  enabled: boolean; mode: "imported" | "automatic"; base_url: string; model: string; voice: string;
+  speed: number; timeout: number; has_key: boolean; key_hint: string;
+}
+export interface VoiceCharacter { id: string; name: string; description: string; source: "imported" | "automatic"; enabled: boolean; voice: string }
+export interface VoiceView { pack_id: string; speech: SpeechSettings; characters: VoiceCharacter[] }
+export interface VoiceLine { id: string; character_id: string; name: string; text: string; enabled: boolean; voice: string }
+export interface VoiceDialogue { pack_id: string; entry_id: string; revision: string; lines: VoiceLine[]; characters: VoiceCharacter[] }

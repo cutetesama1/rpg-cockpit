@@ -29,7 +29,7 @@ _FENCE_RE = re.compile(r"```(?:json|JSON)?\s*(.*?)```", re.S)
 
 BUILDER_SYSTEM_PROMPT = """你是文字冒险世界初始化器。将素材转为一个可运行的 JSON 草稿，不输出代码围栏。
 字段：title,description,prompts:{pre,narrator,settler},worldbook:[],skills:[],state:{fields:[],resource_bindings:{},limits:{max_delta_per_turn:{}}},character_profile:{}。
-pre（前置提示词）只写作者世界设定和主角身份；narrator（叙事者提示词）只写视角、篇幅和文风，不包含数值、工具或状态栏职责；settler（结算器提示词）只写本世界结算语义和判断依据。叙事与结算始终分离。
+pre（前置提示词）只写作者世界设定和主角身份；narrator（叙事者提示词）只写视角、篇幅和文风，不包含数值、工具或状态栏职责；settler（结算器提示词）只写本世界结算语义和判断依据。叙事与结算始终分离。货币字段的label/unit应与世界一致（例如日本背景用日元），不要把模板显示单位“元”自动解释为人民币。允许角色看见的票面金额和物品数量；权威余额只由后端维护。
 state.fields 每个数值必须有 id(小写英文下划线)、label(符合世界观)、type(int/float)、default、min、max(无上限=null)、step、display(bar/number)、unit、color(#rrggbb)。
 气血/真元/灵石、生命/魔力/金币、机体完整度/能源/星币等仅为例子，按世界和主角实力制定初始值、上限与货币单位，不固定 hp/focus/credits 或20/10/999。资源可增删。
 resource_bindings 将 health/mana/effort/currency 绑定到实际数值 id；相同资源可兼任两种用途，缺失的用途不绑定。limits 是每回合最大变化量，未声明表示不另设限制。
@@ -38,7 +38,7 @@ skills 只收录作者明确的特殊技能，不用生成整个常规技能库�
 worldbook（世界书）每项含 id,title,content,keywords,always_on,priority,category；关键词具体，主角身份和世界硬规则应常驻。
 工具契约由运行时提供，不在提示词中发明 inventory/flag 等工具名，不设回合上限、不锁死结局、不锁死剧情。
 settler 只写本世界已发生事实如何映射伤害、恢复、货币、物品、技能与剧情变化；不要要求逐个调用工具、输出全量状态或依赖聊天记忆。
-数值规则应与本草稿 state 的实际资源id、范围和 limits 一致，不同时写出互相冲突的固定限额；未知事项保留原值并说明，其他有依据的变化照常结算。
+数值规则应与本草稿 state 的实际资源id、范围和 limits 一致，不同时写出互相冲突的固定限额；模糊数量是否估算、新物品是否登记由运行时 policy 开关和玩家裁定控制，不写死“宁可少调”或“只能使用预注册物品”；其他有依据的变化照常结算。叙事提示词要求交代实际结果、人物与对象，分清意图与结果，不把物品获得等同于已经放入背包。
 只输出一个 JSON 对象，保持作者素材的限制和风格。
 """
 

@@ -73,6 +73,7 @@ def test_only_numeric_checked_final_narrative_is_settled():
     (change("hp", garment="hoodie"), "clothing_slot"),
     ({**change(garment="hoodie"), "hp": 1}, "bad_params"),
 ])
+@pytest.mark.usefixtures("strict_settlement")
 def test_bad_clothing_rolls_back_hp_and_all_slot_changes(update, code):
     narrator = StubProvider([tool("damage", amount=2), say(TEXT)], name="narrator")
     backend = StubProvider([clothes(change("lower", garment="trousers"), update)], name="settler")
@@ -84,6 +85,7 @@ def test_bad_clothing_rolls_back_hp_and_all_slot_changes(update, code):
     assert session.verify()["equal"]
 
 
+@pytest.mark.usefixtures("strict_settlement")
 def test_duplicate_slot_rejected_as_whole_batch():
     session, _, _ = game(settler=StubProvider([clothes(change(garment="hoodie"), change(condition="damaged"))], name="settler"))
     result = session.submit_action({"kind": "text", "text": "训练"})
@@ -133,6 +135,7 @@ def test_direct_narrator_cannot_call_clothing_tool():
     assert not backend.requests and session.state['upper']=='tshirt'
 
 
+@pytest.mark.usefixtures("strict_settlement")
 def test_opening_clothing_is_idempotent_and_invalid_opening_writes_no_state():
     session, narrator, backend = game()
     result = session.start_opening()

@@ -226,7 +226,7 @@ def test_update_settings_selects_provider_model_and_effort(client):
     assert narrator["reasoning_effort"] == "medium"
 
     health = client.get("/api/health").json()
-    assert health["version"] == "0.992"
+    assert health["version"] == "0.993"
     assert health["llm"]["roles"]["narrator"]["reasoning_effort"] == "medium"
     client.post("/api/settings/reset")
 

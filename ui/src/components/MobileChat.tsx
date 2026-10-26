@@ -1,3 +1,4 @@
+import ChatMessage from "./ChatMessage";
 import type { ReactNode } from "react";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { formatNarrativeDialogue } from "../narrativeFormatting";
@@ -72,10 +73,7 @@ export default function MobileChat(props: Props) {
           <p>{props.openingBusy ? "正在生成开局…" : props.openingError || "准备开局…"}</p>
           {props.openingError && <button type="button" disabled={props.openingBusy} onClick={props.onRetryOpening}>重试开局</button>}
         </div>}
-        {props.entries.map(entry => <article className={`chat-message chat-message--${entry.role}${entry.failed ? " chat-message--failed" : ""}${entry.streaming ? " narrative-preview" : ""}`} key={entry.id} data-role={entry.role}>
-          {entry.role !== "notice" && <div className="chat-message-meta"><span>{entry.role === "user" ? "你" : entry.turn === 0 ? "开端" : "叙述"}</span>{entry.meta.map((item, i) => <span key={i}>{item}</span>)}{entry.failed && <span>未完成</span>}</div>}
-          <p>{entry.role === "assistant" ? formatNarrativeDialogue(entry.text).split("\n").map((line, index, all) => <Fragment key={index}><span className={/^[\s]*[“「『"]/.test(line) ? "chat-dialogue-line" : undefined}>{line}</span>{index < all.length - 1 ? "\n" : ""}</Fragment>) : entry.text}</p>
-        </article>)}
+        {props.entries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={props.packId} automatic={entry.id === props.entries.filter(e => e.role === 'assistant').slice(-1)[0]?.id}/>)}
         {props.busy && !props.correcting && !props.entries.some(entry => entry.streaming) && <div className="chat-generating" role="status">正在叙述与结算…</div>}
       </div>
       {!atBottom && <button type="button" className="chat-to-latest" onClick={latest}>回到最新 ↓</button>}
