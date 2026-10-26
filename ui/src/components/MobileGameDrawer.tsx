@@ -53,10 +53,10 @@ export default function MobileGameDrawer(props: Props) {
   if (!props.open) return null;
   const navigate = (action: () => void) => { props.onClose(); action(); };
   const usage = props.status.usage;
-  return <div className={`mobile-game-overlay${props.docked ? " is-docked" : ""}`}>
+  return <div className={`mobile-game-overlay${props.theme.uiStyle === "cinema" ? " is-scene-sheet" : ""}${props.docked ? " is-docked" : ""}`}>
     <div className="mobile-game-backdrop" onClick={props.onClose} aria-hidden="true" />
     <aside ref={pane} id="mobile-game-sidebar" className="mobile-game-sidebar" role={props.docked ? "complementary" : "dialog"} aria-modal={props.docked ? undefined : true} aria-label="游戏侧栏">
-      <header className="mobile-game-sidebar-head"><strong>{props.status.pack.title}</strong><button type="button" aria-label="关闭游戏侧栏" onClick={props.onClose}>✕</button></header>
+      <header className="mobile-game-sidebar-head"><div className="sidebar-style-identity"><small>{props.theme.uiStyle === "journal" ? "CHARACTER JOURNAL" : props.theme.uiStyle === "cinema" ? "CAST & WORLD" : "YOUR CHARACTER"}</small><strong>{props.status.pack.title}</strong></div><button type="button" aria-label="关闭游戏侧栏" onClick={props.onClose}>✕</button></header>
       <div className="mobile-game-sidebar-content">
         {props.theme.showSprite && props.sheet && <SpriteCanvas sheet={props.sheet} state={props.status.state} explicit={props.theme.explicitLayers} view={props.theme.spriteView} forcedPose={props.theme.spriteView.startsWith("closeup_") ? props.theme.spriteView : undefined} animated={props.theme.spriteAnimated} fields={props.status.fields} />}
         {props.theme.showSprite && !props.sheet && <section className="panel panel-compact"><h2>立绘</h2><p className="muted small">{props.spriteError?'立绘配置载入失败，可重新尝试。':'正在读取立绘；没有配置的旧世界可复制为可编辑游戏以接入基础立绘。'}</p><button type="button" onClick={props.onRetrySprite}>重新载入立绘</button></section>}

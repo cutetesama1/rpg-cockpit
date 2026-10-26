@@ -216,7 +216,8 @@ export default function App() {
   useEffect(() => saveTheme(theme), [theme]);
   useEffect(() => {
     document.documentElement.dataset.uiTheme = theme.uiTheme;
-  }, [theme.uiTheme]);
+    document.documentElement.dataset.uiStyle = theme.uiStyle;
+  }, [theme.uiTheme, theme.uiStyle]);
   useEffect(() => saveDebug(debug), [debug]);
   // 字号：只改写 CSS 变量，桌面与手机同一套；默认 100% 时与原样式完全一致
   useEffect(() => {
@@ -557,7 +558,7 @@ export default function App() {
   const playbackControls = paced.playing && playback ? <div className="playback-toolbar"><button className="ghost small" type="button" onClick={paced.finish}>立即显示</button></div> : null;
 
   return (
-    <div className={`app compact-cockpit${navOpen ? " cockpit-sidebar-open" : ""}${wallpaper ? " has-wallpaper" : ""}${correctionOpen ? " correcting" : ""}`}>
+    <div className={`app compact-cockpit ui-style-${theme.uiStyle}${navOpen ? " cockpit-sidebar-open" : ""}${wallpaper ? " has-wallpaper" : ""}${correctionOpen ? " correcting" : ""}`}>
       {wallpaper && (
         <div
           className="wallpaper"
@@ -572,7 +573,7 @@ export default function App() {
       )}
 
       <>
-        <MobileChat title={status.pack.title} scene={sceneTitle} turn={status.turn} modelLabel={modelLabel}
+        <MobileChat uiStyle={theme.uiStyle} title={status.pack.title} scene={sceneTitle} turn={status.turn} modelLabel={modelLabel}
           scrollStyle={theme.narrativeScroll} inputRef={inputRef} onSettings={() => setSettingsOpen(true)} onCorrect={() => setCorrectionOpen(true)}
           advancedInput={<><div className="tag-tools"><span className="tag-tools-hint">选中文字，再标记其中的动作、话语或心理。</span>{TAG_MODES.map(item => <button key={item.id} type="button" disabled={busy} onMouseDown={e => e.preventDefault()} onClick={() => applyTag(item.id)}>{item.label}</button>)}</div>{tagHint && <p>{tagHint}</p>}{tags.length > 0 && <div className="tag-chips">{tags.map((tag,index) => <span className={`tag-chip tag-${tag.mode}`} key={`${tag.start}-${tag.end}`}><span>{TAG_MODES.find(item => item.id === tag.mode)?.label}：{draft.slice(tag.start,tag.end).trim().slice(0,24)}</span><button type="button" aria-label="取消分段标记" disabled={busy} onClick={() => removeTag(index)}>✕</button></span>)}</div>}</>}
           selectionSummary={previewRows.map(row => <span key={row.id} className={row.after < 0 ? "short" : ""}>{row.label} −{row.amount}（{row.before} → {row.after}）</span>)} adjudication={status.adjudication} fields={status.fields} onReviewChanged={refresh} correctionPanel={correctionPanel} correcting={correctionOpen} playbackControls={playbackControls} sendSerial={sendSerial} packId={status.pack.id} entries={chatEntries} draft={draft} modes={inputModes}

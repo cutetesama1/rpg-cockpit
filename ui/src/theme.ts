@@ -18,8 +18,18 @@ export const SCROLL_STYLES: { id: ScrollStyle; label: string; hint: string }[] =
   { id: "page", label: "连续阅读", hint: "在连续时间线中阅读；上翻历史时暂停跟随，回到底部继续跟随" },
 ];
 
+export const UI_STYLES = [
+  { id: "journal", label: "雾色手记", detail: "章节式阅读 · 衬线正文 · 手记侧栏", eyebrow: "THE STORY JOURNAL" },
+  { id: "cinema", label: "星夜剧场", detail: "场景幕头 · 剧场对白 · 角色面板", eyebrow: "A WORLD IN MOTION" },
+  { id: "cockpit", label: "轻量驾驶舱", detail: "紧凑时间线 · 简洁气泡 · 并排侧栏", eyebrow: "RPG COCKPIT" },
+] as const;
+export type UiStyleId = (typeof UI_STYLES)[number]["id"];
+export function normalizeUiStyle(value: unknown, fallback: UiStyleId = "journal"): UiStyleId {
+  return UI_STYLES.some(item => item.id === value) ? value as UiStyleId : fallback;
+}
+
 export const UI_THEMES = [
-  { id: "cockpit", label: "轻量驾驶舱", detail: "雾蓝 · 石墨灰", colors: ["#171c24", "#91b2cc", "#e0e8ed"] },
+  { id: "cockpit", label: "跟随界面风格", detail: "使用所选设计的默认配色", colors: ["#171c24", "#91b2cc", "#e0e8ed"] },
   { id: "jade", label: "翠金星穹", detail: "深翠 · 香槟金", colors: ["#0b171b", "#82c9ae", "#d2bd89"] },
   { id: "lunar", label: "月海银蓝", detail: "午夜蓝 · 月光银", colors: ["#0c1528", "#92bded", "#c5d5ee"] },
   { id: "amethyst", label: "紫晶秘仪", detail: "墨紫 · 浅玫瑰金", colors: ["#191225", "#c3a2eb", "#e1bfca"] },
@@ -32,6 +42,7 @@ export function normalizeUiTheme(value: unknown): UiThemeId {
 }
 
 export interface ThemeSettings {
+  uiStyle: UiStyleId;
   uiTheme: UiThemeId;
   wallpaper: WallpaperPreset;
   /** 自定义壁纸（data URL）；设置后优先于预设 */
@@ -59,6 +70,7 @@ export interface ThemeSettings {
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
+  uiStyle: "journal",
   uiTheme: "cockpit",
   wallpaper: "none",
   custom: null,
@@ -166,6 +178,7 @@ function loadStoredTheme(): ThemeSettings {
     if (!raw) return { ...DEFAULT_THEME };
     const parsed = JSON.parse(raw) as Partial<ThemeSettings>;
     return {
+      uiStyle: normalizeUiStyle(parsed.uiStyle, parsed.uiTheme === "cockpit" ? "cockpit" : "journal"),
       uiTheme: normalizeUiTheme(parsed.uiTheme),
       wallpaper: (parsed.wallpaper as WallpaperPreset) ?? DEFAULT_THEME.wallpaper,
       custom: typeof parsed.custom === "string" ? parsed.custom : null,

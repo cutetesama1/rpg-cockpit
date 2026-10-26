@@ -2,7 +2,7 @@ import { useCallback,useEffect,useMemo,useRef,useState } from 'react';
 import { jsonRequest,requestId,roomRequest,roomImageLoader,savedSession,saveSession,serverUrl,subscribe } from './partyClient';
 import type { PartySession,PartyView,PartySheet,Intent } from './partyClient';
 import SpriteCanvas from './components/SpriteCanvas';
-import { loadTheme,wallpaperCss,UI_THEMES,saveTheme } from './theme';
+import { loadTheme,wallpaperCss,UI_STYLES,UI_THEMES,saveTheme } from './theme';
 import { formatNarrativeDialogue } from './narrativeFormatting';
 import { useTextPlayback } from './useTextPlayback';
 import { useMobileLayout } from './useMobileLayout';
@@ -21,7 +21,7 @@ export default function MultiplayerApp(){
   const imageLoader=useMemo(()=>session?roomImageLoader(session):undefined,[session]);
   const paced=useTextPlayback(running?view?.task?.text??'':'',view?.task?.id??'',theme.textSpeed);
   const refresh=useCallback(async()=>{if(!session)return;const data=await roomRequest<PartyView>(session,'state');setView(old=>!old||data.revision>=old.revision?data:old);cursor.current=Math.max(cursor.current,data.cursor);},[session]);
-  useEffect(()=>{document.documentElement.dataset.uiTheme=theme.uiTheme;saveTheme(theme);},[theme]);
+  useEffect(()=>{document.documentElement.dataset.uiTheme=theme.uiTheme;document.documentElement.dataset.uiStyle=theme.uiStyle;saveTheme(theme);},[theme]);
   useEffect(()=>{if(!savedSession())void jsonRequest<{session:PartySession|null}>('/api/multiplayer/client-session').then(result=>{if(result.session&&!savedSession()){setSession(result.session);setLastSession(result.session);saveSession(result.session);}}).catch(()=>undefined);},[]);
   useEffect(()=>{void jsonRequest<HostContext>('/api/multiplayer/host/status').then(setHost).catch(()=>undefined);},[]);
   useEffect(()=>{
@@ -52,7 +52,7 @@ export default function MultiplayerApp(){
   function disconnect(forget=false){if(forget){saveSession(null);setLastSession(null);void jsonRequest('/api/multiplayer/client-session','POST',{session:null}).catch(()=>undefined);}setSession(null);setError('');setConnection('正在连接');void jsonRequest<HostContext>('/api/multiplayer/host/status').then(setHost).catch(()=>undefined);}
   async function leave(){if(session&&view?.phase!=='closed')await roomRequest(session,'leave','POST');disconnect(true);}
   const dirty=!!me&&JSON.stringify({text:draft,modes,skills})!==JSON.stringify(me.intent);const wallpaper=wallpaperCss(theme);
-  return <div className="party-app" style={{'--party-font':`${theme.fontScale}%`} as React.CSSProperties}>
+  return <div className={`party-app party-style-${theme.uiStyle}`} style={{'--party-font':`${theme.fontScale}%`} as React.CSSProperties}>
     {wallpaper&&<div className="party-wallpaper" style={{backgroundImage:wallpaper,filter:`blur(${theme.blur}px)`,opacity:1-theme.dim}}/>}
     <header className="party-top"><button type="button" className="party-menu" aria-label="展开队伍侧栏" onClick={()=>setMenu(!menu)}>☰</button><div><strong>RPG COCKPIT</strong><span>共同冒险 · M1 预览</span></div><small>{session?connection:'2—4 人 · 同一世界'}</small><button type="button" onClick={localHome}>{host?'返回单人':'联机首页'}</button></header>
     {error&&<div className="party-error" role="alert">{error}</div>}
@@ -69,7 +69,7 @@ export default function MultiplayerApp(){
         <section className="party-card"><h3>共享世界</h3><p>场景 · {view.scene_title||view.world.scene}</p>{Object.entries(view.world.facts).map(([id,f])=><p key={id}>{f.title}：{String(f.value)}</p>)}<p>{phases[view.phase]} · 第 {view.round} 回合</p></section>
         {owner&&<section className="party-card"><h3>邀请队友</h3><p>邀请码 <code className="party-invite">{view.invite_code}</code></p>{(host?.addresses??[session.server_url]).map(url=><p key={url}><code>{url}</code></p>)}<p className="muted">局域网队友使用上面的地址。穿透联机请映射本机8790端口，分享穿透地址和邀请码；不要映射单人引擎端口。127.0.0.1不能作为队友的地址。</p></section>}
         <section className="party-card"><h3>回合控制</h3><button disabled={busy||!collecting||!view.round} onClick={()=>void perform(()=>operation('undo'))}>提议回退上一回合</button>{view.pending_count>0&&<details><summary>待核对 · {view.pending_count}</summary><p>未通过校验的变化没有生效，其余合法变化已提交。</p>{view.pending.map(item=><div key={item.id}><p>{item.reason}</p><button disabled={busy||!collecting} onClick={()=>void perform(()=>operation(`pending/${item.id}/dismiss`))}>保留当前状态，忽略此项</button></div>)}</details>}<button disabled={busy||view.phase!=='collecting'&&view.phase!=='closed'} onClick={()=>void perform(leave)}>{owner?'关闭房间并离开':'离开房间'}</button><button onClick={()=>disconnect()}>断开并返回大厅</button></section>
-        <details className="party-card party-settings"><summary>显示设置</summary><label>界面颜色<select value={theme.uiTheme} onChange={e=>setTheme({...theme,uiTheme:e.target.value as typeof theme.uiTheme})}>{UI_THEMES.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}</select></label><label>文字速度 · {theme.textSpeed===0?'即时':theme.textSpeed+' 字/秒'}<input type="range" min={0} max={200} step={5} value={theme.textSpeed} onChange={e=>setTheme({...theme,textSpeed:+e.target.value})}/></label><label className="party-check"><input type="checkbox" checked={theme.showSprite} onChange={e=>setTheme({...theme,showSprite:e.target.checked})}/>显示角色立绘</label><p className="muted">模型连接由房主在单人设置中调整，房客无需填写密钥。</p></details>
+        <details className="party-card party-settings"><summary>显示设置</summary><label>界面风格<select value={theme.uiStyle} onChange={e=>setTheme({...theme,uiStyle:e.target.value as typeof theme.uiStyle})}>{UI_STYLES.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}</select></label><label>界面颜色<select value={theme.uiTheme} onChange={e=>setTheme({...theme,uiTheme:e.target.value as typeof theme.uiTheme})}>{UI_THEMES.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}</select></label><label>文字速度 · {theme.textSpeed===0?'即时':theme.textSpeed+' 字/秒'}<input type="range" min={0} max={200} step={5} value={theme.textSpeed} onChange={e=>setTheme({...theme,textSpeed:+e.target.value})}/></label><label className="party-check"><input type="checkbox" checked={theme.showSprite} onChange={e=>setTheme({...theme,showSprite:e.target.checked})}/>显示角色立绘</label><p className="muted">模型连接由房主在单人设置中调整，房客无需填写密钥。</p></details>
       </aside>
       <main className="party-play"><div className="party-scene"><span><i className={connection==='已连接'?'ready':''}/>{phases[view.phase]}</span><small>{view.players.length}/{view.capacity} 人 · 回合 {view.round}</small></div>
         <div className="party-log" ref={log} role="log" aria-live="polite" onScroll={()=>{const node=log.current;if(node)stick.current=node.scrollHeight-node.clientHeight-node.scrollTop<90;}}>

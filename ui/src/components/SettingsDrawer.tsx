@@ -5,7 +5,7 @@ import SkillLibraryPanel from "./SkillLibraryPanel";
 import { useEffect, useRef, useState } from "react";
 import { getSettings, importPack } from "../api";
 import DebugPanel from "./DebugPanel";
-import { FONT_TARGETS, UI_THEMES, SCROLL_STYLES, WALLPAPERS, SPRITE_VIEW_LABELS, type SpriteView, type ThemeSettings } from "../theme";
+import { FONT_TARGETS, UI_STYLES, UI_THEMES, SCROLL_STYLES, WALLPAPERS, SPRITE_VIEW_LABELS, type SpriteView, type ThemeSettings } from "../theme";
 import type { SettingsView, Status, TurnResult } from "../types";
 interface Props {
   open: boolean;
@@ -77,13 +77,25 @@ export default function SettingsDrawer({ open, onClose, onChanged, status, last,
     <div className="drawer-mask" onClick={onClose}>
       <aside className="drawer" onClick={(event) => event.stopPropagation()}>
         <header className="drawer-head">
-          <h2>设置 <small className="muted">0.998</small></h2>
+          <h2>设置 <small className="muted">0.999</small></h2>
           <button className="ghost small" onClick={onClose}>
             关闭
           </button>
         </header>
 
         <div className="drawer-body">
+            <section className="settings-section ui-style-settings">
+              <h3>外观 · 界面风格</h3>
+              <p className="muted small">切换完整的排版、对话、输入区与角色面板设计，立即生效。不会重开游戏，当前输入与技能选择会保留。</p>
+              <div className="ui-style-grid" role="group" aria-label="界面风格">
+                {UI_STYLES.map(item => <button type="button" key={item.id} className={`ui-style-card preview-${item.id}${theme.uiStyle === item.id ? " on" : ""}`} aria-pressed={theme.uiStyle === item.id} onClick={() => onThemeChange({...theme,uiStyle:item.id})}>
+                  <span className="ui-style-mini" aria-hidden="true"><span className="mini-top"><i/><i/></span><span className="mini-body"><span className="mini-heading"/><span className="mini-bubble"/><span className="mini-lines"><i/><i/><i/></span><span className="mini-dialogue"/></span><span className="mini-input"><i/></span></span>
+                  <span className="ui-style-caption"><strong>{item.label}</strong><small>{item.detail}</small></span>{theme.uiStyle === item.id && <span className="ui-style-check" aria-hidden="true">✓</span>}
+                </button>)}
+              </div>
+            </section>
+
+
             <ModelConnections onChanged={async () => { setSettings(await getSettings()); await onChanged(); }} packId={status?.pack.id} />
             {message && <p className={`drawer-message ${message.ok ? "ok" : "bad"}`}>{message.text}</p>}
             <SettlementPreferences />
@@ -91,7 +103,7 @@ export default function SettingsDrawer({ open, onClose, onChanged, status, last,
 
             <section className="settings-section ui-theme-settings">
               <h3>外观 · 界面主题</h3>
-              <p className="muted small">选择配色，立即预览。壁纸可以另外搭配。</p>
+              <p className="muted small">“跟随界面风格”使用各设计的默认色；也可独立选用其他配色和壁纸。</p>
               <div className="ui-theme-grid" role="group" aria-label="界面主题">
                 {UI_THEMES.map(item => <button type="button" key={item.id}
                   className={`ui-theme-card${theme.uiTheme === item.id ? " on" : ""}`}

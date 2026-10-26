@@ -4,10 +4,12 @@ import { CorrectionIcon } from "./CorrectionPanel";
 import UiIcon from "./UiIcon";
 import type { ReactNode, MutableRefObject } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { UiStyleId } from "../theme";
 import type { ChatEntry } from "../chatHistory";
 import type { AdjudicationView, FieldDef, InputMode, Option } from "../types";
 const MODES: { id: InputMode; label: string }[] = [{ id: "action", label: "动作" }, { id: "speech", label: "话语" }, { id: "thought", label: "心理" }];
 interface Props {
+  uiStyle: UiStyleId;
   scrollStyle: "auto" | "always" | "page";
   title: string;
   scene: string;
@@ -92,6 +94,11 @@ export default function MobileChat(props: Props) {
         stick.current = element.scrollHeight - element.scrollTop - element.clientHeight < 72;
         setAtBottom(stick.current);
       }}>
+{props.uiStyle !== "cockpit" && <section className={`story-scene-intro ${props.uiStyle === "journal" ? "journal-chapter" : "cinema-scene"}`} aria-label="当前场景">
+          <div className="story-scene-eyebrow"><span>{props.uiStyle === "journal" ? "THE STORY JOURNAL" : "A WORLD IN MOTION"}</span><span>第 {props.turn} 回合</span></div>
+          <h2>{props.scene || props.title}</h2>
+          <div className="story-scene-rule" aria-hidden="true"><UiIcon name="spark"/><span/></div>
+        </section>}
         <div className="cockpit-thread-label"><span className="cockpit-dot"/><span>{props.scene || "新的旅程"}</span><button type="button" onClick={props.onSettings} title={`当前叙述模型：${props.modelLabel}；点击设置`}>{props.busy || props.openingBusy ? "正在回应" : "模型设置"}<UiIcon name="spark"/></button></div>
         {!props.ready && !props.entries.some(entry => entry.streaming) && <div className="chat-opening" role="status">
           <UiIcon name="spark"/><h2>{props.openingBusy ? "故事正在展开" : "一切，从你的选择开始"}</h2>
@@ -116,7 +123,7 @@ export default function MobileChat(props: Props) {
         </div>
         {(props.pickedCount > 0 || props.extrasCount > 0) && <div className="cockpit-selection"><button className="chat-picked" type="button" onClick={props.onOpenMenu}>{props.pickedCount > 0 && `技能 ${props.pickedCount}`}{props.pickedCount > 0 && props.extrasCount > 0 && " · "}{props.extrasCount > 0 && `附加 ${props.extrasCount}`}<span aria-hidden="true"> ↗</span></button>{props.selectionSummary}</div>}
         <div className="chat-input-row">
-          <textarea ref={input} aria-label="本回合输入" rows={1} value={props.draft} disabled={props.busy} placeholder="写下你的行动、话语或想法…" onChange={event => props.onDraft(event.target.value)} onKeyDown={event => {
+          <textarea ref={input} aria-label="本回合输入" rows={1} value={props.draft} disabled={props.busy} placeholder={props.uiStyle === "journal" ? "故事接下来，由你书写…" : props.uiStyle === "cinema" ? "回应这段故事…" : "写下你的行动、话语或想法…"} onChange={event => props.onDraft(event.target.value)} onKeyDown={event => {
             if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && !event.nativeEvent.isComposing) { event.preventDefault(); props.onSend(); }
           }}/>
           <button className="primary chat-send" type="button" aria-label={props.busy ? "等待回应" : "发送"} title="发送 · Ctrl / ⌘ + Enter" disabled={!props.canSend} onClick={props.onSend}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>

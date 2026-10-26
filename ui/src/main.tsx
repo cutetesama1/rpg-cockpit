@@ -10,6 +10,7 @@ import "./uiThemes.css";
 import "./mobileComposer.css";
 import "./corrections.css";
 import "./compactCockpit.css";
+import "./uiStyles.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
