@@ -593,6 +593,9 @@ export interface SpriteSheet {
   poses?: Record<string, SpritePose>;
   controls?: Record<string, Record<string, string>>;
   motions?: Record<string, string>;
+  catalog_version?: number;
+  motion_notes?: Record<string, string>;
+  pose_arms?: Record<string, { left?: string; right?: string }>;
   revision?: number;
   arm_preferences?: Record<string, string>;
   handheld_modes?: Record<string, string[]>;

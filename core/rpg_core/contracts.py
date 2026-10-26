@@ -589,7 +589,10 @@ class SpriteSheet(BaseModel):
     poses: dict[str, SpritePose] = Field(default_factory=dict)
     # Registered portrait fields with readable option labels.
     controls: dict[str, dict[str, str]] = Field(default_factory=dict)
-    motions: dict[str, Literal["none", "sway", "walk", "run", "jump", "attack", "cast", "hurt"]] = Field(default_factory=dict)
+    motions: dict[str, Literal["none", "sway", "walk", "run", "jump", "attack", "cast", "hurt", "read", "bow", "dodge", "cheer", "rest"]] = Field(default_factory=dict)
+    catalog_version: int = 0
+    motion_notes: dict[str, str] = Field(default_factory=dict)
+    pose_arms: dict[str, dict[str, Literal["idle", "cover", "hold"]]] = Field(default_factory=dict)
     revision: int = 0
     legacy_hashes: list[str] = Field(default_factory=list)
     arm_preferences: dict[str, Literal["idle", "hold"]] = Field(default_factory=dict)

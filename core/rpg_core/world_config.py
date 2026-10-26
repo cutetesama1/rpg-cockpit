@@ -18,7 +18,7 @@ def apply_config(pack,data):
         for field in pack.state.fields:
             if field.group not in ('appearance','sprite'): continue
             if field.id not in existing: schema.fields.append(copy.deepcopy(field))
-            elif field.id in pack.sprites.controls and field.enum_values:
+            elif (field.id in pack.sprites.controls or pack.wardrobe and field.id in {s.field for s in pack.wardrobe.slots.values()}) and field.enum_values:
                 existing[field.id].enum_values=list(dict.fromkeys([*(existing[field.id].enum_values or []),*field.enum_values]))
     return pack.model_copy(update={'state':schema,'ui':UiLayout.model_validate(data['ui']),
         'skills':[SkillSpec.model_validate(x) for x in data['skills']],'skill_selection':data.get('skill_selection',pack.skill_selection),'skill_catalog':[CatalogSkill.model_validate(x) for x in data['skill_catalog']]})

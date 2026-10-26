@@ -13,17 +13,23 @@ export function portraitMotion(kind: string, seconds: number): PortraitMotion {
   if (kind === "attack") { const hit = Math.max(0, Math.sin(phase * .8)); out.x = hit * 5; out.angle = hit * .065; }
   if (kind === "cast") { out.y = -2 - Math.sin(phase * .65) * 2; }
   if (kind === "hurt") { out.x = Math.sin(phase * 7) * 1.8; out.angle = -.025; }
+  if (kind === "read") { out.angle = .018 + Math.sin(phase * .23) * .004; out.y = .6; }
+  if (kind === "bow") { const lean = (1 - Math.cos(phase * .35)) / 2; out.angle = lean * .06; out.y = lean * 3; }
+  if (kind === "dodge") { out.x = Math.sin(phase * .65) * 5; out.angle = Math.sin(phase * .65) * .045; }
+  if (kind === "cheer") { out.y = -Math.abs(Math.sin(phase * .9)) * 6; out.angle = Math.sin(phase * .9) * .016; }
+  if (kind === "rest") { out.y = 1 + Math.sin(phase * .18) * .5; out.scaleY = 1 + Math.sin(phase * .18) * .003; }
   return out;
 }
 
-export function portraitContext(state: Record<string, unknown>, seconds = 0, animate = false, preferences: Record<string,string> = {}, modes: Record<string,string[]> = {}) {
+export function portraitContext(state: Record<string, unknown>, seconds = 0, animate = false, preferences: Record<string,string> = {}, modes: Record<string,string[]> = {}, poseArms: Record<string,{left?:string;right?:string}> = {}) {
   const out = { ...state };
   const pose = String(state.pose ?? "stand");
-  out.portrait_left_arm = state.left_arm && state.left_arm !== "auto" ? state.left_arm : pose === "guard" ? "cover" : "idle";
-  out.portrait_right_arm = state.right_arm && state.right_arm !== "auto" ? state.right_arm : pose === "guard" ? "cover" : (["hold", "attack", "cast"].includes(pose) || Boolean(state.handheld && state.handheld !== "none")) ? "hold" : "idle";
+  const arms = poseArms[pose];
+  out.portrait_left_arm = state.left_arm && state.left_arm !== "auto" ? state.left_arm : arms?.left ?? (pose === "guard" ? "cover" : "idle");
+  out.portrait_right_arm = state.right_arm && state.right_arm !== "auto" ? state.right_arm : arms?.right ?? (pose === "guard" ? "cover" : (["hold", "attack", "cast"].includes(pose) || Boolean(state.handheld && state.handheld !== "none")) ? "hold" : "idle");
   const held = String(state.handheld ?? "none");
   if ((!state.right_arm || state.right_arm === "auto") && held !== "none" && modes[held]?.length) {
-    if (!["guard", "attack", "cast"].includes(pose) || !modes[held].includes(String(out.portrait_right_arm))) out.portrait_right_arm = preferences[held] ?? "hold";
+    if ((!arms?.right && !["guard", "attack", "cast"].includes(pose)) || !modes[held].includes(String(out.portrait_right_arm))) out.portrait_right_arm = preferences[held] ?? "hold";
   }
   out.portrait_mouth = state.mouth_shape ?? "auto";
   if (state.mouth_shape === "auto" && pose === "talk") out.portrait_mouth = animate && Math.floor(seconds * 4) % 2 ? "neutral" : "chew";

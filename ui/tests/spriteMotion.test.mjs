@@ -20,3 +20,16 @@ test('motion transforms stay within the portrait padding and are deterministic',
  }
  assert.deepEqual(portraitMotion('none',3),{x:0,y:0,angle:0,scaleX:1,scaleY:1});
 });
+
+
+test('registered presentation actions use declared arm parts and bounded animation',()=>{
+ const sheet=JSON.parse(fs.readFileSync(new URL('../../packs/new-game/ui/sprites.json',import.meta.url),'utf8'));
+ for(const pose of ['read','bow','dodge','cheer','rest']){
+  const context=portraitContext({pose,left_arm:'auto',right_arm:'auto'},0,false,{}, {},sheet.pose_arms);
+  assert.equal(context.portrait_left_arm,sheet.pose_arms[pose].left);
+  assert.equal(context.portrait_right_arm,sheet.pose_arms[pose].right);
+  assert.equal(portraitContext({pose,right_arm:'idle'},0,false,{}, {},sheet.pose_arms).portrait_right_arm,'idle');
+  assert.ok(sheet.motion_notes[pose]);
+  for(let t=0;t<5;t+=.073){ const m=portraitMotion(sheet.motions[pose],t); assert.ok(Object.values(m).every(Number.isFinite)); assert.ok(Math.abs(m.x)<=6&&Math.abs(m.y)<=13&&Math.abs(m.angle)<=.07); }
+ }
+});

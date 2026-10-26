@@ -187,13 +187,13 @@ def restore_session(session: GameSession, payload: dict[str, Any]) -> dict[str, 
             for field in current.state.fields:
                 if field.group not in ('appearance', 'sprite'): continue
                 if field.id not in existing: snapshot.state.fields.append(copy.deepcopy(field))
-                elif field.id in current.sprites.controls and field.enum_values:
+                elif (field.id in current.sprites.controls or current.wardrobe and field.id in {s.field for s in current.wardrobe.slots.values()}) and field.enum_values:
                     existing[field.id].enum_values = list(dict.fromkeys([*(existing[field.id].enum_values or []), *field.enum_values]))
             snapshot.sprites = current.sprites
             snapshot.asset_pack = current.asset_pack
             if current.wardrobe:
                 slots = dict(current.wardrobe.slots)
-                if snapshot.wardrobe: slots.update(snapshot.wardrobe.slots)
+                if snapshot.wardrobe and not current.sprites.catalog_version: slots.update(snapshot.wardrobe.slots)
                 snapshot.wardrobe = current.wardrobe.model_copy(update={'slots': slots})
         session.pack=snapshot
         session.executor.wardrobe=snapshot.wardrobe
