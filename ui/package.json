@@ -1,7 +1,7 @@
 {
   "name": "rpg-cockpit",
   "private": true,
-  "version": "0.99.1-beta.1",
+  "version": "0.992.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

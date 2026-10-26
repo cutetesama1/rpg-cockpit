@@ -2486,7 +2486,7 @@ dependencies = [
 
 [[package]]
 name = "rpg-cockpit"
-version = "0.99.1-beta.1"
+version = "0.992.0"
 dependencies = [
  "tauri",
  "tauri-build",

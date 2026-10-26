@@ -99,7 +99,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.991beta-api-fix-builder"
+API_VERSION = "0.992"
 
 
 # -- 请求体 -----------------------------------------------------------------

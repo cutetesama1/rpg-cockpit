@@ -42,7 +42,8 @@ def main() -> int:
     files: list[tuple[str, bytes]] = []
     py_root = sdist / "python" / "pydantic_core"
     for path in sorted(py_root.rglob("*")):
-        if path.is_file():
+        # Runtime wheels omit the same-name type-stub namespace.
+        if path.is_file() and not path.relative_to(py_root).as_posix().startswith("_pydantic_core/"):
             arc = "pydantic_core/" + path.relative_to(py_root).as_posix()
             files.append((arc, path.read_bytes()))
     files.append(("pydantic_core/_pydantic_core.so", lib_path.read_bytes()))

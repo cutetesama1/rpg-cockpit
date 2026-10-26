@@ -23,8 +23,8 @@ android {
         applicationId = "com.rpgframework.cockpit"
         minSdk = 29
         targetSdk = 36
-        versionCode = 32
-        versionName = "0.991beta-api-fix"
+        versionCode = 38
+        versionName = "0.992"
         ndk {
             // 两个 ABI 都要有对应的 pydantic-core wheel（local-wheels/ 里各一份）。
             abiFilters += listOf("arm64-v8a", "x86_64")
@@ -91,6 +91,7 @@ chaquopy {
             // pydantic-core 没有现成的 Android wheel（Chaquopy 官方仓库也没有），
             // 用本地用 NDK 交叉编译 + 手工组装的 wheel，见 android/local-wheels/README.md。
             install("pydantic==2.14.1")
+            install("pydantic-core==2.50.1")
             // 后端框架：fastapi/uvicorn 及依赖都是纯 Python 包（uvicorn 不装 [standard]，
             // 避免 uvloop/httptools 这些原生扩展）。
             install("fastapi")
@@ -139,4 +140,15 @@ tasks.matching { it.name.contains("Lint") || it.name.startsWith("lint") }.config
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.core:core-ktx:1.16.0")
+}
+
+// Reject desktop native libraries and missing ABI extensions before creating an APK.
+val verifyReleasePythonNative = tasks.register<Exec>("verifyReleasePythonNative") {
+    dependsOn("installReleasePythonRequirements")
+    commandLine("C:/Users/Administrator/AppData/Local/Programs/Python/Python313/python.exe",
+        rootProject.file("scripts/verify_android_native.py").absolutePath,
+        "--pip", layout.buildDirectory.dir("python/pip/release").get().asFile.absolutePath)
+}
+tasks.matching { it.name == "generateReleasePythonRequirementsAssets" }.configureEach {
+    dependsOn(verifyReleasePythonNative)
 }

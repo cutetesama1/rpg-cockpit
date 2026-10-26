@@ -101,7 +101,7 @@ def test_auto_save_after_action(client):
 
 def test_health_reports_saves_dir(client, tmp_path):
     data = client.get("/api/health").json()
-    assert data["version"] == "0.991beta-api-fix-builder"
+    assert data["version"] == "0.992"
     assert data["saves_dir"] == str(tmp_path / "saves")
     assert data["resumed"] is False
 

@@ -444,7 +444,7 @@ export default function SettingsDrawer({
     <div className="drawer-mask" onClick={onClose}>
       <aside className="drawer" onClick={(event) => event.stopPropagation()}>
         <header className="drawer-head">
-          <h2>设置 <small className="muted">0.991beta</small></h2>
+          <h2>设置 <small className="muted">0.992</small></h2>
           <button className="ghost small" onClick={onClose}>
             关闭
           </button>

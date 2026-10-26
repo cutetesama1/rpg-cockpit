@@ -1,0 +1,56 @@
+{
+  "version": "0.992",
+  "backend_passed": 616,
+  "backend_skipped": 12,
+  "ui_passed": 28,
+  "typescript": true,
+  "production_ui": true,
+  "public_original_static_avatar": true,
+  "private_art_included": false,
+  "android": [
+    {
+      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-arm64-v8a-release.apk",
+      "abis": [
+        "arm64-v8a"
+      ],
+      "ok": true,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "version": "0.992",
+      "version_code": 38
+    },
+    {
+      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-universal-release.apk",
+      "abis": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "ok": true,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "version": "0.992",
+      "version_code": 38
+    },
+    {
+      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-x86_64-release.apk",
+      "abis": [
+        "x86_64"
+      ],
+      "ok": true,
+      "original_public_signer": true,
+      "source_and_ui_match": true,
+      "version": "0.992",
+      "version_code": 38
+    }
+  ],
+  "native": {
+    "packaged_engine_starts": true,
+    "version_matches": true,
+    "ui_matches_source": true,
+    "original_sample_available": true,
+    "feature_endpoints_readable": true,
+    "paid_api_tested": false,
+    "physical_android_tested": false
+  },
+  "historical_snapshot_stage": -1
+}

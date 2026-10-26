@@ -45,3 +45,14 @@ python scripts/assemble_pydantic_wheel.py pydantic_core-2.50.1 \
 4. 把产出的 `.whl` 放进本目录，重新 `gradle assembleDebug` 即可。
 
 > 升级 pydantic 时注意：`pydantic` 的每个版本都钉死一个 `pydantic-core` 版本，两者要一起换。
+
+
+## 2026-10-26 原生加载与 16KB 兼容修订
+
+- Chaquopy 升级到 17.1.0；保留 Python 3.13、pydantic 2.14.1 / pydantic-core 2.50.1 的配套版本。
+- 两个 ABI 均从官方 2.50.1 sdist 重编译；链接额外加入 `-Wl,-z,max-page-size=16384` 和 `-Wl,-z,common-page-size=16384`。
+- 组装 wheel 时不复制 `_pydantic_core/` 类型提示目录，避免旧 importer 把它作为同名空模块。保留真正的 `_pydantic_core.so`。
+- 发布旧 APK 曾混入 `_pydantic_core.cp313-win_amd64.pyd` 且丢失 Android `.so`，已在隔离模拟器复现 ArgsKwargs 导入错误。构建成功、签名成功不足以证明启动成功。
+- `verifyReleasePythonNative` 在 requirements 打包前检查每个 ABI 原生库、ELF 架构与 16KB 对齐，拒绝任何 `.pyd` / `.dll`。重建已有目录时必须重新安装目标平台依赖，不复制宿主机 site-packages。
+- 最终 APK 再用 `python android/scripts/verify_android_native.py --apk <apk>` 验证，并在 Android 运行时启动检查 `/api/health`。
+- ARM64 的 ELF 架构和对齐已核验；没有宣称完成 ARM64 真机或真实 16KB 系统运行测试。
