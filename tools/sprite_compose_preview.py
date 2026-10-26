@@ -91,10 +91,13 @@ def portrait_context(state, sheet=None):
     ctx.setdefault('eye_state', 'auto');ctx.setdefault('gaze', 'forward')
     ctx['portrait_left_arm'] = ctx.get('left_arm') if ctx.get('left_arm') not in (None, 'auto') else 'cover' if pose=='guard' else 'idle'
     ctx['portrait_right_arm'] = ctx.get('right_arm') if ctx.get('right_arm') not in (None, 'auto') else 'cover' if pose=='guard' else 'hold' if pose in ('hold','attack','cast') or ctx.get('handheld') not in (None,'none') else 'idle'
+    arms=(sheet or {}).get('pose_arms',{}).get(pose,{})
+    if ctx.get('left_arm') in (None,'auto') and 'left' in arms:ctx['portrait_left_arm']=arms['left']
+    if ctx.get('right_arm') in (None,'auto') and 'right' in arms:ctx['portrait_right_arm']=arms['right']
     held=ctx.get('handheld','none')
     if sheet and ctx.get('right_arm') in (None,'auto') and held!='none':
         modes=sheet.get('handheld_modes',{}).get(held,[])
-        if modes and (pose not in ('guard','attack','cast') or ctx['portrait_right_arm'] not in modes):ctx['portrait_right_arm']=sheet.get('arm_preferences',{}).get(held,'hold')
+        if modes and (('right' not in arms and pose not in ('guard','attack','cast')) or ctx['portrait_right_arm'] not in modes):ctx['portrait_right_arm']=sheet.get('arm_preferences',{}).get(held,'hold')
     ctx['portrait_mouth'] = ctx.get('mouth_shape', 'auto')
     if ctx['portrait_mouth']=='auto' and pose=='talk':ctx['portrait_mouth']='chew'
     ctx['_portrait_resolved'] = True

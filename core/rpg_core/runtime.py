@@ -807,7 +807,7 @@ class GameSession:
             "scene_id": self.scene_id,
             "state": self.state,
             "inventory": self.inventory,
-            "fields": [field.model_dump(mode="json") for field in self.pack.state.fields],
+            "fields": __import__("rpg_core.appearance_catalog",fromlist=["field_views"]).field_views(self.pack),
             "limits": self.pack.state.limits.model_dump(mode="json"),
             "items": [item.model_dump(mode="json") for item in self.pack.items],
             "flags": [flag.model_dump(mode="json") for flag in self.pack.flags],
@@ -857,12 +857,17 @@ class GameSession:
         """直接改任意状态字段（写一条 tool.applied，投影照常生效）。"""
         fields = self.pack.state.by_id()
         current = self.state
+        from .appearance_catalog import choices_for
+        available = choices_for(self.pack)
         folded: dict[str, dict[str, Any]] = {}
         for raw_id, value in (changes or {}).items():
             field_id = str(raw_id)
             field = fields.get(field_id)
             if field is None:
                 raise ValueError(f"内容包没有声明字段 {field_id}")
+            if field_id in available and value not in available[field_id]:
+                if value == current.get(field_id):continue
+                raise ValueError(f"{field_id} 不在当前可用素材目录中")
             folded[field_id] = {
                 "field": field_id,
                 "before": current.get(field_id),
@@ -991,7 +996,7 @@ class GameSession:
             "adjudication": adjudication_view(self),
             "correction_revision": __import__("rpg_core.adjudication", fromlist=["revision"]).revision(self),
             "replay": self.verify(),
-            "fields": [f.model_dump(mode="json") for f in self.pack.state.fields],
+            "fields": __import__("rpg_core.appearance_catalog",fromlist=["field_views"]).field_views(self.pack),
             "layout": self.pack.ui.model_dump(mode="json"),
             "skills": self.skill_states(),
             "pack": self.pack.manifest.model_dump(mode="json"),
