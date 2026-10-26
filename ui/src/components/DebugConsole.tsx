@@ -292,7 +292,7 @@ export default function DebugConsole({
           ) : tab === "sprite" ? (
             <>
               <p className="muted small">
-                这些字段直接驱动立绘合成，应用后写入当前游戏并支持撤销。衣物和动作只列出已注册的可用项；标注“表现”的动作使用已有部件配合程序位移或特效，不是独立逐帧原画。
+                这些字段直接驱动立绘合成：改完应用即可在右栏「立绘」里看到变化。动作、表情、饰品和前后景均可预览；应用后写入当前游戏并支持撤销。
               </p>
               {sheet && (
                 <div className="dbg-sprite-preview">
@@ -303,7 +303,6 @@ export default function DebugConsole({
                   </p>
                 </div>
               )}
-              {sheet?.motion_notes && <p className="muted small" role="status">动作实现：{sheet.motion_notes[String(draft.pose ?? status?.state.pose ?? "stand")] || "使用当前内容包的已注册姿势"}</p>}
               <div className="dbg-grid">
                 {SPRITE_FIELDS.map((id) => fields.find((field) => field.id === id))
                   .filter((field): field is FieldDef => Boolean(field))

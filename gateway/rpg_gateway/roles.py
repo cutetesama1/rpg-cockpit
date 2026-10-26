@@ -31,7 +31,7 @@ class LlmRouter:
         self.providers = providers
 
     def profile(self, role: str) -> LlmProfile:
-        if role in ("corrector", "voice_cast") and getattr(self.config, role) is None:
+        if role == "corrector" and self.config.corrector is None:
             role = "settler" if self.separated else "narrator"
         try:
             return getattr(self.config, role)
@@ -52,7 +52,7 @@ class LlmRouter:
         # 衣物阶段始终走后置结算；单模型时复用 narrator 的连接配置。
         clothing = request.get("phase") == "clothing"
         backend = request.get("phase") in ("clothing", "skill_selection", "skill_learning", "settlement")
-        reuse_director = request.get('phase')=='director' and request.get('reuse_narrator',True) and not self.config.director.provider.startswith('role_')
+        reuse_director = request.get('phase')=='director' and request.get('reuse_narrator',True)
         profile = self.profile("narrator" if reuse_director or backend and not self.separated else role)
         provider = self.providers.get(profile.provider)
         if provider is None:
@@ -64,7 +64,7 @@ class LlmRouter:
             # max_tokens <= 0 表示不限制：完全不传给端点，避免截断长叙事
             **({"max_tokens": profile.max_tokens} if profile.max_tokens > 0 else {}),
         }
-        if backend or role in ("corrector", "voice_cast"):
+        if backend or role == "corrector":
             request["temperature"] = 0.0
         if clothing:
             request["temperature"] = 0.0

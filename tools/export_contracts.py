@@ -18,8 +18,6 @@ from rpg_core.dynamic_worldbook import Change  # noqa: E402
 from rpg_core.corrections import Correction, NumericCorrection
 
 CONTRACTS = {
-    "voice-settings": c.VoiceSettings,
-    "llm-settings": c.LlmSettings,
     "ai-correction": Correction,
     "numeric-correction": NumericCorrection,
     "personality-npcs": Roster,

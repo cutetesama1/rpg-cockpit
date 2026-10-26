@@ -5,7 +5,7 @@ import type { CheckResult, DirectorConfig, DirectorView, PlotClue, Status } from
 const uuid = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const reasonLabels: Record<string, string> = { npc_entrance_review: "人物出场复查", manual: "手动请求", scene_change: "场景变化", milestone: "重要事件", clue_change: "线索变化" };
 
-export default function DirectorPanel({ status, onChanged, independentDirector = false }: { status: Status | null; onChanged: () => Promise<void> | void; independentDirector?: boolean }) {
+export default function DirectorPanel({ status, onChanged }: { status: Status | null; onChanged: () => Promise<void> | void }) {
   const packId = status?.pack.id ?? "";
   const [data, setData] = useState<DirectorView | null>(status?.director ?? null);
   const [draft, setDraft] = useState<DirectorConfig | null>(status?.director?.config ?? null);
@@ -71,7 +71,7 @@ export default function DirectorPanel({ status, onChanged, independentDirector =
     <h3>剧情导演与骰子</h3>
     <p className="muted small">当前游戏：{status?.pack.title}。候选剧情先经后端检定，只有已触发且结果确定的公开事件才交给叙事模型。</p>
     <label className="checkbox-row"><input type="checkbox" checked={draft.enabled} onChange={e => patch({ enabled: e.target.checked })} /><span>启用可选剧情导演</span></label>
-    {independentDirector ? <p className="muted small">使用上方“剧情导演 AI”的独立 URL、API Key 与模型；不会被旧版复用选项覆盖。</p> : <label className="checkbox-row"><input type="checkbox" checked={draft.use_narrator_model} onChange={e => patch({ use_narrator_model: e.target.checked })} /><span>复用叙事模型连接（关闭后使用模型设置中的剧情导演）</span></label>}
+    <label className="checkbox-row"><input type="checkbox" checked={draft.use_narrator_model} onChange={e => patch({ use_narrator_model: e.target.checked })} /><span>复用叙事模型连接（关闭后使用高级模型设置中的 director）</span></label>
     <div className="field-row">
       <label><span>最少间隔回合</span><input type="number" min="1" max="100" value={draft.min_turn_gap} onChange={e => patch({ min_turn_gap: Number(e.target.value) })} /></label>
       <label><span>每次最多候选事件</span><input type="number" min="1" max="5" value={draft.max_candidates} onChange={e => patch({ max_candidates: Number(e.target.value) })} /></label>

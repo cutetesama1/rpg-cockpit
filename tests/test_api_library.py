@@ -192,7 +192,7 @@ def test_select_unknown_pack_returns_400(client):
 
 def test_health_reports_pack_editable(client):
     data = client.get("/api/health").json()
-    assert data["version"].startswith("0.994")
+    assert data["version"].startswith("0.992")
     assert data["pack"] == "night-convenience-store"
     assert data["pack_editable"] is False
 

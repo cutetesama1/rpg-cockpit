@@ -80,7 +80,6 @@ def public_view(settings: LlmSettings, path: Path | None = None) -> dict[str, An
         for name, cfg in settings.providers.items()
     }
     return {
-        "speech": {**settings.speech.model_dump(exclude={"api_key"}), "has_key": bool(settings.speech.api_key), "key_hint": mask_key(settings.speech.api_key)},
         "roles": settings.roles.model_dump(mode="json"),
         "providers": providers,
         "active_provider": settings.roles.narrator.provider,
@@ -101,9 +100,9 @@ def merge_update(
         merged_roles = dict(merged.get("roles", {}))
         if "separated" in roles:
             merged_roles["separated"] = roles["separated"]
-        for role_name in ("narrator", "settler", "arbiter", "setup", "director", "corrector", "voice_cast"):
+        for role_name in ("narrator", "settler", "arbiter", "setup", "director", "corrector"):
             incoming_role = roles.get(role_name)
-            if role_name in ("corrector", "voice_cast") and role_name in roles and incoming_role is None:
+            if role_name == "corrector" and role_name in roles and incoming_role is None:
                 merged_roles[role_name] = None
                 continue
             if not isinstance(incoming_role, dict):
@@ -114,19 +113,11 @@ def merge_update(
                     base_role[key] = incoming_role[key]
             merged_roles[role_name] = base_role
         merged["roles"] = merged_roles
-    if isinstance(update.get("speech"), dict):
-        speech = dict(merged.get("speech") or {})
-        for key, value in update["speech"].items():
-            if key in ("has_key", "key_hint"): continue
-            if key == "api_key" and (not isinstance(value, str) or not value.strip()): continue
-            speech[key] = value.strip() if isinstance(value, str) else value
-        merged["speech"] = speech
     incoming_providers = update.get("providers") or {}
     for name, cfg in incoming_providers.items():
         if not isinstance(cfg, dict):
             continue
-        source = merged.get("providers", {}).get(str(cfg.get("copy_from") or ""), {})
-        base = dict(merged.get("providers", {}).get(name, source))
+        base = dict(merged.get("providers", {}).get(name, {}))
         for key in (
             "base_url",
             "model",

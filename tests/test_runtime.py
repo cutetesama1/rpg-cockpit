@@ -105,7 +105,6 @@ def test_leak_scrubbed_when_retry_also_leaks(pack):
     assert checked and checked[0]["payload"]["action"] == "scrubbed"
 
 
-@pytest.mark.usefixtures("strict_settlement")
 def test_guardrail_rejection_rolls_back_whole_turn(pack):
     provider = StubProvider([tool("damage", amount=30), say()])
     session = make_session(provider)

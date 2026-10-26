@@ -99,7 +99,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.994"
+API_VERSION = "0.992"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -114,7 +114,6 @@ class ModelProbeBody(BaseModel):
     base_url: str = ""
     api_key: str = ""
     preset: str = ""
-    provider: str = ""
     timeout: float = Field(default=10.0, ge=1.0, le=60.0)
 
 
@@ -123,8 +122,6 @@ class SettingsUpdate(BaseModel):
 
     roles: dict[str, Any] | None = None
     providers: dict[str, dict[str, Any]] | None = None
-    speech: dict[str, Any] | None = None
-    test_role: str = "narrator"
 
 
 class NewGameBody(BaseModel):
@@ -519,7 +516,7 @@ class SessionManager:
         router = build_router(self.settings)
         request = builder_request(material, title_hint=title_hint, extra_rules=extra_rules)
         try:
-            response = router.complete("setup" if self.settings.roles.setup.provider.startswith("role_") else "narrator", request)
+            response = router.complete("narrator", request)
         except Exception as exc:  # noqa: BLE001 - 模型错误原样转 400 供界面显示
             raise ValueError(f"模型调用失败：{exc}") from exc
         text = (response.narrator.narrative if response.narrator else "") or response.raw
@@ -1172,8 +1169,8 @@ def probe_models(body: ModelProbeBody) -> dict[str, Any]:
         endpoint = get_preset(preset)
         base_url = str((endpoint or {}).get("base_url") or "")
     api_key = body.api_key.strip()
-    if not api_key and (body.provider or preset):
-        saved = manager.settings.providers.get(body.provider or preset)
+    if not api_key and preset:
+        saved = manager.settings.providers.get(preset)
         api_key = saved.api_key if saved is not None else ""
     try:
         result = list_endpoint_models(base_url, api_key, timeout=body.timeout)
@@ -1222,12 +1219,7 @@ def test_settings(body: SettingsUpdate | None = None) -> dict[str, Any]:
             "action": {"kind": "text", "text": "测试连接"},
         }
         started = time.perf_counter()
-        role = body.test_role if body else "narrator"
-        if role not in ("narrator","settler","director","setup","arbiter","corrector","voice_cast"):
-            raise ValueError("未知模型角色")
-        request['phase'] = 'connection_test'
-        request['allow_tools'] = False
-        response = router.complete(role, request)
+        response = router.complete("narrator", request)
         latency = round((time.perf_counter() - started) * 1000, 1)
         return {
             "ok": True,
@@ -1569,89 +1561,6 @@ def propose_world_memory(body:MemoryProposal):
         propose_decision(manager.session,manager.session.turn,pending,len(manager.session.ledger.events),origin='world_builder')
         manager.session._record(turn=0,kind='worldbook.proposal.receipt',payload={'request_id':body.request_id,'request_hash':request_hash,'visibility':'internal'})
         manager.auto_save();return {'ok':True,'reused':False,'message':'已加入裁定中心，请预览差异后确认'}
-
-
-# -- NPC-only speech: canonical completed narratives, no free-form TTS input --
-from fastapi.responses import Response
-from rpg_gateway.speech import SpeechService
-speech_service = SpeechService()
-speech_lock = threading.RLock()
-
-def _voice_snapshot(pack_id=None,entry_id=None):
-    import copy
-    with manager.lock:
-        if pack_id is not None:require_current_pack(pack_id)
-        current=manager.session
-        if entry_id is not None:
-            from rpg_gateway.speech import narrative_for
-            try:narrative_for(current,entry_id)
-            except ValueError as exc:raise HTTPException(400,str(exc)) from None
-        snapshot=copy.copy(current)
-        snapshot.ledger=copy.copy(current.ledger)
-        snapshot.ledger.events=list(current.ledger.events)
-        usage=[]
-        snapshot._record_usage=lambda turn,role,response,totals:usage.append(response)
-        return current,snapshot,manager.settings.model_copy(deep=True),usage
-
-def _voice_finish(current,entry_id,revision,usage):
-    from rpg_gateway.speech import narrative_for,digest
-    with manager.lock:
-        if manager.session is not current:raise HTTPException(409,'游戏已切换，请在当前游戏重新选择台词')
-        try:actual=digest([current.pack.manifest.id,entry_id,narrative_for(current,entry_id)])
-        except ValueError:raise HTTPException(409,'叙述已撤销，请刷新对话') from None
-        for response in usage:current._record_usage(0,'voice_cast',response,{})
-        if usage:manager.auto_save()
-        if actual!=revision:raise HTTPException(409,'叙述已修改，请重新识别台词')
-
-class VoiceDialogueBody(BaseModel):
-    model_config={'extra':'forbid'}
-    pack_id: str
-    entry_id: str = Field(min_length=1,max_length=100)
-
-class VoiceAudioBody(VoiceDialogueBody):
-    revision: str = Field(min_length=64,max_length=64)
-    line_id: str = Field(min_length=24,max_length=24)
-
-class VoiceCharacterBody(BaseModel):
-    model_config={'extra':'forbid'}
-    pack_id: str
-    character_id: str = Field(min_length=1,max_length=80)
-    enabled: bool
-    voice: str = Field(default='',max_length=200)
-
-@app.get('/api/voice')
-def voice_view():
-    _,snapshot,settings,_=_voice_snapshot()
-    with speech_lock:characters=speech_service.characters(snapshot)
-    return {'pack_id':snapshot.pack.manifest.id,'speech':public_view(settings)['speech'],'characters':characters}
-
-@app.post('/api/voice/dialogue')
-def voice_dialogue(body:VoiceDialogueBody):
-    current,snapshot,settings,usage=_voice_snapshot(body.pack_id,body.entry_id)
-    try:
-        with speech_lock:view=speech_service.analyze(snapshot,settings,body.entry_id)
-    except ValueError as exc:raise HTTPException(400,str(exc)) from None
-    except Exception:raise HTTPException(502,'人物识别服务不可用，请检查识别模型接口设置') from None
-    _voice_finish(current,body.entry_id,view['revision'],usage)
-    return view
-
-@app.post('/api/voice/character')
-def voice_character(body:VoiceCharacterBody):
-    _,snapshot,_,_=_voice_snapshot(body.pack_id)
-    with speech_lock:
-        try:speech_service.configure_character(snapshot,body.character_id,body.enabled,body.voice)
-        except ValueError as exc:raise HTTPException(400,str(exc)) from None
-    return voice_view()
-
-@app.post('/api/voice/audio')
-def voice_audio(body:VoiceAudioBody):
-    current,snapshot,settings,usage=_voice_snapshot(body.pack_id,body.entry_id)
-    try:
-        with speech_lock:data,mime=speech_service.speak(snapshot,settings,body.entry_id,body.revision,body.line_id)
-    except ValueError as exc:raise HTTPException(400,str(exc)) from None
-    except Exception:raise HTTPException(502,'无法生成语音，请检查语音服务配置') from None
-    _voice_finish(current,body.entry_id,body.revision,usage)
-    return Response(data,media_type=mime,headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
 
 
 if UI_DIST.is_dir():

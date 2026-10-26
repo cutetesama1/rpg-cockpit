@@ -31,7 +31,6 @@ def test_hp_tools_apply_and_undo_replays():
     assert game.undo()["state"]["hp"] == 17
     assert game.verify()["equal"]
 
-@pytest.mark.usefixtures("strict_settlement")
 def test_mp_requires_a_declared_numeric_field():
     game = session([tool("add_stat", field="mp", delta=-2), say()])
     result = game.submit_action({"kind": "text", "text": "施法"})
@@ -55,7 +54,6 @@ def test_declared_mp_can_pay_for_learned_skill_without_double_charge():
     assert game.verify()["equal"]
 
 @pytest.mark.parametrize(("field", "value"), [("upper", "hoodie"), ("pose", "standing")])
-@pytest.mark.usefixtures("strict_settlement")
 def test_clothes_and_pose_cannot_be_changed_with_numeric_tools(field, value):
     game = session([tool("set_stat", field=field, value=value), say()])
     before = dict(game.state)

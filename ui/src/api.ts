@@ -127,7 +127,6 @@ export async function probeModels(body: {
   base_url?: string;
   api_key?: string;
   preset?: string;
-  provider?: string;
   timeout?: number;
 }): Promise<RemoteModelList> {
   return readJson<RemoteModelList>(

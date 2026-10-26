@@ -9,7 +9,7 @@ from rpg_core.contracts import LlmSettings
 from .providers import OpenAICompatibleProvider, ScriptedProvider
 from .roles import LlmProvider, LlmRouter
 
-ROLE_NAMES = ("narrator", "settler", "arbiter", "setup", "director", "corrector", "voice_cast")
+ROLE_NAMES = ("narrator", "settler", "arbiter", "setup", "corrector")
 
 
 def build_providers(settings: LlmSettings) -> dict[str, LlmProvider]:

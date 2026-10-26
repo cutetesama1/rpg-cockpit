@@ -19,9 +19,7 @@
             "set_value",
             "record_fact",
             "update_worldbook",
-            "roll",
-            "acquire_item",
-            "credit_currency"
+            "roll"
           ],
           "title": "Name",
           "type": "string"
@@ -44,17 +42,6 @@
             "skill_cost"
           ],
           "title": "Source",
-          "type": "string"
-        },
-        "estimated": {
-          "default": false,
-          "title": "Estimated",
-          "type": "boolean"
-        },
-        "estimate_reason": {
-          "default": "",
-          "maxLength": 500,
-          "title": "Estimate Reason",
           "type": "string"
         }
       },
@@ -93,12 +80,6 @@
             "internal"
           ],
           "title": "Visibility",
-          "type": "string"
-        },
-        "question": {
-          "default": "",
-          "maxLength": 300,
-          "title": "Question",
           "type": "string"
         },
         "operations": {
@@ -147,7 +128,7 @@
       "type": "object"
     },
     "uncertain": {
-      "description": "无法从正文或目录确定的事项及原因；关闭模糊鉴定时不猜测；开启时按协议给有依据的估值或物品草案，不阻止其他已确认变化提交",
+      "description": "无法从正文或目录确定的事项及原因；不对这些事项执行猜测操作，不阻止其他已确认变化提交",
       "items": {
         "type": "string"
       },

@@ -217,7 +217,7 @@ export default function SpriteCanvas({
   }, [state, fields]);
 
   const context = useMemo<Context>(() => {
-    const base: Context = portraitContext({ ...safeState, explicit }, 0, false, sheet.arm_preferences, sheet.handheld_modes, sheet.pose_arms);
+    const base: Context = portraitContext({ ...safeState, explicit }, 0, false, sheet.arm_preferences, sheet.handheld_modes);
     if (sheet.revision && base.expression === "default") {
       const health = fields?.find(field => field.id === (sheet.resource_bindings?.health ?? "hp"));
       const current = health ? Number(base[health.id]) : NaN;
@@ -230,7 +230,7 @@ export default function SpriteCanvas({
       }
     }
     return base;
-  }, [safeState, explicit, sheet.rules, sheet.revision, sheet.resource_bindings, sheet.arm_preferences, sheet.handheld_modes, sheet.pose_arms, fields]);
+  }, [safeState, explicit, sheet.rules, sheet.revision, sheet.resource_bindings, sheet.arm_preferences, sheet.handheld_modes, fields]);
 
   // 姿势：界面的「取景」优先，其次看状态里的 pose
   const poseName = useMemo(() => {

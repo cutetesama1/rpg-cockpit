@@ -190,8 +190,6 @@ class ScriptedProvider:
     )
 
     def complete(self, request: dict) -> LlmResponse:
-        if request.get('phase') == 'voice_cast':
-            return LlmResponse(raw='{"lines":[]}')
         if request.get('phase') == 'numeric_correction':
             return LlmResponse(raw=json.dumps({'changes': [], 'explanation': '脚本演示模式不推断数值，请在设置中连接数值纠正模型。'}, ensure_ascii=False))
         if request.get('phase') == 'narrative_correction':
@@ -493,9 +491,6 @@ class OpenAICompatibleProvider:
         tool_results = request.get("tool_results") or []
         tool_exchanges = request.get("tool_exchanges") or []
         retry_reason = request.get("retry_reason")
-        if request.get('phase') == 'voice_cast':
-            return [{'role':'system','content':request['system_prompt']},
-                    {'role':'user','content':json.dumps({k:request[k] for k in ('narrative','quotes','characters')},ensure_ascii=False)}]
         if request.get('phase') == 'numeric_correction':
             keys=('narrative','state','fields','resource_bindings')
             return [{'role':'system','content':request['system_prompt']},

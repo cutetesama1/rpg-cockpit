@@ -8,8 +8,8 @@
 <p align="center">从世界构筑到角色成长，让 AI 叙事成为可以游玩、修改与延续的冒险。</p>
 <p align="center">开源 · Windows / Android / Web · 自选模型 · 自定义世界与规则</p>
 <p align="center">
-  <a href="https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.994">下载 0.994</a> ·
-  <a href="docs/CHANGELOG-v0.994.md">本版更新</a> ·
+  <a href="https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.992">下载 0.992</a> ·
+  <a href="docs/CHANGELOG-v0.992.md">本版更新</a> ·
   <a href="docs/CHANGELOG-v0.99beta.md">0.99beta 更新</a> ·
   <a href="LICENSE">Apache 2.0</a>
 </p>
@@ -22,16 +22,20 @@
 
 适合单人文字冒险、角色扮演、原创剧情试演、世界设定验证，以及轻量 RPG 原型开发。
 
+## 本轮归档发布说明
+
+本轮按每版 +0.001 整理保留的 0.991 后缀导出包，GitHub 编号为 0.992–0.999。安装包未经重新编译，应用内可能仍显示原版本；详见各版更新日志。日常使用选 0.999，其余为历史归档。
+
 ## 下载与安装
 
-**当前数字版本：[v0.994](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.994)**，包含 0.99beta 的全部更新。数字版按每次 +0.001 发布，均仍处于开发预发布阶段。
+**当前数字版本：[v0.992](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.992)**，包含 0.99beta 的全部更新。数字版按每次 +0.001 发布，均仍处于开发预发布阶段。
 
-| 平台 | 0.994下载 |
+| 平台 | 0.992下载 |
 | --- | --- |
-| Android 10+，多数手机 | [arm64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Cockpit-v0.994-arm64.apk) |
-| Android 通用包 | [通用 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Cockpit-v0.994.apk) |
-| Android x86_64 设备或模拟器 | [x86_64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Cockpit-v0.994-x86_64.apk) |
-| Windows 10/11 64 位 | [桌面安装包](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Cockpit-v0.994-Windows-x64-Setup.exe) · [便携 ZIP](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Cockpit-v0.994-Windows-x64-Portable.zip) |
+| Android 10+，多数手机 | [arm64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Cockpit-v0.992-arm64.apk) |
+| Android 通用包 | [通用 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Cockpit-v0.992.apk) |
+| Android x86_64 设备或模拟器 | [x86_64 APK](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Cockpit-v0.992-x86_64.apk) |
+| Windows 10/11 64 位 | [桌面安装包](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Cockpit-v0.992-Windows-x64-Setup.exe) · [便携 ZIP](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Cockpit-v0.992-Windows-x64-Portable.zip) |
 | Web | 从源码运行 React 前端与本地 Python API，见下方开发运行说明 |
 
 便携版请完整解压，让两个 EXE 保持在同一目录，再运行 `rpg-cockpit.exe`。Windows 窗口需要 WebView2 Runtime。升级前退出旧版，建议先备份存档；Android 沿用原公开版签名。
@@ -42,16 +46,16 @@
 
 ## 本版更新
 
-- 按实际可用目录管理衣物、饰品和动作，拒绝未注册选项。
-- 保留行走、施法等表现动作，并区分位移/特效与独立逐帧原画。
+- 普通、流式、回退与模型列表统一使用应用 User-Agent。
+- 识别 Cloudflare 1010，提供清晰原因和 CF-Ray，避免回显密钥。
 
-[完整更新日志](docs/releases/v0.994.md) · [数字版本对应表](docs/NUMERICAL-RELEASES.md)
+[完整更新日志](docs/releases/v0.992.md) · [数字版本对应表](docs/NUMERICAL-RELEASES.md)
 
 ## 历史更新
 
 ### 0.991beta API 修复
 
-统一发送应用 User-Agent，修复默认 Python 网络库标识可能导致的自建网关 / Cloudflare 1010 拦截；覆盖普通、流式及模型列表请求，明确提示 1010 与 CF-Ray。详见 [API 修复说明](docs/releases/v0.994.md)。
+统一发送应用 User-Agent，修复默认 Python 网络库标识可能导致的自建网关 / Cloudflare 1010 拦截；覆盖普通、流式及模型列表请求，明确提示 1010 与 CF-Ray。详见 [API 修复说明](docs/releases/v0.992.md)。
 
 [原 0.991beta](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.991beta) 保留供回退。
 
@@ -90,7 +94,7 @@
 | 模型连接 | 接入兼容的模型 API，不同角色可选不同模型或复用连接，查看用量与结算记录 |
 | 外观与阅读 | 四套主题、自选壁纸、50%—160% 字号、文字展示速度，桌面驾驶舱与手机聊天布局 |
 
-[下载 300 技能库](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-300-Skills-v1.zip) · [下载技能作者模板](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.994/RPG-Skill-Library-Author-Template-v1.zip)
+[下载 300 技能库](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-300-Skills-v1.zip) · [下载技能作者模板](https://github.com/cutetesama1/rpg-cockpit/releases/download/v0.992/RPG-Skill-Library-Author-Template-v1.zip)
 
 ## 游玩体验
 
@@ -168,7 +172,7 @@ tests/            测试
 
 公开源码和安装包采用**原创静态示意角色**，没有包含开发演示中的第三方完整立绘库。衣物、表情与姿势字段接口保留；完整换装和动作画面需要提供对应素材和配置。
 
-0.991beta 公开源码验证：后端 **608 项通过、12 项跳过、0 失败**，前端 **28 项通过**，TypeScript 与生产构建通过。Windows 打包程序启动与相关接口、三种 APK 的版本、签名和包内资源一致性已核对。跳过项涉及可选配置或未分发的第三方图片；未使用真实付费模型，未进行 Android 真机安装测试。详细记录见 [版本验证报告](docs/releases/v0.991beta-verification.json) 与 [发布页](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.994)。
+0.991beta 公开源码验证：后端 **608 项通过、12 项跳过、0 失败**，前端 **28 项通过**，TypeScript 与生产构建通过。Windows 打包程序启动与相关接口、三种 APK 的版本、签名和包内资源一致性已核对。跳过项涉及可选配置或未分发的第三方图片；未使用真实付费模型，未进行 Android 真机安装测试。详细记录见 [版本验证报告](docs/releases/v0.991beta-verification.json) 与 [发布页](https://github.com/cutetesama1/rpg-cockpit/releases/tag/v0.992)。
 
 Android 预编译依赖 wheel、发布签名、模型密钥、个人配置和存档不随源码分发。Android 构建依赖见 [说明](android/local-wheels/README.md)，公开源码导出范围见 [EXPORT_REPORT.json](EXPORT_REPORT.json)。
 

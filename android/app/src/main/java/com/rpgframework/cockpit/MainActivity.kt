@@ -2,11 +2,6 @@ package com.rpgframework.cockpit
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Rect
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsAnimationCompat
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -42,7 +37,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var statusView: TextView
-    private var imeVisible = false
     private val handler = Handler(Looper.getMainLooper())
     private val executor = Executors.newSingleThreadExecutor()
 
@@ -131,7 +125,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         val root = FrameLayout(this)
 
         webView = WebView(this).apply {
@@ -141,11 +134,7 @@ class MainActivity : AppCompatActivity() {
             settings.allowContentAccess = false
             settings.mediaPlaybackRequiresUserGesture = false
             setBackgroundColor(Color.parseColor("#11151b"))
-            webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    publishViewport()
-                }
-            }
+            webViewClient = WebViewClient()
             setDownloadListener { url, _, disposition, mime, _ ->
                 val uri = Uri.parse(url)
                 if (pendingArtifactUrl != null || pendingArtifactBytes != null || pendingTemplateUrl != null) return@setDownloadListener
@@ -223,58 +212,7 @@ class MainActivity : AppCompatActivity() {
         root.addView(statusView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         setContentView(root)
 
-        installKeyboardInsets(root)
         startBackend()
-    }
-
-    private fun publishViewport() {
-        if (!::webView.isInitialized || webView.width <= 0 || webView.height <= 0) return
-        val script = "window.__rpgNativeViewport={widthPx:${webView.width},heightPx:${webView.height},keyboardVisible:$imeVisible};window.dispatchEvent(new Event('rpg-native-viewport'));"
-        webView.evaluateJavascript(script, null)
-    }
-
-    private fun installKeyboardInsets(root: View) {
-        var barsBottom = 0
-        var imeBottom = 0
-        fun applyInsets(insets: WindowInsetsCompat) {
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            barsBottom = bars.bottom
-            imeBottom = ime.bottom
-            imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val bottom = maxOf(bars.bottom, ime.bottom)
-            if (root.paddingLeft != bars.left || root.paddingTop != bars.top || root.paddingRight != bars.right || root.paddingBottom != bottom) {
-                root.setPadding(bars.left, bars.top, bars.right, bottom)
-            }
-            webView.post { publishViewport() }
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
-            applyInsets(insets)
-            insets
-        }
-        ViewCompat.setWindowInsetsAnimationCallback(root, object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
-            override fun onProgress(insets: WindowInsetsCompat, runningAnimations: MutableList<WindowInsetsAnimationCompat>): WindowInsetsCompat {
-                applyInsets(insets)
-                return insets
-            }
-        })
-        // Some OEM keyboards report visible-window changes without IME Insets.
-        root.viewTreeObserver.addOnGlobalLayoutListener {
-            if (imeBottom == 0) {
-                val visible = Rect()
-                root.getWindowVisibleDisplayFrame(visible)
-                val location = IntArray(2)
-                root.getLocationOnScreen(location)
-                val overlap = (location[1] + root.height - visible.bottom).coerceAtLeast(0)
-                val fallback = if (overlap > root.height * 0.15) overlap else 0
-                imeVisible = fallback > 0
-                val bottom = maxOf(barsBottom, fallback)
-                if (root.paddingBottom != bottom) root.setPadding(root.paddingLeft, root.paddingTop, root.paddingRight, bottom)
-            }
-            publishViewport()
-        }
-        webView.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> publishViewport() }
-        ViewCompat.requestApplyInsets(root)
     }
 
     private fun startBackend() {

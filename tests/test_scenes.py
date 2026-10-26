@@ -55,7 +55,6 @@ def test_enter_scene_tool_moves_and_records(pack):
     assert session.verify()["scene"] == {"live": "aisle", "replay": "aisle"}
 
 
-@pytest.mark.usefixtures("strict_settlement")
 def test_locked_scene_is_rejected_and_rolls_back(pack):
     provider = StubProvider(
         [tool("enter_scene", scene_id="backroom"), say("你撬开了后仓的门。")]
@@ -95,7 +94,6 @@ def test_set_flag_then_enter_scene_in_same_turn(pack):
     assert [e["kind"] for e in result.events].count("scene.entered") == 1
 
 
-@pytest.mark.usefixtures("strict_settlement")
 def test_unknown_scene_is_rejected(pack):
     provider = StubProvider([tool("enter_scene", scene_id="nowhere"), say("...")])
     session = make_session(provider)
@@ -205,7 +203,6 @@ def test_scripted_provider_navigates_by_text():
     assert "货架" in result.narrative or "走进" in result.narrative
 
 
-@pytest.mark.usefixtures("strict_settlement")
 def test_scripted_provider_locked_scene_produces_rejection():
     session = _session(PACK_DIR, ScriptedProvider())
     session.submit_action({"kind": "option", "option_id": "opt_enter"})  # → aisle

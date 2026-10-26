@@ -76,7 +76,6 @@ enter_scene={scene_id:scenes中id,reason:原因}，必须已实际到达且满�
 学习条目的 evidence 须6至240字连续原文，包含玩家主语、对应技能名称和明确学会/掌握/领悟结果；前置必须已掌握或同次确实学会。
 update_clothing={changes:[{slot,garment,condition,color,evidence}]}：slot/garment 用 wardrobe 目录id，子项 evidence 也须2至300字的正文连续原文。
 只填确有变化的衣物项目；condition 只用 intact/scuffed/damaged/ruined，color 只用槽位支持的 #rrggbb。不支持的款式写 uncertain，不捏造id。
-动作只用 portrait.pose.options 中已注册的 ID；无法匹配时保持现有姿势并说明，不发明坐姿、翻滚等不存在的接口。标注“表现”的动作是已有部件配合程序动画，不自动装备道具。
 帽饰、眼镜、项链、手饰、鞋袜、背饰、耳饰、戒指和持物也走 update_clothing；没发生换装不重置衣物与损坏程度。
 update_portrait={changes:{字段id:目录值}}，只用 portrait 已注册字段、options和范围；姿势取正文末尾仍在进行的动作，已结束并明确站定才恢复 stand。
 表情只按正文明确表现更新，不推断玩家情绪；仅提及某件装饰不代表已穿戴或已更换前景/背景。

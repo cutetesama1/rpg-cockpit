@@ -126,16 +126,3 @@ def say(
 @pytest.fixture()
 def pack():
     return load_pack(PACK_DIR)
-
-
-@pytest.fixture()
-def strict_settlement(monkeypatch):
-    """Legacy whole-turn rollback tests explicitly select the strict option.
-
-    The default relaxed mode is covered independently in test_accuracy.py.
-    """
-    original = GameSession.__init__
-    def create(self, *args, **kwargs):
-        original(self, *args, **kwargs)
-        self.router.settlement_options = {**getattr(self.router, 'settlement_options', {}), 'relaxed_validation': False}
-    monkeypatch.setattr(GameSession, '__init__', create)

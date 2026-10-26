@@ -27,14 +27,12 @@ def attach_default_appearance(root: Path, template: Path) -> bool:
     state = read(root / 'state.json')
     existing = {f['id']: f for f in state['fields']}
     source = read(template / 'state.json')
-    wardrobe_source = read(template / 'wardrobe.json') if (template / 'wardrobe.json').is_file() else {'slots':{}}
-    registered = set(source_sheet.get('controls',{})) | {slot['field'] for slot in wardrobe_source['slots'].values()}
     for field in source['fields']:
         if field.get('group') not in ('appearance', 'sprite'):
             continue
         if field['id'] not in existing:
             state['fields'].append(copy.deepcopy(field))
-        elif field['id'] in registered and field.get('enum_values'):
+        elif field['id'] in source_sheet.get('controls', {}) and field.get('enum_values'):
             old = existing[field['id']]
             old['enum_values'] = list(dict.fromkeys([*old.get('enum_values', []), *field['enum_values']]))
     (root / 'ui').mkdir(exist_ok=True)
@@ -44,7 +42,7 @@ def attach_default_appearance(root: Path, template: Path) -> bool:
         wardrobe = read(template / 'wardrobe.json')
         if (root / 'wardrobe.json').is_file():
             current = read(root / 'wardrobe.json')
-            if not source_sheet.get('catalog_version'):wardrobe['slots'].update(current.get('slots', {}))
+            wardrobe['slots'].update(current.get('slots', {}))
         (root / 'wardrobe.json').write_text(json.dumps(wardrobe, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     shared.write_text(json.dumps({'asset_pack': 'new-game', 'revision': source_sheet.get('revision', 0)}), encoding='utf-8')
     return True

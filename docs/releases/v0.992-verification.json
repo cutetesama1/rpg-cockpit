@@ -1,56 +1,38 @@
 {
-  "version": "0.992",
-  "backend_passed": 616,
-  "backend_skipped": 12,
-  "ui_passed": 28,
-  "typescript": true,
-  "production_ui": true,
-  "public_original_static_avatar": true,
-  "private_art_included": false,
-  "android": [
+  "release_version": "0.992",
+  "reused_existing_export": true,
+  "rebuilt": false,
+  "original_directory": "D:\\work\\RPG-Cockpit-Public-Release-v0.991beta-api-fix",
+  "original_verification": "ORIGINAL-VERIFICATION.json",
+  "original_checksums_verified": true,
+  "apks": [
     {
-      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-arm64-v8a-release.apk",
-      "abis": [
-        "arm64-v8a"
-      ],
-      "ok": true,
-      "original_public_signer": true,
-      "source_and_ui_match": true,
-      "version": "0.992",
-      "version_code": 38
+      "source_name": "RPG-Cockpit-v0.991beta-api-fix-arm64.apk",
+      "internal_version": "0.991beta-api-fix",
+      "version_code": 32,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
     },
     {
-      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-universal-release.apk",
-      "abis": [
-        "arm64-v8a",
-        "x86_64"
-      ],
-      "ok": true,
-      "original_public_signer": true,
-      "source_and_ui_match": true,
-      "version": "0.992",
-      "version_code": 38
+      "source_name": "RPG-Cockpit-v0.991beta-api-fix-x86_64.apk",
+      "internal_version": "0.991beta-api-fix",
+      "version_code": 32,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
     },
     {
-      "apk": "E:\\work\\RPG-Cockpit-Sequential-Releases\\repo\\android\\app\\build\\outputs\\apk\\release\\app-x86_64-release.apk",
-      "abis": [
-        "x86_64"
-      ],
-      "ok": true,
-      "original_public_signer": true,
-      "source_and_ui_match": true,
-      "version": "0.992",
-      "version_code": 38
+      "source_name": "RPG-Cockpit-v0.991beta-api-fix.apk",
+      "internal_version": "0.991beta-api-fix",
+      "version_code": 32,
+      "signer_sha256": "0deff8294cbf88da7af56393079c4e9e012402c0956a7cf923afbf5e3a2752d8",
+      "zip_integrity": true,
+      "settings_and_signing_secrets_absent": true
     }
   ],
-  "native": {
-    "packaged_engine_starts": true,
-    "version_matches": true,
-    "ui_matches_source": true,
-    "original_sample_available": true,
-    "feature_endpoints_readable": true,
-    "paid_api_tested": false,
-    "physical_android_tested": false
-  },
-  "historical_snapshot_stage": -1
+  "original_installer_bytes_unchanged": true,
+  "source_binary_asset_sets_differ": false,
+  "new_paid_api_tested": false,
+  "new_physical_device_tested": false
 }

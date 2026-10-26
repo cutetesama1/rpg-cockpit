@@ -61,17 +61,6 @@
         }
       ],
       "default": null
-    },
-    "voice_cast": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/LlmProfile"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
     }
   },
   "title": "LlmRolesConfig",
