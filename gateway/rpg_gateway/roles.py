@@ -51,7 +51,7 @@ class LlmRouter:
     def _invoke(self, role: str, request: dict, on_text: Callable[[str], None] | None = None) -> LlmResponse:
         # 衣物阶段始终走后置结算；单模型时复用 narrator 的连接配置。
         clothing = request.get("phase") == "clothing"
-        backend = request.get("phase") in ("clothing", "skill_selection", "skill_learning", "settlement")
+        backend = request.get("phase") in ("clothing", "skill_selection", "skill_learning", "settlement", "party_settlement")
         reuse_director = request.get('phase')=='director' and request.get('reuse_narrator',True) and not self.config.director.provider.startswith('role_')
         profile = self.profile("narrator" if reuse_director or backend and not self.separated else role)
         provider = self.providers.get(profile.provider)

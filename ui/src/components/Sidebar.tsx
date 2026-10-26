@@ -78,6 +78,7 @@ export default function Sidebar({
           <span className="nav-icon"><UiIcon name="library" /></span>
           <span className="nav-label">游戏库</span>
         </button>
+        <button className="nav-item" title="创建或加入多人队伍" onClick={() => {location.href="/?multiplayer=1";}}><UiIcon name="library"/><span className="nav-label">多人联机</span></button>
         <button className="nav-item" title="世界书 / 技能 / 前置提示词" onClick={onOpenWorld}>
           <span className="nav-icon"><UiIcon name="book" /></span>
           <span className="nav-label">世界构筑</span>
@@ -94,10 +95,12 @@ export default function Sidebar({
           <span className="nav-icon"><UiIcon name="save" /></span>
           <span className="nav-label">存档读档</span>
         </button>
+        <details className="adjudication-menu-entry"><summary>裁定与记录</summary>
         <button className="nav-item" title="处理待确认事项、查看裁定历史" onClick={onOpenAdjudication}>
           <span className="nav-icon"><UiIcon name="book" /></span>
           <span className="nav-label">玩家裁定{status.adjudication?.pending_count ? ` · ${status.adjudication.pending_count}` : ""}</span>
         </button>
+        </details>
         <button className="nav-item" title="模型 / 外观壁纸 / 调试" onClick={onOpenSettings}>
           <span className="nav-icon"><UiIcon name="settings" /></span>
           <span className="nav-label">设置</span>

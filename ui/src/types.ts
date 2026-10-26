@@ -192,7 +192,13 @@ export interface ModelCatalog {
   custom_preset: string;
 }
 
+export interface SettlementSettings {
+  relaxed_validation: boolean;
+  fuzzy_identification: boolean;
+  confirm_item_gains: boolean;
+}
 export interface SettingsView {
+  settlement: SettlementSettings;
   speech: SpeechSettings;
   ok: boolean;
   roles: LlmRoles;
@@ -203,6 +209,7 @@ export interface SettingsView {
 }
 
 export interface SettingsUpdate {
+  settlement?: Partial<SettlementSettings>;
   speech?: Partial<SpeechSettings> & { api_key?: string };
   test_role?: string;
   roles?: LlmRoles;
@@ -307,6 +314,7 @@ export interface DirectorView {
 }
 
 export interface Status {
+  items?: {id:string;name:string;description?:string}[];
   correction_revision?: string;
   director?: DirectorView;
   adjudication?: AdjudicationView;
@@ -687,6 +695,7 @@ export interface WorldSkillCatalog {
 
 export interface AdjudicationChange { domain: string; field: string; before: unknown; after: unknown }
 export interface AdjudicationItem {
+  question?: string;
   id: string; title: string; reason: string; evidence: string; visibility: "public" | "internal";
   operations: Record<string,unknown>[]; status_patch: Record<string,unknown>; source_turn: number;
   state: "pending" | "deferred" | "confirmed" | "rejected"; version: number; stale: boolean; can_undo: boolean;

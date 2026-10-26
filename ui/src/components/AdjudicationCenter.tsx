@@ -7,7 +7,7 @@ import "../adjudication.css";
 const uuid = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const states: Record<string, string> = { pending: "待裁定", deferred: "已搁置", confirmed: "已确认", rejected: "已否决" };
 const actions: Record<string, string> = { confirm: "确认", modify: "修改草案", reject: "否决", defer: "搁置", resume: "恢复", undo: "撤销裁定" };
-const domains: Record<string, string> = { state: "状态", inventory: "物品", status: "角色信息", skills: "技能", facts: "剧情事实", worldbook: "动态世界书", npcs: "人物出场", scene: "场景" };
+const domains: Record<string, string> = { state: "状态", inventory: "物品", status: "角色信息", skills: "技能", facts: "剧情事实", worldbook: "动态世界书", npcs: "人物出场", items: "物品登记", scene: "场景" };
 const text = (value: unknown) => value === null || value === undefined ? "未设置" : typeof value === "object" ? JSON.stringify(value) : String(value);
 
 export default function AdjudicationCenter({ open, onClose, status, busy: gameBusy, onChanged }: {
@@ -53,7 +53,11 @@ export default function AdjudicationCenter({ open, onClose, status, busy: gameBu
     const current = ++scope.current;
     setData(null); setSelected(null); setPreview(null); setRetry(null); setEditing(false); setMessage("");
     if (open) getAdjudications(internal).then(next => {
-      if (scope.current === current && next.pack_id === packId) setData(next);
+      if (scope.current === current && next.pack_id === packId) {
+        setData(next);
+        const first = next.items.find(row => row.state === "pending");
+        if (first) choose(first);
+      }
     }).catch(err => { if (scope.current === current) setMessage(String(err)); });
     return () => { ++scope.current; };
   }, [open, internal, packId]);
@@ -105,7 +109,7 @@ export default function AdjudicationCenter({ open, onClose, status, busy: gameBu
       <div className="drawer-body">
         <p className="muted">不确定事项由你决定。确认和修改前先检查差异，裁定不额外调用 AI，也不消耗回合。</p>
         <details className="adjudication-guide"><summary>裁定是什么？如何使用</summary>
-          <p>这里用来处理 AI 无法确定的游戏变化。例如叙述中发生擦伤，但伤害程度不明确；在你裁定前，对应状态保持原值。</p>
+          <p>这里用来回答后端 AI 提出的疑问，也可以确认新获得的物品是否入包。新物品先有临时 ID，只有你确认后才会正式登记。例如叙述中发生擦伤，但伤害程度不明确；在你裁定前，对应状态保持原值。</p>
           <ol><li>选择一条“待裁定”，查看本轮叙述依据和拟修改内容。</li><li>建议正确：点“预览确认”，检查前后数值，再“确认并提交”。</li><li>需要调整：填写玩家裁定依据，选择状态、衣物、饰品或颜色并添加草案；先“预览修改草案 → 保存修改草案”，再预览确认。</li></ol>
           <p>数字填写修改后的最终值；衣物、损坏程度、动作与表情从当前游戏目录选择；颜色可用色板或 R/G/B（0—255）调整。</p>
           <p>“否决”表示不执行；“搁置”留到以后，可在已搁置中恢复。“清空变更”只保留文字说明，不会改状态。历史记录可查看每次差异；有后续有效进度时需先撤销后续回合，才能撤销先前裁定。</p>
@@ -121,18 +125,19 @@ export default function AdjudicationCenter({ open, onClose, status, busy: gameBu
         </div> : <>
           <div className="adjudication-list">{data.items.filter(row => tab === "all" || row.state === tab).map(row => <button key={row.id} className={`adjudication-card ${selected === row.id ? "selected" : ""}`} onClick={() => choose(row)}><span>{row.title}</span><small>{states[row.state]} · 第 {row.source_turn} 回合{row.visibility === "internal" ? " · 内部" : ""}{row.stale && row.state === "pending" ? " · 需重新校对" : ""}</small></button>)}
             {!data.items.some(row => tab === "all" || row.state === tab) && <p className="muted">这里没有待处理事项。</p>}</div>
-          {item && <section className="adjudication-editor" key={item.id}><h3>{item.title}</h3><p>{item.reason}</p>
+          {item && <section className="adjudication-editor" key={item.id}><h3>{item.title}</h3><p className="adjudication-question">{item.question || "是否采用这项游戏变化？"}</p><p>{item.reason}</p>
+            {item.operations.filter(op => op.name === "acquire_item").map((op, i) => <div className="adjudication-item-preview" key={i}><strong>{String((op.args as Record<string, unknown>).name)} × {String((op.args as Record<string, unknown>).count)}</strong><small>临时 ID：{String((op.args as Record<string, unknown>).item_id || "确认时生成")}</small><span>选择“是”后登记并加入背包；否决或搁置不会入包。</span></div>)}
             <details><summary>本轮叙述依据</summary><p className="adjudication-evidence">{item.evidence || "旧版记录未保存证据，需要先修改并填写裁定依据。"}</p></details>
             {item.stale && item.state === "pending" && <p className="adjudication-message">游戏进度已变化。请核对当前状态，填写依据后保存修改，再确认。</p>}
             <label>玩家裁定依据<textarea aria-label="玩家裁定依据" maxLength={500} value={reason} disabled={disabled} onChange={e => { setReason(e.target.value); setPreview(null); }} placeholder="例如：这次只是轻微擦伤，当前体力应为 19。" /></label>
             {item.state === "pending" && <>
-              <details open><summary>修改状态草案</summary><AdjudicationFieldEditor packId={packId} operations={operations} disabled={disabled} onChange={value=>{setOperations(value);change();}} onMessage={setMessage}/><button disabled={disabled} onClick={()=>{setOperations("[]");setPatch("{}");change();}}>清空变更，仅确认说明</button></details>
-              <details><summary>查看或编辑完整操作草案</summary><p className="muted small">物品、衣物、技能等沿用现有工具格式和目录；后端统一校验，未注册内容不能写入。</p><label>操作数组<textarea className="adjudication-json" aria-label="操作草案" value={operations} disabled={disabled} onChange={e => { setOperations(e.target.value); change(); }} /></label><label>角色信息补丁<textarea className="adjudication-json" aria-label="角色信息补丁" value={patch} disabled={disabled} onChange={e => { setPatch(e.target.value); change(); }} /></label></details>
-              <div className="drawer-actions"><button disabled={disabled || editing || item.stale} onClick={() => void inspect("confirm")}>预览确认</button><button disabled={disabled || !reason.trim()} onClick={() => void inspect("modify")}>{item.stale ? "按当前状态重新校对" : "预览修改草案"}</button><button disabled={disabled} onClick={() => simple("reject")}>否决</button><button disabled={disabled} onClick={() => simple("defer")}>搁置</button></div>
+              <details><summary>需要调整？修改状态草案</summary><AdjudicationFieldEditor packId={packId} operations={operations} disabled={disabled} onChange={value=>{setOperations(value);change();}} onMessage={setMessage}/><button disabled={disabled} onClick={()=>{setOperations("[]");setPatch("{}");change();}}>清空变更，仅确认说明</button></details>
+              <details><summary>查看或编辑完整操作草案</summary><p className="muted small">物品、衣物、技能等沿用现有工具格式和目录；后端统一校验，新物品可通过 acquire_item 草案生成临时 ID，确认后登记；衣物与动作仍从真实目录选择。</p><label>操作数组<textarea className="adjudication-json" aria-label="操作草案" value={operations} disabled={disabled} onChange={e => { setOperations(e.target.value); change(); }} /></label><label>角色信息补丁<textarea className="adjudication-json" aria-label="角色信息补丁" value={patch} disabled={disabled} onChange={e => { setPatch(e.target.value); change(); }} /></label></details>
+              <div className="drawer-actions"><button disabled={disabled || editing || item.stale} onClick={() => void inspect("confirm")}>是 · 预览变化</button><button disabled={disabled || !reason.trim()} onClick={() => void inspect("modify")}>{item.stale ? "按当前状态重新校对" : "预览修改草案"}</button><button disabled={disabled} onClick={() => simple("reject")}>否 · 不采用</button><button disabled={disabled} onClick={() => simple("defer")}>搁置</button></div>
             </>}
-            {item.state === "deferred" && <div className="drawer-actions"><button disabled={disabled} onClick={() => simple("resume")}>恢复待裁定</button><button disabled={disabled} onClick={() => simple("reject")}>否决</button></div>}
+            {item.state === "deferred" && <div className="drawer-actions"><button disabled={disabled} onClick={() => simple("resume")}>恢复待裁定</button><button disabled={disabled} onClick={() => simple("reject")}>否 · 不采用</button></div>}
             {(item.state === "confirmed" || item.state === "rejected") && <><button disabled={disabled || !item.can_undo} onClick={() => simple("undo")}>撤销这次裁定</button>{!item.can_undo && <p className="muted small">后续已有进度，不能直接撤销。可以先撤销后续回合，或在调试台修正当前状态。</p>}</>}
-            {preview && <section ref={previewPane} className="adjudication-preview"><h4>{preview.decision.action === "modify" ? "草案预览 · 保存后仍需确认" : "确认后将发生的变化"}</h4>{diffs(preview.changes)}{preview.no_state_change && <p>本次不改变游戏状态，仅记录裁定。</p>}<div className="drawer-actions"><button disabled={disabled} onClick={() => void submit({ id: item.id, internal, decision: preview.decision })}>{preview.decision.action === "modify" ? "保存修改草案" : "确认并提交"}</button><button disabled={disabled} onClick={() => setPreview(null)}>返回检查</button></div></section>}
+            {preview && <section ref={previewPane} className="adjudication-preview"><h4>{preview.decision.action === "modify" ? "草案预览 · 保存后仍需确认" : "确认后将发生的变化"}</h4>{diffs(preview.changes)}{preview.no_state_change && <p>本次不改变游戏状态，仅记录裁定。</p>}<div className="drawer-actions"><button disabled={disabled} onClick={() => void submit({ id: item.id, internal, decision: preview.decision })}>{preview.decision.action === "modify" ? "保存修改草案" : "是 · 确认并提交"}</button><button disabled={disabled} onClick={() => setPreview(null)}>返回检查</button></div></section>}
           </section>}
         </>}
       </div>

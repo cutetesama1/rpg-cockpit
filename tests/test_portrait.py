@@ -61,11 +61,13 @@ def test_portrait_and_accessories_are_one_stateless_transaction_with_undo_and_sa
     {'pose':'undefined_attack'}, {'pose':'cast','tears':5}, {'freckles':1},
     {'tears':True},{'tears':1.5},{'hp':1},{'headwear':'witch'}, {'pose':['stand']},
 ])
+@pytest.mark.usefixtures("strict_settlement")
 def test_illegal_portrait_patch_cannot_partially_equip_accessories(bad):
     g,_=game(bad);before=dict(g.state)
     assert not g.submit_action({'text':'继续'}).ok
     assert g.state==before and g.turn==0 and g.verify()['equal']
 
+@pytest.mark.usefixtures("strict_settlement")
 def test_portrait_evidence_cannot_come_from_player_input():
     g,_=game({'pose':'cast'},evidence='你在玩家输入中说想施法')
     assert not g.submit_action({'text':'你在玩家输入中说想施法'}).ok

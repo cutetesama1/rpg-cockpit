@@ -44,6 +44,7 @@ import type {
 
 import MobileChat from "./components/MobileChat";
 import ChatMessage from "./components/ChatMessage";
+import InventoryPanel from "./components/InventoryPanel";
 import CorrectionPanel, { CorrectionIcon } from "./components/CorrectionPanel";
 import { useTextPlayback } from "./useTextPlayback";
 import { streamCorrection, undoCorrection } from "./api";
@@ -178,7 +179,6 @@ export default function App() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const storyRef = useRef<HTMLDivElement | null>(null);
   const storyFollow = useRef(true);
-  const openingTried = useRef(false);
   const [openingBusy, setOpeningBusy] = useState(false);
   const [openingError, setOpeningError] = useState<string | null>(null);
 
@@ -219,14 +219,7 @@ export default function App() {
     }
   }, [refresh, captureNarrative]);
 
-  // 新游戏（第 0 回合、还没有开场叙述）自动生成开局；失败时留一个小的重试入口
-  useEffect(() => {
-    if (!status) return;
-    if (status.turn > 0 || status.opening_generated) return;
-    if (openingTried.current) return;
-    openingTried.current = true;
-    void generateOpening();
-  }, [status, generateOpening]);
+  // 创建、切换和恢复世界不自动调用开场模型。
 
   // 立绘配置随当前内容包变化（没有配置的包返回 null，不显示立绘）
   useEffect(() => {
@@ -484,7 +477,7 @@ export default function App() {
     setError(null);
     try {
       await postReset();
-      openingTried.current = false;
+      setOpeningError(null);
       setLast(null);
       setPlayback(null);
       setCorrectionResult(null);
@@ -520,7 +513,7 @@ export default function App() {
   }, [reloadWorld]);
 
   const onGameChanged = useCallback(async () => {
-    openingTried.current = false;
+    setOpeningError(null);
     setLast(null);
     setPlayback(null);
     setCorrectionResult(null);
@@ -532,7 +525,7 @@ export default function App() {
 
   const onSaveLoaded = useCallback(
     async (loaded: Status) => {
-      openingTried.current = false;
+      setOpeningError(null);
       setStatus(loaded);
       setLast(null);
       setPlayback(null);
@@ -816,7 +809,7 @@ export default function App() {
                           ? "正在生成开局…"
                           : openingError
                             ? "开局没有生成成功"
-                            : "准备开局…"}
+                            : "世界已创建，等待开始"}
                       </p>
                       {openingError ? (
                         <>
@@ -831,9 +824,10 @@ export default function App() {
                         </>
                       ) : (
                         <p className="muted">
-                          让叙事模型先把你带进这个场景，稍等片刻。
+                          {openingBusy ? "正在生成，请稍候。" : "点击下方按钮生成开场叙述。"}
                         </p>
                       )}
+                      {!openingBusy && !openingError && <button type="button" className="primary generate-world" onClick={() => void generateOpening()}>生成世界</button>}
                     </div>
                   ) : (
                     chatEntries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={status.pack.id} automatic={entry.id === chatEntries.filter(e => e.role === "assistant").slice(-1)[0]?.id}/>)
@@ -1004,6 +998,7 @@ export default function App() {
                   fields={status.fields}
                 />
               )}
+              <InventoryPanel status={status} />
               <StatusBars
                 fields={status.fields}
                 state={status.state}
@@ -1032,6 +1027,7 @@ export default function App() {
       </div>
       )}
 
+      {!adjudicationOpen && !correctionOpen && !settingsOpen && !!status.adjudication?.pending_count && <button type="button" className="adjudication-orb" aria-label={`待裁定问题 ${status.adjudication.pending_count} 项`} title="回答后端 AI 的问题" disabled={busy || openingBusy} onClick={() => {setNavOpen(false);setAdjudicationOpen(true);}}><span aria-hidden="true">?</span><small>{status.adjudication.pending_count}</small></button>}
       {!correctionOpen && <button type="button" className="correction-orb" aria-label="打开 AI 纠正框" title="纠正 AI" disabled={busy || openingBusy || !ready} onClick={() => {setNavOpen(false);setCorrectionOpen(true);}}><CorrectionIcon/></button>}
 
       <LibraryDialog

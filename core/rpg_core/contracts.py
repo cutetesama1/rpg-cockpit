@@ -288,6 +288,9 @@ EventKind = Literal[
     "settlement.checked",
     "settlement.rejected",
     "settlement.warning",
+    "settlement.estimated",
+    "settlement.deferred",
+    "item.registered",
     "adjudication.proposed",
     "adjudication.decided",
     "dice.seeded",
@@ -838,6 +841,13 @@ class VoiceSettings(BaseModel):
     timeout: float = Field(default=60, ge=1, le=180, allow_inf_nan=False)
 
 
+class SettlementSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    relaxed_validation: bool = True
+    fuzzy_identification: bool = False
+    confirm_item_gains: bool = True
+
+
 class LlmSettings(BaseModel):
     """持久化模型设置：角色 → profile，provider 名 → 端点信息。
 
@@ -847,6 +857,7 @@ class LlmSettings(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    settlement: SettlementSettings = Field(default_factory=SettlementSettings)
     speech: VoiceSettings = Field(default_factory=VoiceSettings)
     roles: LlmRolesConfig = Field(default_factory=LlmRolesConfig)
     providers: dict[str, ProviderSettings] = Field(

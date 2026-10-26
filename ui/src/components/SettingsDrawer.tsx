@@ -1,3 +1,4 @@
+import SettlementPreferences from "./SettlementPreferences";
 import DirectorPanel from "./DirectorPanel";
 import ModelConnections from "./ModelConnections";
 import SkillLibraryPanel from "./SkillLibraryPanel";
@@ -76,7 +77,7 @@ export default function SettingsDrawer({ open, onClose, onChanged, status, last,
     <div className="drawer-mask" onClick={onClose}>
       <aside className="drawer" onClick={(event) => event.stopPropagation()}>
         <header className="drawer-head">
-          <h2>设置 <small className="muted">0.995</small></h2>
+          <h2>设置 <small className="muted">0.996</small></h2>
           <button className="ghost small" onClick={onClose}>
             关闭
           </button>
@@ -85,6 +86,7 @@ export default function SettingsDrawer({ open, onClose, onChanged, status, last,
         <div className="drawer-body">
             <ModelConnections onChanged={async () => { setSettings(await getSettings()); await onChanged(); }} packId={status?.pack.id} />
             {message && <p className={`drawer-message ${message.ok ? "ok" : "bad"}`}>{message.text}</p>}
+            <SettlementPreferences />
             <DirectorPanel independentDirector={settings?.roles.director.provider.startsWith("role_")} key={status?.pack.id ?? "none"} status={status} onChanged={onChanged} />
 
             <section className="settings-section ui-theme-settings">
@@ -199,7 +201,7 @@ export default function SettingsDrawer({ open, onClose, onChanged, status, last,
             <section className="settings-section">
               <h3>外观 · 叙事滚动</h3>
               <p className="muted small">
-                控制桌面对话历史的滚动；电脑和手机均保留你的输入与 AI 回复，可向上翻阅。设置存在本机浏览器。
+                电脑和手机共用对话时间线，可向上翻阅历史。自动跟随只在你处于底部时生效；选择停留当前位置可暂停跟随。设置存在本机。
               </p>
               <div className="scroll-styles">
                 {SCROLL_STYLES.map((item) => (

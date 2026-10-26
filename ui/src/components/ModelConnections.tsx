@@ -4,7 +4,7 @@ import type { LlmProfile, LlmRoles, ProviderView, SettingsUpdate, SettingsView, 
 
 const ROLE_INFO = [
   ["narrator", "叙事 AI · 前端", "生成正文、选项与叙述修订。"],
-  ["settler", "结算 AI · 后端", "只读本回合叙述与当前状态，结算资源、技能和世界书。"],
+  ["settler", "结算 AI · 后端", "读取本轮玩家输入、最终叙述与当前状态，结算资源、技能和世界书。"],
   ["director", "剧情导演 AI", "独立连接，按场景和事件触发；在下方剧情导演中开启功能。"],
   ["setup", "世界构筑 AI", "根据你的设定生成游戏草稿。"],
   ["corrector", "数值纠正 AI", "只处理本次纠正说明，不携带历史对话。"],

@@ -99,7 +99,7 @@ from rpg_gateway import (  # noqa: E402
 
 BUILTIN_PACKS = ROOT / "packs"
 UI_DIST = ROOT / "ui" / "dist"
-API_VERSION = "0.995"
+API_VERSION = "0.996"
 
 
 # -- 请求体 -----------------------------------------------------------------
@@ -124,6 +124,7 @@ class SettingsUpdate(BaseModel):
     roles: dict[str, Any] | None = None
     providers: dict[str, dict[str, Any]] | None = None
     speech: dict[str, Any] | None = None
+    settlement: dict[str, Any] | None = None
     test_role: str = "narrator"
 
 
@@ -1653,6 +1654,10 @@ def voice_audio(body:VoiceAudioBody):
     _voice_finish(current,body.entry_id,body.revision,usage)
     return Response(data,media_type=mime,headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
 
+
+# The LAN app intentionally has no model-settings or single-player routes.
+from rpg_gateway.party_server import install_host_routes
+party_host = install_host_routes(app, manager, UI_DIST)
 
 if UI_DIST.is_dir():
     app.mount("/", StaticFiles(directory=UI_DIST, html=True), name="ui")

@@ -80,6 +80,7 @@ def public_view(settings: LlmSettings, path: Path | None = None) -> dict[str, An
         for name, cfg in settings.providers.items()
     }
     return {
+        "settlement": settings.settlement.model_dump(mode="json"),
         "speech": {**settings.speech.model_dump(exclude={"api_key"}), "has_key": bool(settings.speech.api_key), "key_hint": mask_key(settings.speech.api_key)},
         "roles": settings.roles.model_dump(mode="json"),
         "providers": providers,
@@ -121,6 +122,8 @@ def merge_update(
             if key == "api_key" and (not isinstance(value, str) or not value.strip()): continue
             speech[key] = value.strip() if isinstance(value, str) else value
         merged["speech"] = speech
+    if isinstance(update.get("settlement"), dict):
+        merged["settlement"] = {**merged.get("settlement", {}), **update["settlement"]}
     incoming_providers = update.get("providers") or {}
     for name, cfg in incoming_providers.items():
         if not isinstance(cfg, dict):

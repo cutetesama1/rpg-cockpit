@@ -53,4 +53,6 @@ def validate_settings(settings: LlmSettings) -> None:
 
 def build_router(settings: LlmSettings) -> LlmRouter:
     validate_settings(settings)
-    return LlmRouter(settings.roles, build_providers(settings))
+    router = LlmRouter(settings.roles, build_providers(settings))
+    router.settlement_options = settings.settlement.model_dump(mode="json")
+    return router

@@ -57,8 +57,8 @@ export default function MobileChat(props: Props) {
   // Resizing the keyboard keeps the latest reply visible only when already following it.
   useEffect(() => {
     const update = () => { if (stick.current) latest(); };
-    window.visualViewport?.addEventListener("resize", update);
-    return () => window.visualViewport?.removeEventListener("resize", update);
+    window.addEventListener("rpg-viewport-resized", update);
+    return () => window.removeEventListener("rpg-viewport-resized", update);
   }, []);
   return (
     <main className="mobile-chat" aria-label="游戏对话">
@@ -70,8 +70,8 @@ export default function MobileChat(props: Props) {
         setAtBottom(stick.current);
       }}>
         {!props.ready && !props.entries.some(entry => entry.streaming) && <div className="chat-opening" role="status">
-          <p>{props.openingBusy ? "正在生成开局…" : props.openingError || "准备开局…"}</p>
-          {props.openingError && <button type="button" disabled={props.openingBusy} onClick={props.onRetryOpening}>重试开局</button>}
+          <p>{props.openingBusy ? "正在生成开局…" : props.openingError || "世界已创建，点击按钮生成开场"}</p>
+          {!props.openingBusy && <button className="primary generate-world" type="button" onClick={props.onRetryOpening}>{props.openingError ? "重试生成世界" : "生成世界"}</button>}
         </div>}
         {props.entries.map(entry => <ChatMessage key={entry.id} entry={entry} packId={props.packId} automatic={entry.id === props.entries.filter(e => e.role === 'assistant').slice(-1)[0]?.id}/>)}
         {props.busy && !props.correcting && !props.entries.some(entry => entry.streaming) && <div className="chat-generating" role="status">正在叙述与结算…</div>}

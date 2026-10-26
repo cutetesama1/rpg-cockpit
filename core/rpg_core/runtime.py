@@ -166,7 +166,8 @@ class GameSession:
         self.executor.skill_catalog={e.ref:e for e in self.pack.skill_catalog}
         self.executor.wardrobe=self.pack.wardrobe
         self.executor.scenes=scene_map(self.pack)
-        self.executor.item_ids={i.id for i in self.pack.items}
+        from .accuracy_policy import item_catalog
+        self.executor.item_ids=set(item_catalog(self,include_internal=True))
         self.executor.flag_ids={f.id for f in self.pack.flags}
         self.executor.catalog_mode=bool(self.pack.skill_selection.get('library_versions'))
         self.executor.skill_ids = {skill.id for skill in self.pack.skills} | {
@@ -517,6 +518,8 @@ class GameSession:
         request = self._with_skill_catalog(self.assembler.build(
             turn=turn, action=action, state=working, events=self.ledger.events, scene_id=scene_used), skills)
         request['payments'] = payments_info
+        from .accuracy_policy import item_catalog
+        request['vocab'] += '\n当前背包：'+__import__('json').dumps([{'id':k,'name':item_catalog(self).get(k,{}).get('name',k),'count':v} for k,v in self.inventory.items() if v>0],ensure_ascii=False)
         from .plot_director import prepare as prepare_director
         director_events=prepare_director(self,turn=turn,action=action,working=working,scene_id=scene_used,totals=usage_totals)
         if director_events:
@@ -809,7 +812,7 @@ class GameSession:
             "inventory": self.inventory,
             "fields": __import__("rpg_core.appearance_catalog",fromlist=["field_views"]).field_views(self.pack),
             "limits": self.pack.state.limits.model_dump(mode="json"),
-            "items": [item.model_dump(mode="json") for item in self.pack.items],
+            "items": list(__import__("rpg_core.accuracy_policy",fromlist=["item_catalog"]).item_catalog(self).values()),
             "flags": [flag.model_dump(mode="json") for flag in self.pack.flags],
             "skills": skill_rows,
             "scenes": scenes,
@@ -888,7 +891,7 @@ class GameSession:
 
     def debug_set_inventory(self, item_id: str, count: int) -> dict[str, Any]:
         """把某个物品数量设成 count（正负差额都写成 add_item，投影按增量累计）。"""
-        if item_id not in {item.id for item in self.pack.items}:
+        if item_id not in __import__("rpg_core.accuracy_policy",fromlist=["item_catalog"]).item_catalog(self,include_internal=True):
             raise ValueError(f"内容包没有物品 {item_id}")
         current = int(self.inventory.get(item_id, 0))
         target = max(0, int(count))
@@ -912,6 +915,7 @@ class GameSession:
             "changed": 1,
             "delta": delta,
             "inventory": self.inventory,
+            "items": list(__import__("rpg_core.accuracy_policy",fromlist=["item_catalog"]).item_catalog(self).values()),
         }
 
     def debug_jump_scene(self, scene_id: str) -> dict[str, Any]:
@@ -986,6 +990,7 @@ class GameSession:
             "story_facts": facts(self),
             "state": self.state,
             "inventory": self.inventory,
+            "items": list(__import__("rpg_core.accuracy_policy",fromlist=["item_catalog"]).item_catalog(self).values()),
             "scene": self.scene_status(),
             "options": self.options(),
             "opening": self.pack.opening.model_dump(mode="json"),

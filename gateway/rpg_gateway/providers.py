@@ -190,6 +190,12 @@ class ScriptedProvider:
     )
 
     def complete(self, request: dict) -> LlmResponse:
+        if request.get('phase') == 'party_narration':
+            rows=[i['name']+'：'+(i['text'] or '使用已选择的技能') for i in request['inputs']]
+            narrative=(request.get('scene',{}).get('text','共同的旅途即将开始。')+'\n\n'+ '、'.join(p['name'] for p in request['players'])+'在这里会合，等待各自的第一个决定。') if request.get('opening') else '\n\n'.join(rows)+'\n\n队伍的行动汇合在同一条旅途中，前方的景象逐渐清晰。'
+            return LlmResponse(raw=json.dumps({'narrative':narrative,'options':[{'actor_id':p['actor_id'],'label':'观察四周','action_text':'仔细观察周围环境'} for p in request['players']]},ensure_ascii=False),model='scripted-party',provider=self.name)
+        if request.get('phase') == 'party_settlement':
+            return LlmResponse(tool_calls=[ToolCall(id='party_demo',name='settle_party_round',args={'operations':[],'uncertain':[]})],model='scripted-party',provider=self.name)
         if request.get('phase') == 'voice_cast':
             return LlmResponse(raw='{"lines":[]}')
         if request.get('phase') == 'numeric_correction':
@@ -493,6 +499,9 @@ class OpenAICompatibleProvider:
         tool_results = request.get("tool_results") or []
         tool_exchanges = request.get("tool_exchanges") or []
         retry_reason = request.get("retry_reason")
+        if request.get('phase') in ('party_narration','party_settlement'):
+            keys=('opening','scene','players','world','inputs','worldbook','recent','paid_skills') if request['phase']=='party_narration' else ('inputs','narrative','players','world','fields','limits','resource_bindings','paid_skills','items','unique_items','wardrobe','portrait','skill_catalog','scenes','rules','validation_feedback')
+            return [{'role':'system','content':request['system_prompt']},{'role':'user','content':json.dumps({k:request[k] for k in keys if k in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get('phase') == 'voice_cast':
             return [{'role':'system','content':request['system_prompt']},
                     {'role':'user','content':json.dumps({k:request[k] for k in ('narrative','quotes','characters')},ensure_ascii=False)}]
@@ -510,7 +519,7 @@ class OpenAICompatibleProvider:
             return [{'role':'system','content':DIRECTOR_PROMPT},{'role':'user','content':json.dumps({k:request[k] for k in keys if k in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get('phase') == 'settlement':
             from rpg_core.settlement import PROMPT
-            keys=('world_rules','dynamic_worldbook','dynamic_worldbook_index','known_npcs','narrative','determined_events','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
+            keys=('player_input','policy','world_rules','dynamic_worldbook','dynamic_worldbook_index','known_npcs','narrative','determined_events','state','fields','limits','resource_bindings','status','facts','flags','inventory','items','skills','known_refs','candidates','wardrobe','portrait','scene','scenes','quests','paid_skills','validation_feedback')
             return [{'role':'system','content':PROMPT+'\n# 本世界结算语义（仅作效果与背景参考；旧版逐工具调用、输出格式指令不适用）\n'+str(request.get('rules') or '')+'\n# 最终协议提醒\n只提交一次 settle_turn 完整草案；字段、目录、已收费用与累计限额以本次输入为准。'},
                     {'role':'user','content':json.dumps({key:request[key] for key in keys if key in request},ensure_ascii=False,separators=(',',':'))}]
         if request.get("phase") == "skill_selection":
@@ -771,6 +780,11 @@ class OpenAICompatibleProvider:
             max_tokens = 0
         if max_tokens > 0:
             payload["max_tokens"] = max_tokens
+        if request.get('phase') == 'party_settlement':
+            from rpg_core.party_contracts import PartyProposal
+            payload['tools']=[{'type':'function','function':{'name':'settle_party_round','description':'提交带明确角色ID的合作回合结算草案。','parameters':PartyProposal.model_json_schema()}}]
+            payload['tool_choice']='auto'
+            return payload
         if request.get('phase') == 'numeric_correction':
             from rpg_core.corrections import NumericCorrection
             payload['tools']=[{'type':'function','function':{'name':'correct_values','description':'仅修改本次说明明确涉及的数值字段。','parameters':NumericCorrection.model_json_schema()}}]

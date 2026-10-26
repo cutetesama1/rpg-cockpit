@@ -43,3 +43,20 @@
 .adjudication-color output { width:100%; }
 
 .adjudication-field-value { display:grid; gap:8px; flex:1 1 260px; min-width:0; }
+
+.adjudication-question { font-size:1.15rem; font-weight:650; line-height:1.6; color:var(--accent); }
+.adjudication-item-preview { display:grid; gap:7px; padding:14px; border:1px solid var(--line); border-radius:12px; overflow-wrap:anywhere; }
+.adjudication-item-preview small,.adjudication-item-preview span { color:var(--muted); font-size:.8rem; }
+.adjudication-menu-entry summary { cursor:pointer; padding:12px; color:var(--muted); font-size:.85rem; }
+.adjudication-menu-entry button { width:100%; }
+.adjudication-orb { position:fixed; right:88px; bottom:27px; z-index:24; width:46px; height:46px; min-height:46px; border-radius:50%; display:grid; place-items:center; padding:0; color:var(--accent); background:var(--panel,#18252d); border:1px solid var(--accent); box-shadow:0 6px 20px #0004; }
+.adjudication-orb > span { font-size:23px; font-weight:700; }
+.adjudication-orb small { position:absolute; right:-4px; top:-5px; min-width:19px; height:19px; padding:0 3px; border-radius:12px; background:var(--accent); color:var(--bg,#122026); font-size:11px; line-height:19px; }
+body[data-mobile-layout="true"] .adjudication-orb { right:71px; bottom:calc(194px + env(safe-area-inset-bottom)); width:43px; height:43px; min-height:43px; }
+.settlement-preferences > label { display:flex; align-items:flex-start; gap:12px; margin:16px 0; cursor:pointer; }
+.settlement-preferences input { width:18px; height:18px; margin-top:3px; flex-shrink:0; }
+.settlement-preferences label span { display:grid; gap:5px; }
+.settlement-preferences small { color:var(--muted); line-height:1.6; }
+.inventory-panel summary { cursor:pointer; display:flex; justify-content:space-between; gap:10px; }
+.inventory-panel summary small { color:var(--muted); }
+.inventory-panel p { display:flex; justify-content:space-between; gap:12px; overflow-wrap:anywhere; }

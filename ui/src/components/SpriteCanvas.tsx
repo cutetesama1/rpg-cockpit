@@ -163,6 +163,7 @@ function isValidColor(value: unknown): value is string {
 }
 
 interface Props {
+  loadAsset?: (relative:string)=>Promise<HTMLImageElement|null>;
   sheet: SpriteSheet;
   state: Record<string, unknown>;
   explicit: boolean;
@@ -181,6 +182,7 @@ interface Props {
 
 export default function SpriteCanvas({
   sheet,
+  loadAsset,
   state,
   explicit,
   view = "full",
@@ -263,15 +265,15 @@ export default function SpriteCanvas({
       .filter((layer) => layerVisible(layer, context, explicit))
       .map((layer) => ({
         layer,
-        src: packAssetUrl(resolveTemplate(layer.src, context),sheet.asset_key),
-        mask: layer.mask ? packAssetUrl(resolveTemplate(layer.mask, context),sheet.asset_key) : null,
+        src: loadAsset ? resolveTemplate(layer.src, context) : packAssetUrl(resolveTemplate(layer.src, context),sheet.asset_key),
+        mask: layer.mask ? (loadAsset ? resolveTemplate(layer.mask, context) : packAssetUrl(resolveTemplate(layer.mask, context),sheet.asset_key)) : null,
         tint: (isValidColor(layer.tint_field ? context[layer.tint_field] : layer.tint)
           ? (layer.tint_field ? context[layer.tint_field] : layer.tint)
           : layer.tint) as string | null,
       }))
       .filter((item) => !item.src.endsWith("/"))
       .sort((a, b) => a.layer.z - b.layer.z);
-  }, [layers, context, explicit, sheet.asset_key]);
+  }, [layers, context, explicit, sheet.asset_key, loadAsset]);
 
   // 只重绘用的数据：图片 + 遮罩图，加载完成后放进 ref 供动画帧复用
   const assetsRef = useRef<{
@@ -390,8 +392,8 @@ export default function SpriteCanvas({
     void Promise.all(
       visible.map(async (item) => {
         const [image, mask] = await Promise.all([
-          loadImage(item.src),
-          item.mask ? loadImage(item.mask) : Promise.resolve(null),
+          (loadAsset ?? loadImage)(item.src),
+          item.mask ? (loadAsset ?? loadImage)(item.mask) : Promise.resolve(null),
         ]);
         return image ? { layer: item.layer, image, mask, tint: item.tint } : null;
       }),
@@ -406,7 +408,7 @@ export default function SpriteCanvas({
     return () => {
       alive = false;
     };
-  }, [visible]);
+  }, [visible, loadAsset]);
 
   // 绘制 + 逐帧动画：图片就绪后先画一帧，需要动画时按 fps 循环（帧号变化才重绘）
   useEffect(() => {

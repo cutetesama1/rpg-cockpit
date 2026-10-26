@@ -42,7 +42,8 @@ def snapshot(session):
     from .settlement import facts
     from .dynamic_worldbook import entries_for
     from .personality_npcs import introduced
-    return {'worldbook': entries_for(session,include_internal=True), 'npcs': introduced(session.ledger.events), 'state': session.state, 'inventory': session.inventory,
+    from .accuracy_policy import item_catalog
+    return {'items':item_catalog(session,include_internal=True),'worldbook': entries_for(session,include_internal=True), 'npcs': introduced(session.ledger.events), 'state': session.state, 'inventory': session.inventory,
             'scene': session.scene_id, 'status': session.narrative_status(),
             'skills': {s.id: s.model_dump(mode='json') for s in session.all_skills()},
             'facts': facts(session, include_internal=True),
@@ -72,7 +73,13 @@ def pending_events(session, turn, proposal, narrative, staged):
     pending += [(Pending(title=text[:100], reason=text[:500]), 'uncertain') for text in proposal.uncertain]
     result = []
     for index, (p, origin) in enumerate(pending):
-        if p.evidence and p.evidence not in narrative: raise DecisionError('待裁定证据不是本次正文的连续原文')
+        from .accuracy_policy import evidence_excerpt,options
+        if p.evidence:
+            try:p.evidence=evidence_excerpt(p.evidence,narrative,options(session)['relaxed_validation'])
+            except ValueError:
+                if not options(session)['relaxed_validation']:raise
+                p.evidence=''
+                p.reason=(p.reason+'；引用未能匹配正文，请在确认前核对原文和操作草案。')[:500]
         data = p.model_dump(mode='json')
         data['evidence_excerpt'] = data['evidence']; data['evidence'] = narrative
         item_id = 'decision_' + digest([turn, origin, index, data])[:24]
@@ -120,7 +127,7 @@ def _get(session, item_id, include_internal):
 
 def _changes(before, after):
     result = []
-    for domain in ('state', 'inventory', 'status', 'skills', 'facts', 'worldbook', 'npcs'):
+    for domain in ('state', 'inventory', 'status', 'skills', 'facts', 'worldbook', 'npcs', 'items'):
         left, right = before[domain] or {}, after[domain] or {}
         for key in sorted(set(left) | set(right)):
             if left.get(key) != right.get(key):
@@ -140,7 +147,8 @@ def _validate(session, item, decision):
     if decision.action == 'confirm':
         if decision.operations is not None or decision.status_patch is not None:
             raise DecisionError('确认不能夹带修改，请先保存修改并重新预览')
-        if item.get('basis') != digest(snapshot(session)) or item['anchor'] != session.turn:
+        from .accuracy_policy import acquisition_only
+        if not acquisition_only(item) and (item.get('basis') != digest(snapshot(session)) or item['anchor'] != session.turn):
             raise DecisionError('原状态或游戏进度已变化，请先修改并按当前状态重新校对', 409)
         operations = copy.deepcopy(item['operations']); patch = item['status_patch']
         narrative = item['evidence']; reason = decision.reason.strip()
@@ -188,7 +196,7 @@ def preview(session, item_id, decision, *, include_internal=False):
 
 
 def _undo_allowed(session, receipt):
-    authority = {'correction.applied', 'worldbook.updated', 'npc.introduced', 'npc.roster.configured', 'turn.started', 'turn.committed', 'turn.rolled_back', 'tool.applied', 'skill.used', 'skill.learned', 'scene.entered', 'status.updated', 'story.fact', 'world.configured'}
+    authority = {'item.registered','correction.applied', 'worldbook.updated', 'npc.introduced', 'npc.roster.configured', 'turn.started', 'turn.committed', 'turn.rolled_back', 'tool.applied', 'skill.used', 'skill.learned', 'scene.entered', 'status.updated', 'story.fact', 'world.configured'}
     cancelled = cancelled_turns(session.ledger.events)
     return not any(e.seq > receipt.seq and e.kind in authority and e.turn not in cancelled for e in session.ledger.events)
 
@@ -250,7 +258,8 @@ def view(session, *, include_internal=False):
     result = []; basis = digest(snapshot(session))
     for item in visible.values():
         row = copy.deepcopy(item)
-        row['stale'] = row.get('basis') != basis or row['anchor'] != session.turn
+        from .accuracy_policy import acquisition_only
+        row['stale'] = not acquisition_only(row) and (row.get('basis') != basis or row['anchor'] != session.turn)
         row.pop('basis', None)
         if row['state'] in ('confirmed', 'rejected'):
             receipt = next(e for e in reversed(session.ledger.events) if e.kind == 'adjudication.decided' and e.payload.get('id') == row['id'])
