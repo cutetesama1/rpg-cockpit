@@ -724,10 +724,11 @@ export interface CurrentCard { pack_id:string; card:{name:string; spec:string; c
 
 
 export interface SpeechSettings {
-  enabled: boolean; mode: "imported" | "automatic"; base_url: string; model: string; voice: string;
+  provider: "openai" | "elevenlabs"; enabled: boolean; mode: "imported" | "automatic"; base_url: string; model: string; voice: string;
   speed: number; timeout: number; has_key: boolean; key_hint: string;
 }
 export interface VoiceCharacter { id: string; name: string; description: string; source: "imported" | "automatic"; enabled: boolean; voice: string }
 export interface VoiceView { pack_id: string; speech: SpeechSettings; characters: VoiceCharacter[] }
 export interface VoiceLine { id: string; character_id: string; name: string; text: string; enabled: boolean; voice: string }
 export interface VoiceDialogue { pack_id: string; entry_id: string; revision: string; lines: VoiceLine[]; characters: VoiceCharacter[] }
+

@@ -832,6 +832,7 @@ class ProviderSettings(BaseModel):
 class VoiceSettings(BaseModel):
     """Compatible speech API; secrets never leave the backend."""
     model_config = ConfigDict(extra="forbid")
+    provider: Literal["openai", "elevenlabs"] = "openai"
     enabled: bool = False
     mode: Literal["imported", "automatic"] = "imported"
     base_url: str = Field(default="", max_length=2000)
@@ -864,3 +865,4 @@ class LlmSettings(BaseModel):
     providers: dict[str, ProviderSettings] = Field(
         default_factory=lambda: {"openai": ProviderSettings()}
     )
+

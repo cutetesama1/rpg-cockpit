@@ -42,7 +42,7 @@
       "type": "string"
     },
     "speed": {
-      "default": 1.0,
+      "default": 1,
       "maximum": 4,
       "minimum": 0.25,
       "title": "Speed",
@@ -54,6 +54,15 @@
       "minimum": 1,
       "title": "Timeout",
       "type": "number"
+    },
+    "provider": {
+      "default": "openai",
+      "enum": [
+        "openai",
+        "elevenlabs"
+      ],
+      "title": "Provider",
+      "type": "string"
     }
   },
   "title": "VoiceSettings",
