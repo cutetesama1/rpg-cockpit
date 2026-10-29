@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections import OrderedDict
 import hashlib
 import json
+import logging
 import re
 import urllib.error
 import urllib.parse
@@ -75,30 +76,50 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
+logger = logging.getLogger(__name__)
+
 def synthesize(config, text, voice):
     url=config.base_url.strip().rstrip('/')
     parsed=urllib.parse.urlsplit(url)
     if parsed.scheme not in ('http','https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
         raise ValueError('语音 URL 须为 http(s) 地址，不能包含用户名、密码、查询参数或片段')
-    if not config.model.strip():raise ValueError('请填写语音模型名称')
-    if not url.endswith('/audio/speech'):url += '/audio/speech'
-    body=json.dumps({'model':config.model,'voice':voice,'input':text,'response_format':'mp3','speed':config.speed},ensure_ascii=False).encode()
-    headers=api_headers(config.api_key,accept='audio/mpeg, audio/wav, audio/ogg')
+    provider=config.provider
+    if provider=='elevenlabs':
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,200}',voice):
+            raise ValueError('请填写有效的 ElevenLabs Voice ID')
+        if not config.api_key.strip():raise ValueError('请填写 ElevenLabs API Key')
+        url += '/text-to-speech/' + voice
+        payload={'text':text,'model_id':config.model.strip() or 'eleven_multilingual_v2'}
+        headers=api_headers(accept='audio/mpeg')
+        headers['xi-api-key']=config.api_key
+        endpoint='/text-to-speech/{voice_id}'
+    else:
+        if not config.model.strip():raise ValueError('请填写语音模型名称')
+        if not url.endswith('/audio/speech'):url += '/audio/speech'
+        payload={'model':config.model,'voice':voice,'input':text,'response_format':'mp3','speed':config.speed}
+        headers=api_headers(config.api_key,accept='audio/mpeg, audio/wav, audio/ogg')
+        endpoint='/audio/speech'
+    body=json.dumps(payload,ensure_ascii=False).encode()
+    # Deliberately omit user-supplied URLs, credentials, text and remote bodies.
+    logger.info('TTS provider=%s method=POST endpoint=%s',provider,endpoint)
     try:
         opener=urllib.request.build_opener(NoRedirect())
         with opener.open(urllib.request.Request(url,data=body,headers=headers,method='POST'),timeout=config.timeout) as response:
             mime=response.headers.get_content_type()
             data=response.read(8*1024*1024+1)
     except urllib.error.HTTPError as error:
+        logger.warning('TTS provider=%s status=%s',provider,error.code)
         hint=cloudflare_1010_hint(error.code,error.read(65536).decode('utf-8',errors='replace'),error.headers)
         if hint:raise ValueError(f'语音服务返回 HTTP {error.code}：{hint}') from None
-        raise ValueError(f'语音服务返回 HTTP {error.code}，请核对 URL、Key、模型与音色') from None
+        raise ValueError(f'{provider} 语音服务返回 HTTP {error.code}，请核对 Provider、URL、Key、模型与音色') from None
     except Exception:
+        logger.warning('TTS provider=%s connection_failed',provider)
         raise ValueError('语音服务连接失败或超时，请检查接口配置') from None
     if not data or len(data)>8*1024*1024:raise ValueError('语音返回为空或超过8 MB限制')
     if mime not in ('audio/mpeg','audio/mp3','audio/wav','audio/x-wav','audio/ogg','audio/opus','application/octet-stream'):
-        raise ValueError('语音接口没有返回音频；请使用兼容 audio/speech 的接口')
-    return data, ('audio/mpeg' if mime=='application/octet-stream' else mime)
+        raise ValueError('语音接口没有返回音频；请检查所选 Provider 的接口')
+    logger.info('TTS provider=%s audio_received bytes=%s',provider,len(data))
+    return data, ('audio/mpeg' if mime in ('application/octet-stream','audio/mp3') else mime)
 
 class SpeechService:
     def __init__(self):
@@ -204,3 +225,4 @@ class SpeechService:
             while len(self.audio)>32 or sum(len(a[0]) for a in self.audio.values())>32*1024*1024:
                 self.audio.popitem(last=False)
         return self.audio[key]
+

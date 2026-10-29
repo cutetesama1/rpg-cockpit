@@ -68,3 +68,33 @@ def test_settings_test_uses_selected_role_instead_of_narrator(fixture,monkeypatc
         r=client.post('/api/settings/test',json={'test_role':role})
         assert r.status_code==200 and r.json()['ok']
     assert len(provider.requests)==4
+
+def test_elevenlabs_mp3_reaches_browser_without_json_conversion(fixture,monkeypatch):
+    import json
+    from email.message import Message
+    from unittest.mock import MagicMock
+    client,g,entry,_=fixture
+    settings=api.manager.settings.speech
+    settings.provider='elevenlabs';settings.base_url='https://api.elevenlabs.io/v1'
+    settings.api_key='only-test-eleven-key';settings.model=''
+    settings.voice='cJ90yKqmDMAuUmZ3fyB4'
+    mp3=b'ID3\x04\x00\xff\xfb\x90\x00'
+    response=MagicMock();response.__enter__.return_value=response
+    response.headers=Message();response.headers['Content-Type']='audio/mpeg'
+    response.read.return_value=mp3
+    opener=MagicMock();opener.open.return_value=response
+    monkeypatch.setattr('urllib.request.build_opener',lambda *args:opener)
+    body={'pack_id':g.pack.manifest.id,'entry_id':entry}
+    view=client.post('/api/voice/dialogue',json=body).json()
+    audio={**body,'revision':view['revision'],'line_id':view['lines'][0]['id']}
+    result=client.post('/api/voice/audio',json=audio)
+    assert result.status_code==200 and result.content==mp3
+    assert result.headers['content-type']=='audio/mpeg'
+    assert result.headers['cache-control']=='no-store'
+    req=opener.open.call_args.args[0]
+    assert req.full_url.endswith('/v1/text-to-speech/'+settings.voice)
+    assert json.loads(req.data)['model_id']=='eleven_multilingual_v2'
+    assert 'only-test-eleven-key' not in client.get('/api/voice').text
+    assert client.post('/api/voice/audio',json=audio).content==mp3
+    assert opener.open.call_count==1
+

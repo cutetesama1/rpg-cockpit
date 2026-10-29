@@ -14,7 +14,7 @@ const ROLE_INFO = [
 type Role = typeof ROLE_INFO[number][0];
 interface Draft { profile: LlmProfile; source: string; endpoint: ProviderView & { api_key: string }; scripted: boolean }
 const empty: ProviderView = { base_url: "", model: "", preset: "custom", reasoning_effort: "", timeout: 60, price_in: 0, price_out: 0, max_retries: 2, retry_backoff_ms: 500, has_key: false, key_hint: "" };
-const speechDefault: SpeechSettings = { enabled: false, mode: "imported", base_url: "", model: "", voice: "alloy", speed: 1, timeout: 60, has_key: false, key_hint: "" };
+const speechDefault: SpeechSettings = { provider: "openai", enabled: false, mode: "imported", base_url: "", model: "", voice: "alloy", speed: 1, timeout: 60, has_key: false, key_hint: "" };
 
 export default function ModelConnections({ onChanged, packId }: { onChanged: () => void | Promise<void>; packId?: string }) {
   const [saved, setSaved] = useState<SettingsView | null>(null);
@@ -112,10 +112,12 @@ export default function ModelConnections({ onChanged, packId }: { onChanged: () 
       {speech.enabled && <>
         <label><span>可朗读人物范围</span><select value={speech.mode} onChange={e => setSpeech({ ...speech, mode: e.target.value as SpeechSettings['mode'] })}><option value="imported">仅用户导入的 NPC</option><option value="automatic">后端 AI 自动识别人物并加入可朗读列表</option></select></label>
         <p className="muted small">仅导入模式保守匹配带姓名的台词，不额外调用识别模型；自动模式在叙述完成后调用 NPC 识别 AI，不带历史。归属不确定的台词跳过。旁白、心理与玩家台词不朗读。</p>
-        <label><span>语音 URL（兼容 audio/speech）</span><input type="url" value={speech.base_url} placeholder="https://语音服务/v1 或完整 /audio/speech 地址" onChange={e => setSpeech({ ...speech, base_url: e.target.value })} /></label>
+        <label><span>语音 Provider</span><select value={speech.provider} onChange={e => setSpeech({ ...speech, provider: e.target.value as SpeechSettings['provider'], base_url: e.target.value === 'elevenlabs' ? 'https://api.elevenlabs.io/v1' : '', model: e.target.value === 'elevenlabs' ? 'eleven_multilingual_v2' : '', voice: e.target.value === 'elevenlabs' ? 'cJ90yKqmDMAuUmZ3fyB4' : 'alloy', api_key: '' })}><option value="openai">OpenAI 兼容</option><option value="elevenlabs">ElevenLabs 原生</option></select></label>
+        <p className="muted small">切换 Provider 后请填写该服务的 API Key；留空会保留后端已存 Key。ElevenLabs URL 填 API 根地址 /v1，音色填 Voice ID；原生模式使用默认语速。</p>
+        <label><span>语音 URL（{speech.provider === 'elevenlabs' ? 'ElevenLabs 原生' : '兼容 audio/speech'}）</span><input type="url" value={speech.base_url} placeholder="https://语音服务/v1 或完整 /audio/speech 地址" onChange={e => setSpeech({ ...speech, base_url: e.target.value })} /></label>
         <label><span>语音 API Key {speech.has_key ? `（已保存 ${speech.key_hint}，留空保留）` : ''}</span><input type="password" autoComplete="new-password" value={speech.api_key || ''} onChange={e => setSpeech({ ...speech, api_key: e.target.value })} /></label>
         <label><span>语音模型名称</span><input value={speech.model} onChange={e => setSpeech({ ...speech, model: e.target.value })} /></label>
-        <div className="field-row"><label><span>默认音色 ID</span><input value={speech.voice} onChange={e => setSpeech({ ...speech, voice: e.target.value })} /></label><label><span>语速（0.25—4）</span><input type="number" min="0.25" max="4" step="0.05" value={speech.speed} onChange={e => setSpeech({ ...speech, speed: Number(e.target.value) })} /></label></div>
+        <div className="field-row"><label><span>默认音色 ID</span><input value={speech.voice} onChange={e => setSpeech({ ...speech, voice: e.target.value })} /></label><label><span>语速（0.25—4）</span><input type="number" min="0.25" max="4" step="0.05" disabled={speech.provider === "elevenlabs"} value={speech.speed} onChange={e => setSpeech({ ...speech, speed: Number(e.target.value) })} /></label></div>
         <p className="muted small">音色 ID 由你的语音服务提供。保存后，对话下方可选择台词并播放；支持停止与重播。人物开关和音色在下方即时保存，各世界独立。</p>
         <button type="button" className="ghost small" onClick={() => void reloadCharacters().catch(e => setMessage(String(e)))}>刷新可朗读人物</button>
         <div className="voice-character-list">{characters.length ? characters.map(c => <div key={c.id} className="voice-character"><label className="checkbox-row"><input type="checkbox" checked={c.enabled} onChange={e => void updateCharacter(c, { enabled: e.target.checked })} /><span>{c.name} · {c.source === 'imported' ? '导入 NPC' : '自动识别'}</span></label><input aria-label={`${c.name}音色`} placeholder="音色 ID，空白使用默认" value={c.voice} onChange={e => setCharacters(old => old.map(x => x.id === c.id ? { ...x, voice: e.target.value } : x))} onBlur={e => void updateCharacter(c, { voice: e.target.value })} /></div>) : <p className="muted small">导入 NPC 后或自动识别到人物台词后，这里会显示可朗读人物。</p>}</div>
@@ -125,3 +127,4 @@ export default function ModelConnections({ onChanged, packId }: { onChanged: () 
     <div className="drawer-actions"><button type="button" className="primary" disabled={busy} onClick={() => void save()}>保存全部模型与语音设置</button><button type="button" className="ghost" disabled={busy} onClick={() => { setBusy(true); resetSettings().then(async d => { load(d); window.dispatchEvent(new Event('rpg-settings-changed')); await onChanged(); setMessage('已恢复脚本演示，语音已关闭。'); }).catch(e => setMessage(String(e))).finally(() => setBusy(false)); }}>恢复默认</button></div>
   </section>;
 }
+

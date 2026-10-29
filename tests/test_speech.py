@@ -144,6 +144,22 @@ def test_voice_recognition_wire_request_has_no_tools_history_or_state():
 def test_invalid_voice_settings_rejected(kwargs):
     with pytest.raises(ValueError):VoiceSettings(**kwargs)
 
+def test_speech_provider_defaults_and_settings_roundtrip(tmp_path):
+    from rpg_gateway.settings import save_settings, load_settings
+    assert VoiceSettings().provider == 'openai'
+    settings = merge_update(default_settings(), {'speech': {
+        'provider': 'elevenlabs', 'base_url': 'https://api.elevenlabs.io/v1',
+        'api_key': 'only-test-eleven-key', 'model': '', 'voice': 'cJ90yKqmDMAuUmZ3fyB4',
+    }})
+    path = tmp_path / 'settings.json'
+    save_settings(settings, path)
+    restored = load_settings(path)
+    assert restored.speech.provider == 'elevenlabs'
+    assert restored.speech.api_key == 'only-test-eleven-key'
+    assert 'only-test-eleven-key' not in json.dumps(public_view(restored))
+    assert merge_update(restored, {'speech': {'api_key': ''}}).speech.api_key == 'only-test-eleven-key'
+    with pytest.raises(ValueError):VoiceSettings(provider='unknown')
+
 def test_real_http_cast_response_unwraps_completion_envelope(tmp_path,monkeypatch):
     monkeypatch.setenv('RPG_CONFIG_DIR',str(tmp_path))
     class Handler(BaseHTTPRequestHandler):
@@ -162,3 +178,4 @@ def test_real_http_cast_response_unwraps_completion_envelope(tmp_path,monkeypatc
         assert [line['name'] for line in result['lines']]==['守门人']
         assert [line['text'] for line in result['lines']]==['请出示通行证。']
     finally:server.shutdown();server.server_close()
+
